@@ -33,18 +33,22 @@ func BzMinimum(pointsPerSide int64, dimension int64, fn BzFunc) float64 {
 }
 
 // Iterate over the Brillouin zone, accumulating the values of fn with combine.
+// Dev note (TODO?): An interface for point generators could be created to
+// allow for dependency injection here to replace bzPoints with an arbitrary
+// point generator. By doing this we could treat symmetric functions
+// differently (more efficiently). This would also allow testing bzReduce
+// independently of bzPoints.
 func bzReduce(combine bzConsumer, start float64, pointsPerSide int64, dimension int64, fn BzFunc) float64 {
 	maxWorkers := 2 // TODO: set this via config file
-	points, done := bzPoints(pointsPerSide, dimension)
+	points := bzPoints(pointsPerSide, dimension)
 	work := func(result chan float64) {
 		var k BzPoint
 		total := start
 		for {
-			select {
-			case k = <-points:
+			k = <-points
+			if k != nil {
 				combine(fn(k), &total)
-			case <-done:
-				done <- true
+			} else {
 				break
 			}
 		}
@@ -64,31 +68,34 @@ func bzReduce(combine bzConsumer, start float64, pointsPerSide int64, dimension 
 	return fullTotal
 }
 
-// Produce (points, done) where points is a channel whose values cover each
-// Brillouin zone point once, and done is is a channel which contains true
-// after all points have been traversed.
-func bzPoints(pointsPerSide int64, dimension int64) (chan BzPoint, chan bool) {
+// Produce a channel whose values cover each Brillouin zone point once. 
+// After all points have been traversed, the channel's values are nil.
+func bzPoints(pointsPerSide int64, dimension int64) <-chan BzPoint {
 	points := make(chan BzPoint)
-	done := make(chan bool)
 	// start is the minumum value of any component of a point
 	start := -math.Pi
 	// (finish - step) is the maximum value of any component of a point
 	finish := -start
 	// separation between point components
 	step := (finish - start) / float64(pointsPerSide)
+	// total number of points
+	numPoints := int64(math.Pow(float64(pointsPerSide), float64(dimension)))
 
-	generatePoints := func() {
+	go func() {
 		k := make([]float64, dimension)
+		// initial value for k
 		for i := int64(0); i < dimension; i++ {
 			k[i] = start
 		}
-		for {
-			// TODO: iterate over points
+		// TODO: iterate over Brillouin zone
+		for i := int64(0); i < numPoints; i++ {
 			k[0] += step
-			break
+			points <- k
 		}
-		done <- true
-	}
-	go generatePoints()
-	return points, done
+		// we're done
+		for {
+			points <- nil
+		}
+	}()
+	return points
 }
