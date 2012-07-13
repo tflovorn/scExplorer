@@ -9,7 +9,7 @@ type bzConsumer func(next float64, total *float64)
 
 // Sum values of fn over all Brillouin zone points.
 // Uses Kahan summation algorithm for increased accuracy.
-func BzSum(pointsPerSide int64, dimension int64, fn BzFunc) float64 {
+func BzSum(pointsPerSide int, dimension int, fn BzFunc) float64 {
 	c := 0.0
 	var y, t float64
 	add := func(next float64, total *float64) {
@@ -23,7 +23,7 @@ func BzSum(pointsPerSide int64, dimension int64, fn BzFunc) float64 {
 }
 
 // Find the minimum of fn over all Brillouin zone points.
-func BzMinimum(pointsPerSide int64, dimension int64, fn BzFunc) float64 {
+func BzMinimum(pointsPerSide int, dimension int, fn BzFunc) float64 {
 	minimum := func(next float64, min *float64) {
 		if next < *min {
 			*min = next
@@ -38,7 +38,7 @@ func BzMinimum(pointsPerSide int64, dimension int64, fn BzFunc) float64 {
 // point generator. By doing this we could treat symmetric functions
 // differently (more efficiently). This would also allow testing bzReduce
 // independently of bzPoints.
-func bzReduce(combine bzConsumer, start float64, pointsPerSide int64, dimension int64, fn BzFunc) float64 {
+func bzReduce(combine bzConsumer, start float64, pointsPerSide int, dimension int, fn BzFunc) float64 {
 	maxWorkers := 2 // TODO: set this via config file
 	points := bzPoints(pointsPerSide, dimension)
 	work := func(result chan float64) {
@@ -70,32 +70,69 @@ func bzReduce(combine bzConsumer, start float64, pointsPerSide int64, dimension 
 
 // Produce a channel whose values cover each Brillouin zone point once. 
 // After all points have been traversed, the channel's values are nil.
-func bzPoints(pointsPerSide int64, dimension int64) <-chan BzPoint {
+// TODO: it would be nice to cache the result of this to avoid many
+// re-generations for the same arguments.
+func bzPoints(pointsPerSide int, dimension int) <-chan BzPoint {
 	points := make(chan BzPoint)
 	// start is the minumum value of any component of a point
 	start := -math.Pi
 	// (finish - step) is the maximum value of any component of a point
 	finish := -start
-	// separation between point components
+	// step is the separation between point components
 	step := (finish - start) / float64(pointsPerSide)
-	// total number of points
-	numPoints := int64(math.Pow(float64(pointsPerSide), float64(dimension)))
 
 	go func() {
 		k := make([]float64, dimension)
-		// initial value for k
-		for i := int64(0); i < dimension; i++ {
+		kIndex := make([]int, dimension)
+		// set initial value for k
+		for i := 0; i < dimension; i++ {
 			k[i] = start
+			kIndex[i] = 0
 		}
-		// TODO: iterate over Brillouin zone
-		for i := int64(0); i < numPoints; i++ {
-			k[0] += step
-			points <- k
+		// iterate over Brillouin zone
+		done := false
+		for {
+			if !done {
+				points <- k
+			} else {
+				break
+			}
+			done = bzAdvance(k, kIndex, start, step, pointsPerSide, dimension)
 		}
-		// we're done
+		// we're done; signal that
 		for {
 			points <- nil
 		}
 	}()
 	return points
+}
+
+// Advances k and kIndex to the next value. Returns true on overflow back to
+// the initial k value.
+func bzAdvance(k []float64, kIndex []int, start, step float64, pointsPerSide, dimension int) bool {
+	for i := 0; i < dimension; i++ {
+		// Check if we need to carry.
+		// To avoid any possible (maybe imagined) risk of
+		// rounding error breaking results, use kIndex instead
+		// of making this comparison as k[i] == finish.
+		carry := kIndex[i] == pointsPerSide
+		if !carry {
+			// Advance k.
+			k[i] += step
+			kIndex[i] += 1
+			// Break unless advancing k caused us to need
+			// to carry.
+			if kIndex[i] != pointsPerSide {
+				break
+			}
+		}
+		// If we get to here, a carry is required.
+		if i == dimension-1 {
+			// finished iteration
+			return true
+		}
+		k[i] = start
+		kIndex[i] = 0
+	}
+	return false
 }
