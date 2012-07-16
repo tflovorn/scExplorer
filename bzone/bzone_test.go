@@ -1,4 +1,4 @@
-package scExplorer
+package bzone
 
 import "github.com/farces/dumb/bufbig"
 import (

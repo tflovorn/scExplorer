@@ -1,5 +1,5 @@
 // Functions related to traversal of the first Brillouin zone.
-package scExplorer
+package bzone
 
 import "math"
 
@@ -9,7 +9,7 @@ type bzConsumer func(next float64, total *float64)
 
 // Sum values of fn over all Brillouin zone points.
 // Uses Kahan summation algorithm for increased accuracy.
-func BzSum(pointsPerSide int, dimension int, fn BzFunc) float64 {
+func Sum(pointsPerSide int, dimension int, fn BzFunc) float64 {
 	c := 0.0
 	var y, t float64
 	add := func(next float64, total *float64) {
@@ -23,7 +23,7 @@ func BzSum(pointsPerSide int, dimension int, fn BzFunc) float64 {
 }
 
 // Find the minimum of fn over all Brillouin zone points.
-func BzMinimum(pointsPerSide int, dimension int, fn BzFunc) float64 {
+func Minimum(pointsPerSide int, dimension int, fn BzFunc) float64 {
 	minimum := func(next float64, min *float64) {
 		if next < *min {
 			*min = next
