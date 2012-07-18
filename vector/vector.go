@@ -27,15 +27,6 @@ func (v Vector) Add(u Vector) Vector {
 	return r
 }
 
-// Create a new vector equal to xv.
-func (v Vector) Mul(x float64) Vector {
-	xv := ZeroVector(len(v))
-	for i := 0; i < len(v); i++ {
-		xv[i] = x * (v[i])
-	}
-	return xv
-}
-
 // Convert v to GSL format.
 func ToGSL(v Vector) *C.gsl_vector {
 	dim := len(v)
