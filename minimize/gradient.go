@@ -1,8 +1,7 @@
 // Multidimensional minimization based on the gradient descent method.
-package solver
+package minimize
 
-type Vector []float64
-type VectorFunc func(v Vector) float64
+import . "../vector"
 
 type GradientFunc struct {
 	f       VectorFunc
@@ -10,7 +9,7 @@ type GradientFunc struct {
 	epsilon float64 // maximum acceptable value for zero-finding
 }
 
-func GradientZero(gfs []GradientFunc, start Vector) (Vector, error) {
+func GradientMin(gfs []GradientFunc, start Vector) (Vector, error) {
 	return []float64{}, nil
 }
 
@@ -21,4 +20,10 @@ func Gradient(gf GradientFunc, v Vector) Vector {
 		xs[i] = gf.grad[i](v)
 	}
 	return xs
+}
+
+func oneDimInDirection(vf VectorFunc, start, dir Vector) func(float64) float64 {
+	return func(alpha float64) float64 {
+		return vf(start.Add(dir.Mul(alpha)))
+	}
 }
