@@ -10,6 +10,9 @@ extern int go_f(const gsl_vector * x, void * fn, gsl_vector * f);
 extern int go_df(const gsl_vector * x, void * fn, gsl_matrix * J);
 extern int go_fdf(const gsl_vector * x, void * fn, gsl_vector * f, gsl_matrix * J);
 
+static int powellSolve(void * fn, const gsl_vector * start, double apsabs, double epsrel, gsl_vector * solution) {
+	return 0;
+}
 */
 import "C"
 
@@ -22,7 +25,17 @@ import "unsafe"
 // Callback passing through cgo follows the model at:
 // http://stackoverflow.com/questions/6125683/call-go-functions-from-c/6147097#6147097
 func MultiDim(fn Diffable, start vec.Vector) (vec.Vector, error) {
-	return []float64{}, nil
+	cfn := unsafe.Pointer(&fn)
+	csolution, cstart := C.gsl_vector_alloc(C.size_t(fn.Dimension)), C.gsl_vector_alloc(C.size_t(fn.Dimension))
+	epsabs, epsrel := C.double(fn.EpsAbs), C.double(fn.EpsRel)
+	err := C.powellSolve(cfn, cstart, epsabs, epsrel, csolution)
+	if err != C.GSL_SUCCESS {
+		// TODO: handle error
+	}
+	solution := VecFromGSL(csolution)
+	C.gsl_vector_free(csolution)
+	C.gsl_vector_free(cstart)
+	return solution, nil
 }
 
 // Wrapper for fn.F

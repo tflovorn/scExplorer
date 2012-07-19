@@ -30,7 +30,7 @@ func Combine(fns []Diffable) DiffSystem {
 	// F(v) = \sum_i fns[i].F(v) e_i
 	// (e_i is unit vector in i'th direction)
 	F := func(v vec.Vector) vec.Vector {
-		ret := vec.ZeroVector(Dimension)
+		ret := vec.ZeroVector(NumFuncs)
 		for i := 0; i < NumFuncs; i++ {
 			ret[i] = fns[i].F(v)
 		}
@@ -38,14 +38,14 @@ func Combine(fns []Diffable) DiffSystem {
 	}
 	// Df(v) = \sum_i fns[i].Df(v)
 	Df := func(v vec.Vector) []vec.Vector {
-		ret := make([]vec.Vector, len(fns))
+		ret := make([]vec.Vector, NumFuncs)
 		for i := 0; i < NumFuncs; i++ {
 			ret[i] = fns[i].Df(v)
 		}
 		return ret
 	}
 	Fdf := func(v vec.Vector) (vec.Vector, []vec.Vector) {
-		ret_f := vec.ZeroVector(Dimension)
+		ret_f := vec.ZeroVector(NumFuncs)
 		ret_df := make([]vec.Vector, NumFuncs)
 		for i := 0; i < NumFuncs; i++ {
 			ret_f[i] = fns[i].F(v)
