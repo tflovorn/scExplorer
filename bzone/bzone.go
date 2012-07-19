@@ -3,32 +3,28 @@ package bzone
 
 import vec "../vector"
 
-import (
-	_ "fmt"
-	"math"
-)
+import "math"
 
 type BzFunc func(k vec.Vector) float64
-type bzConsumer func(next, total float64, other *float64) float64
+type bzConsumer func(next, total float64) float64
 
-// Sum values of fn over all Brillouin zone points. It must be safe to make
-// multiple concurrent calls to fn.
+// Sum values of fn over all Brillouin zone points.
 // Uses Kahan summation algorithm for increased accuracy.
 func Sum(pointsPerSide int, dimension int, fn BzFunc) float64 {
-	add := func(next, total float64, c *float64) float64 {
+	c := 0.0
+	add := func(next, total float64) float64 {
 		// add next to total; c holds error compensation information
-		y := next - *c
+		y := next - c
 		t := total + y
-		*c = (t - total) - y
+		c = (t - total) - y
 		return t
 	}
 	return bzReduce(add, 0.0, pointsPerSide, dimension, fn)
 }
 
-// Find the minimum of fn over all Brillouin zone points. It must be safe to
-// make multiple concurrent calls to fn.
+// Find the minimum of fn over all Brillouin zone points.
 func Minimum(pointsPerSide int, dimension int, fn BzFunc) float64 {
-	minimum := func(next, min float64, foo *float64) float64 {
+	minimum := func(next, min float64) float64 {
 		if next < min {
 			return next
 		}
@@ -44,34 +40,24 @@ func Minimum(pointsPerSide int, dimension int, fn BzFunc) float64 {
 // differently (more efficiently). This would also allow testing bzReduce
 // independently of bzPoints.
 func bzReduce(combine bzConsumer, start float64, L, d int, fn BzFunc) float64 {
-	maxWorkers := 2 // TODO: set this via config file
 	points := bzPoints(L, d)
 	work := func(result chan float64) {
 		total := start
-		other := 0.0
 		for {
 			k := <-points
 			if k != nil {
-				total = combine(fn(k), total, &other)
+				total = combine(fn(k), total)
 			} else {
 				break
 			}
 		}
 		result <- total
 	}
-	// set up workers
-	results := make([]chan float64, maxWorkers)
-	for i := 0; i < maxWorkers; i++ {
-		results[i] = make(chan float64)
-		go work(results[i])
-	}
+	// set up worker
+	result := make(chan float64)
+	go work(result)
 	// collect the results
-	fullTotal := start
-	other := 0.0
-	for i := 0; i < maxWorkers; i++ {
-		fullTotal = combine(<-results[i], fullTotal, &other)
-	}
-	return fullTotal
+	return <-result
 }
 
 // Produce a channel whose values cover each Brillouin zone point once. 
@@ -99,7 +85,6 @@ func bzPoints(L, d int) <-chan vec.Vector {
 		done := false
 		for {
 			if !done {
-				//fmt.Println(k)
 				points <- k
 			} else {
 				break
