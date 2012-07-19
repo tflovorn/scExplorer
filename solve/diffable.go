@@ -7,7 +7,8 @@ import "math"
 // Function plus first derivatives.
 type Diffable struct {
 	F         func(vec.Vector) float64
-	Grad      func(vec.Vector) vec.Vector
+	Df        func(vec.Vector) vec.Vector
+	Fdf       func(vec.Vector) (float64, vec.Vector)
 	Dimension int
 	Epsilon   float64 // maximum acceptable value for zero-finding
 }
@@ -24,18 +25,27 @@ func Combine(fns []Diffable) Diffable {
 		}
 		return sum
 	}
-	// Grad(v) = \sum_i fns[i].Grad(v)
-	Grad := func(v vec.Vector) vec.Vector {
+	// Df(v) = \sum_i fns[i].Df(v)
+	Df := func(v vec.Vector) vec.Vector {
 		sum := vec.ZeroVector(Dimension)
 		for i := 0; i < len(fns); i++ {
-			sum.Add(fns[i].Grad(v))
+			sum = sum.Add(fns[i].Df(v))
 		}
 		return sum
+	}
+	Fdf := func(v vec.Vector) (float64, vec.Vector) {
+		fsum := 0.0
+		dfsum := vec.ZeroVector(Dimension)
+		for i := 0; i < len(fns); i++ {
+			fsum += fns[i].F(v)
+			dfsum = dfsum.Add(fns[i].Df(v))
+		}
+		return fsum, dfsum
 	}
 	// epsilon = min({epsilon_i})
 	Epsilon := math.MaxFloat64
 	for i := 0; i < len(fns); i++ {
 		Epsilon = math.Min(fns[i].Epsilon, Epsilon)
 	}
-	return Diffable{F, Grad, Dimension, Epsilon}
+	return Diffable{F, Df, Fdf, Dimension, Epsilon}
 }
