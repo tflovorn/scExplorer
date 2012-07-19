@@ -2,11 +2,13 @@ package solve
 
 /*
 #cgo LDFLAGS: -lgsl -lgslcblas
+#include <gsl/gsl_errno.h>
 #include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multiroots.h>
-extern double go_f(const gsl_vector * x, void * fn);
-extern void go_df(const gsl_vector * x, void * fn, gsl_vector * g);
-extern void go_fdf(const gsl_vector * x, void * fn, double * f, gsl_vector * g);
+extern int go_f(const gsl_vector * x, void * fn, gsl_vector * f);
+extern int go_df(const gsl_vector * x, void * fn, gsl_matrix * J);
+extern int go_fdf(const gsl_vector * x, void * fn, gsl_vector * f, gsl_matrix * J);
 
 */
 import "C"
@@ -23,39 +25,55 @@ func MultiDim(fn Diffable, start vec.Vector) (vec.Vector, error) {
 	return []float64{}, nil
 }
 
-func go_f(x *C.gsl_vector, fn unsafe.Pointer) C.double {
-	gofn := *((*Diffable)(fn))
-	return C.double(gofn.F(FromGSL(x)))
+// Wrapper for fn.F
+func go_f(x *C.gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
+	gofn := *((*DiffSystem)(fn))
+	VecToGSL(gofn.F(VecFromGSL(x)), f)
+	return C.GSL_SUCCESS
 }
 
-func go_df(x *C.gsl_vector, fn unsafe.Pointer, g *C.gsl_vector) {
-	gofn := (*Diffable)(fn)
-	g = ToGSL(gofn.Df(FromGSL(x)))
+// Wrapper for fn.Df
+func go_df(x *C.gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
+	gofn := (*DiffSystem)(fn)
+	MatrixToGSL(gofn.Df(VecFromGSL(x)), J)
+	return C.GSL_SUCCESS
 }
 
-func go_fdf(x *C.gsl_vector, fn unsafe.Pointer, f *C.double, g *C.gsl_vector) {
-	gofn := (*Diffable)(fn)
-	val, grad := gofn.Fdf(FromGSL(x))
-	*f = C.double(val)
-	g = ToGSL(grad)
+// Wrapper for fn.Fdf
+func go_fdf(x *C.gsl_vector, fn unsafe.Pointer, f *C.gsl_vector, J *C.gsl_matrix) C.int {
+	gofn := (*DiffSystem)(fn)
+	val, grad := gofn.Fdf(VecFromGSL(x))
+	VecToGSL(val, f)
+	MatrixToGSL(grad, J)
+	return C.GSL_SUCCESS
 }
 
 // Convert v to GSL format.
-func ToGSL(v vec.Vector) *C.gsl_vector {
+func VecToGSL(v vec.Vector, target *C.gsl_vector) {
 	dim := len(v)
-	u := C.gsl_vector_alloc(C.size_t(dim))
 	for i := 0; i < dim; i++ {
-		C.gsl_vector_set(u, C.size_t(i), C.double(v[i]))
+		C.gsl_vector_set(target, C.size_t(i), C.double(v[i]))
 	}
-	return u
 }
 
 // Convert v back to Go format.
-func FromGSL(v *C.gsl_vector) vec.Vector {
+func VecFromGSL(v *C.gsl_vector) vec.Vector {
 	dim := int(v.size)
 	u := vec.ZeroVector(dim)
 	for i := 0; i < dim; i++ {
 		u[i] = float64(C.gsl_vector_get(v, C.size_t(i)))
 	}
 	return u
+}
+
+// Convert m to GSL format.
+func MatrixToGSL(m []vec.Vector, target *C.gsl_matrix) {
+	numFunctions := len(m)
+	dimension := len(m[0])
+	for i := 0; i < numFunctions; i++ {
+		for j := 0; j < dimension; j++ {
+			it, jt := C.size_t(i), C.size_t(j)
+			C.gsl_matrix_set(target, it, jt, C.double(m[i][j]))
+		}
+	}
 }
