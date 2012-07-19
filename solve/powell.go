@@ -24,9 +24,11 @@ import "unsafe"
 // implementation of Powell's Hybrid method (gsl_multiroot_fdfsolver_hybridsj).
 // Callback passing through cgo follows the model at:
 // http://stackoverflow.com/questions/6125683/call-go-functions-from-c/6147097#6147097
-func MultiDim(fn Diffable, start vec.Vector) (vec.Vector, error) {
+func MultiDim(fn DiffSystem, start vec.Vector) (vec.Vector, error) {
 	cfn := unsafe.Pointer(&fn)
-	csolution, cstart := C.gsl_vector_alloc(C.size_t(fn.Dimension)), C.gsl_vector_alloc(C.size_t(fn.Dimension))
+	dim := C.size_t(fn.Dimension)
+	csolution, cstart := C.gsl_vector_alloc(dim), C.gsl_vector_alloc(dim)
+	VecToGSL(start, cstart)
 	epsabs, epsrel := C.double(fn.EpsAbs), C.double(fn.EpsRel)
 	err := C.powellSolve(cfn, cstart, epsabs, epsrel, csolution)
 	if err != C.GSL_SUCCESS {
@@ -41,21 +43,32 @@ func MultiDim(fn Diffable, start vec.Vector) (vec.Vector, error) {
 // Wrapper for fn.F
 func go_f(x *C.gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
 	gofn := *((*DiffSystem)(fn))
-	VecToGSL(gofn.F(VecFromGSL(x)), f)
+	val, err := gofn.F(VecFromGSL(x))
+	if err != nil {
+		// TODO: handle error
+	}
+	VecToGSL(val, f)
 	return C.GSL_SUCCESS
 }
 
 // Wrapper for fn.Df
 func go_df(x *C.gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
 	gofn := (*DiffSystem)(fn)
-	MatrixToGSL(gofn.Df(VecFromGSL(x)), J)
+	val, err := gofn.Df(VecFromGSL(x))
+	if err != nil {
+		// TODO: handle error
+	}
+	MatrixToGSL(val, J)
 	return C.GSL_SUCCESS
 }
 
 // Wrapper for fn.Fdf
 func go_fdf(x *C.gsl_vector, fn unsafe.Pointer, f *C.gsl_vector, J *C.gsl_matrix) C.int {
 	gofn := (*DiffSystem)(fn)
-	val, grad := gofn.Fdf(VecFromGSL(x))
+	val, grad, err := gofn.Fdf(VecFromGSL(x))
+	if err != nil {
+		// TODO: handle error
+	}
 	VecToGSL(val, f)
 	MatrixToGSL(grad, J)
 	return C.GSL_SUCCESS
