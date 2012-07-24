@@ -1,4 +1,4 @@
-package allTemps
+package tempAll
 
 import (
 	"../bzone"

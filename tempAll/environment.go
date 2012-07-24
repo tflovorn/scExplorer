@@ -1,4 +1,4 @@
-package allTemps
+package tempAll
 
 type Environment struct {
 	// Program parameters:
@@ -14,7 +14,7 @@ type Environment struct {
 	Mu_h float64 // holon chemical potential
 
 	// Cached values:
-	epsilonMin       float64
+	epsilonMinCache  float64
 	lastEpsilonMinD1 float64
 }
 
@@ -24,8 +24,8 @@ func (env *Environment) Th() float64 {
 
 func (env *Environment) EpsilonMin() float64 {
 	if env.D1 != env.lastEpsilonMinD1 {
-		env.epsilonMin = EpsilonMin(env)
+		env.epsilonMinCache = EpsilonMin(env)
 		env.lastEpsilonMinD1 = env.D1
 	}
-	return env.epsilonMin
+	return env.epsilonMinCache
 }
