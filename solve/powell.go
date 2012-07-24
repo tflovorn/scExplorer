@@ -2,6 +2,7 @@ package solve
 
 /*
 #cgo LDFLAGS: -lgsl -lgslcblas
+#include <stdio.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
@@ -20,12 +21,11 @@ typedef const gsl_vector* const_gsl_vector;
 static int powellSolve(void * uservar, gsl_vector * start, double epsabs, double epsrel, gsl_vector * solution) {
 	const gsl_multiroot_fdfsolver_type *T;
 	gsl_multiroot_fdfsolver *s;
-
 	int status;
 	size_t iter = 0;
 	const size_t n = start->size;
-	gsl_multiroot_function_fdf f = {&go_f, &go_df, &go_fdf, n, &uservar};
 
+	gsl_multiroot_function_fdf f = {&go_f, &go_df, &go_fdf, n, uservar};
 	T = gsl_multiroot_fdfsolver_hybridsj;
 	s = gsl_multiroot_fdfsolver_alloc(T, n);
 	gsl_multiroot_fdfsolver_set(s, &f, start);
@@ -42,12 +42,16 @@ static int powellSolve(void * uservar, gsl_vector * start, double epsabs, double
 		}
 	} while (status == GSL_CONTINUE && iter < MAX_ITERS);
 
+	gsl_vector_memcpy(solution, s->x);
 	gsl_multiroot_fdfsolver_free(s);
 	return status;
 }
 */
 import "C"
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
 
 import vec "../vector"
 
@@ -55,15 +59,15 @@ import vec "../vector"
 // implementation of Powell's Hybrid method (gsl_multiroot_fdfsolver_hybridsj).
 // Callback passing through cgo follows the model at:
 // http://stackoverflow.com/questions/6125683/call-go-functions-from-c/6147097#6147097
-func MultiDim(fn DiffSystem, start vec.Vector) (vec.Vector, error) {
+func MultiDim(fn DiffSystem, start vec.Vector, epsAbs, epsRel float64) (vec.Vector, error) {
 	cfn := unsafe.Pointer(&fn)
 	dim := C.size_t(fn.Dimension)
 	csolution, cstart := C.gsl_vector_alloc(dim), C.gsl_vector_alloc(dim)
 	VecToGSL(start, cstart)
-	epsabs, epsrel := C.double(fn.EpsAbs), C.double(fn.EpsRel)
-	err := C.powellSolve(cfn, cstart, epsabs, epsrel, csolution)
+	err := C.powellSolve(cfn, cstart, C.double(epsAbs), C.double(epsRel), csolution)
 	if err != C.GSL_SUCCESS {
 		// TODO: handle error
+		fmt.Printf("MultiDim got error %v\n", err)
 	}
 	solution := VecFromGSL(csolution)
 	C.gsl_vector_free(csolution)

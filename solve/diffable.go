@@ -2,25 +2,21 @@ package solve
 
 import vec "../vector"
 
-import "math"
-
 // Function plus first derivatives.
 type Diffable struct {
-	F              func(vec.Vector) (float64, error)
-	Df             func(vec.Vector) (vec.Vector, error)
-	Fdf            func(vec.Vector) (float64, vec.Vector, error)
-	Dimension      int     // length of vectors
-	EpsAbs, EpsRel float64 // absolute and relative tolerance
+	F         vec.FnDim0
+	Df        vec.FnDim1
+	Fdf       vec.FnDim0_1
+	Dimension int // length of vectors
 }
 
 // System of functions plus first derivatives.
 type DiffSystem struct {
-	F              func(vec.Vector) (vec.Vector, error)
-	Df             func(vec.Vector) ([]vec.Vector, error)
-	Fdf            func(vec.Vector) (vec.Vector, []vec.Vector, error)
-	NumFuncs       int     // length of F output vector and Df slice
-	Dimension      int     // length of input vectors and Df output vector
-	EpsAbs, EpsRel float64 // absolute and relative tolerance
+	F         vec.FnDim1
+	Df        func(vec.Vector) ([]vec.Vector, error)
+	Fdf       func(vec.Vector) (vec.Vector, []vec.Vector, error)
+	NumFuncs  int // length of F output vector and Df slice
+	Dimension int // length of input vectors and Df output vector
 }
 
 // Combine fns into one function, suitable for passing to MultiDim.
@@ -69,11 +65,5 @@ func Combine(fns []Diffable) DiffSystem {
 		}
 		return ret_f, ret_df, nil
 	}
-	// epsilon = max({epsilon_i})
-	EpsAbs, EpsRel := -math.MaxFloat64, -math.MaxFloat64
-	for i := 0; i < len(fns); i++ {
-		EpsAbs = math.Max(fns[i].EpsAbs, EpsAbs)
-		EpsRel = math.Max(fns[i].EpsRel, EpsRel)
-	}
-	return DiffSystem{F, Df, Fdf, NumFuncs, Dimension, EpsAbs, EpsRel}
+	return DiffSystem{F, Df, Fdf, NumFuncs, Dimension}
 }

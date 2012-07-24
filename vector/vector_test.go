@@ -20,3 +20,14 @@ func TestAdd(t *testing.T) {
 		t.Fatalf("TestAdd added incorrect values; v = %v", v)
 	}
 }
+
+func TestEquals(t *testing.T) {
+	v := Vector([]float64{1.0, 4.0})
+	u := Vector([]float64{2.0, 4.0})
+	if !v.Equals(v) || !u.Equals(u) {
+		t.Fatalf("vector not equal to itself")
+	}
+	if v.Equals(u) {
+		t.Fatalf("vector equal to non-equal vector")
+	}
+}
