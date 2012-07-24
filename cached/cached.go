@@ -19,20 +19,22 @@ func WrapMath(fn func(float64) float64) func(float64) float64 {
 	}
 }
 
-// Cached version of math.Cos.
-func Cos(x float64) float64 {
-	// could remove this check by forcing in Init() call before this
+func init() {
 	if cosCache == nil {
 		cosCache = WrapMath(math.Cos)
 	}
+	if sinCache == nil {
+		sinCache = WrapMath(math.Sin)
+	}
+}
+
+// Cached version of math.Cos.
+func Cos(x float64) float64 {
 	return cosCache(x)
 }
 
 // Cached version of math.Sin.
 func Sin(x float64) float64 {
-	if sinCache == nil {
-		sinCache = WrapMath(math.Sin)
-	}
 	return sinCache(x)
 }
 
