@@ -6,19 +6,50 @@ package solve
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multiroots.h>
-extern int go_f(const gsl_vector * x, void * fn, gsl_vector * f);
-extern int go_df(const gsl_vector * x, void * fn, gsl_matrix * J);
-extern int go_fdf(const gsl_vector * x, void * fn, gsl_vector * f, gsl_matrix * J);
+extern int go_f(const gsl_vector*, void *, gsl_vector*);
+extern int go_df(const gsl_vector*, void *, gsl_matrix*);
+extern int go_fdf(const gsl_vector*, void *, gsl_vector*, gsl_matrix*);
 
-static int powellSolve(void * fn, const gsl_vector * start, double apsabs, double epsrel, gsl_vector * solution) {
-	return 0;
+#define MAX_ITERS 1000
+
+typedef const gsl_vector* const_gsl_vector;
+
+// Follows the fdf solver example at:
+// http://www.gnu.org/software/gsl/manual/html_node/Example-programs-for-Multidimensional-Root-finding.html
+
+static int powellSolve(void * uservar, gsl_vector * start, double epsabs, double epsrel, gsl_vector * solution) {
+	const gsl_multiroot_fdfsolver_type *T;
+	gsl_multiroot_fdfsolver *s;
+
+	int status;
+	size_t iter = 0;
+	const size_t n = start->size;
+	gsl_multiroot_function_fdf f = {&go_f, &go_df, &go_fdf, n, &uservar};
+
+	T = gsl_multiroot_fdfsolver_hybridsj;
+	s = gsl_multiroot_fdfsolver_alloc(T, n);
+	gsl_multiroot_fdfsolver_set(s, &f, start);
+
+	do {
+		iter++;
+		status = gsl_multiroot_fdfsolver_iterate(s);
+		if (status) {
+			break;
+		}
+		status = gsl_multiroot_test_residual(s->f, epsabs);
+		if (status == GSL_CONTINUE) {
+			status = gsl_multiroot_test_delta(s->dx, s->x, epsabs, epsrel);
+		}
+	} while (status == GSL_CONTINUE && iter < MAX_ITERS);
+
+	gsl_multiroot_fdfsolver_free(s);
+	return status;
 }
 */
 import "C"
+import "unsafe"
 
 import vec "../vector"
-
-import "unsafe"
 
 // Multidimensional root-finder. Implemented by providing an interface to GSL
 // implementation of Powell's Hybrid method (gsl_multiroot_fdfsolver_hybridsj).
@@ -40,8 +71,8 @@ func MultiDim(fn DiffSystem, start vec.Vector) (vec.Vector, error) {
 	return solution, nil
 }
 
-// Wrapper for fn.F
-func go_f(x *C.gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
+//export go_f
+func go_f(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
 	gofn := *((*DiffSystem)(fn))
 	val, err := gofn.F(VecFromGSL(x))
 	if err != nil {
@@ -51,8 +82,8 @@ func go_f(x *C.gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
 	return C.GSL_SUCCESS
 }
 
-// Wrapper for fn.Df
-func go_df(x *C.gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
+//export go_df
+func go_df(x C.const_gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
 	gofn := (*DiffSystem)(fn)
 	val, err := gofn.Df(VecFromGSL(x))
 	if err != nil {
@@ -62,8 +93,8 @@ func go_df(x *C.gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
 	return C.GSL_SUCCESS
 }
 
-// Wrapper for fn.Fdf
-func go_fdf(x *C.gsl_vector, fn unsafe.Pointer, f *C.gsl_vector, J *C.gsl_matrix) C.int {
+//export go_fdf
+func go_fdf(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector, J *C.gsl_matrix) C.int {
 	gofn := (*DiffSystem)(fn)
 	val, grad, err := gofn.Fdf(VecFromGSL(x))
 	if err != nil {
