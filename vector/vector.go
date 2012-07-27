@@ -1,7 +1,6 @@
 package vector
 
 type Vector []float64
-type VectorFunc func(v Vector) float64
 type FnDim0 func(Vector) (float64, error)
 type FnDim1 func(Vector) (Vector, error)
 type FnDim0_1 func(Vector) (float64, Vector, error)

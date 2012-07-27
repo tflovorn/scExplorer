@@ -3,6 +3,7 @@ package tempAll
 import "math"
 import (
 	"../bzone"
+	"../serialize"
 	vec "../vector"
 )
 
@@ -32,40 +33,55 @@ type Environment struct {
 	lastEpsilonMinD1 float64
 }
 
+// Create an Environment from the given serialized data.
+func NewEnvironment(jsonData string) (*Environment, error) {
+	// initialize env with input data
+	env := new(Environment)
+	err := serialize.CopyFromJSON(jsonData, env)
+	if err != nil {
+		return nil, err
+	}
+	// initialize cache
+	env.setEpsilonMinCache()
+	env.lastEpsilonMinD1 = env.D1
+
+	return env, nil
+}
+
 // Scaled hopping energy
 func (env *Environment) Th() float64 {
 	return env.T0 * (1.0 - env.X)
-}
-
-// Get minimum value of env.Epsilon. If env.D1 hasn't changed since the last
-// call to this function, return a cached value.
-func (env *Environment) EpsilonMin() float64 {
-	if env.D1 != env.lastEpsilonMinD1 {
-		env.epsilonMinCache = env.FindEpsilonMin()
-		env.lastEpsilonMinD1 = env.D1
-	}
-	return env.epsilonMinCache
 }
 
 // Single-holon energy. Minimum is 0.
 // env.EpsilonMin must be set to the value returned by EpsilonMin before
 // calling this function.
 func (env *Environment) Epsilon(k vec.Vector) float64 {
-	return env.EpsilonBar(k) - env.EpsilonMin()
+	return env.epsilonBar(k) - env.getEpsilonMin()
 }
 
 // Single-holon energy without fixed minimum.
-func (env *Environment) EpsilonBar(k vec.Vector) float64 {
+func (env *Environment) epsilonBar(k vec.Vector) float64 {
 	sx, sy := math.Sin(k[0]), math.Sin(k[1])
 	return 2.0*env.Th()*((sx+sy)*(sx+sy)-1) + 4.0*(env.D1*env.T0-env.Thp)*sx*sy
 }
 
-// Find the minimum of EpsilonBar.
-func (env *Environment) FindEpsilonMin() float64 {
-	worker := func(k vec.Vector) float64 {
-		return env.EpsilonBar(k)
+// Get minimum value of env.Epsilon. If env.D1 hasn't changed since the last
+// call to this function, return a cached value.
+func (env *Environment) getEpsilonMin() float64 {
+	if env.D1 != env.lastEpsilonMinD1 {
+		env.setEpsilonMinCache()
+		env.lastEpsilonMinD1 = env.D1
 	}
-	return bzone.Minimum(env.PointsPerSide, 2, worker)
+	return env.epsilonMinCache
+}
+
+// Find the minimum of EpsilonBar.
+func (env *Environment) setEpsilonMinCache() {
+	worker := func(k vec.Vector) float64 {
+		return env.epsilonBar(k)
+	}
+	env.epsilonMinCache = bzone.Minimum(env.PointsPerSide, 2, worker)
 }
 
 // Single-holon energy minus chemical potential. Minimum is -mu.
