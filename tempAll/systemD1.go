@@ -4,6 +4,6 @@ import (
 	"../solve"
 )
 
-func SystemD1(env *EnvAll) []solve.Diffable {
+func SystemD1(env *Environment) []solve.Diffable {
 	return nil
 }
