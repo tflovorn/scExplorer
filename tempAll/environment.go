@@ -1,5 +1,11 @@
 package tempAll
 
+import "math"
+import (
+	"../bzone"
+	vec "../vector"
+)
+
 // Container for variables relevant at all temperatures.
 type EnvAll struct {
 	// Program parameters:
@@ -20,14 +26,43 @@ type EnvAll struct {
 	lastEpsilonMinD1 float64
 }
 
+// Scaled hopping energy
 func (env *EnvAll) Th() float64 {
 	return env.T0 * (1.0 - env.X)
 }
 
+// Get minimum value of env.Epsilon. If env.D1 hasn't changed since the last
+// call to this function, return a cached value.
 func (env *EnvAll) EpsilonMin() float64 {
 	if env.D1 != env.lastEpsilonMinD1 {
-		env.epsilonMinCache = EpsilonMin(env)
+		env.epsilonMinCache = env.FindEpsilonMin()
 		env.lastEpsilonMinD1 = env.D1
 	}
 	return env.epsilonMinCache
+}
+
+// Single-holon energy. Minimum is 0.
+// env.EpsilonMin must be set to the value returned by EpsilonMin before
+// calling this function.
+func (env *EnvAll) Epsilon(k vec.Vector) float64 {
+	return env.EpsilonBar(k) - env.EpsilonMin()
+}
+
+// Single-holon energy without fixed minimum.
+func (env *EnvAll) EpsilonBar(k vec.Vector) float64 {
+	sx, sy := math.Sin(k[0]), math.Sin(k[1])
+	return 2.0*env.Th()*((sx+sy)*(sx+sy)-1) + 4.0*(env.D1*env.T0-env.Thp)*sx*sy
+}
+
+// Find the minimum of EpsilonBar.
+func (env *EnvAll) FindEpsilonMin() float64 {
+	worker := func(k vec.Vector) float64 {
+		return env.EpsilonBar(k)
+	}
+	return bzone.Minimum(env.PointsPerSide, 2, worker)
+}
+
+// Single-holon energy minus chemical potential. Minimum is -mu.
+func (env *EnvAll) Xi(k []float64) float64 {
+	return env.Epsilon(k) - env.Mu_h
 }
