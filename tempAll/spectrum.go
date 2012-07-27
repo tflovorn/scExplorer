@@ -1,8 +1,8 @@
 package tempAll
 
+import "math"
 import (
 	"../bzone"
-	"../cached"
 	vec "../vector"
 )
 
@@ -15,7 +15,7 @@ func Epsilon(k vec.Vector, env *Environment) float64 {
 
 // Single-holon energy without fixed minimum.
 func EpsilonBar(k vec.Vector, env *Environment) float64 {
-	sx, sy := cached.Sin(k[0]), cached.Sin(k[1])
+	sx, sy := math.Sin(k[0]), math.Sin(k[1])
 	return 2.0*env.Th()*((sx+sy)*(sx+sy)-1) + 4.0*(env.D1*env.T0-env.Thp)*sx*sy
 }
 

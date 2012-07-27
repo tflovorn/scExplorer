@@ -2,6 +2,5 @@
 
 cd tempAll && go test && cd ..
 cd bzone && go test && cd ..
-cd cached && go test && cd ..
 cd solve && go test && cd ..
 cd vector && go test && cd ..
