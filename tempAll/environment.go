@@ -59,7 +59,7 @@ func (env *Environment) Th() float64 {
 // Single-holon energy. Minimum is 0.
 // env.EpsilonMin must be set to the value returned by EpsilonMin before
 // calling this function.
-func (env *Environment) Epsilon(k vec.Vector) float64 {
+func (env *Environment) Epsilon_h(k vec.Vector) float64 {
 	return env.epsilonBar(k) - env.getEpsilonMin()
 }
 
@@ -88,13 +88,26 @@ func (env *Environment) setEpsilonMinCache() {
 }
 
 // Single-holon energy minus chemical potential. Minimum is -mu.
-func (env *Environment) Xi(k []float64) float64 {
-	return env.Epsilon(k) - env.Mu_h
+func (env *Environment) Xi_h(k []float64) float64 {
+	return env.Epsilon_h(k) - env.Mu_h
 }
 
 // Superconducting gap function.
 func (env *Environment) Delta_h(k vec.Vector) float64 {
 	return 4.0 * (env.T0 + env.Tz) * env.F0 * (math.Sin(k[0]) + float64(env.Alpha)*math.Sin(k[1]))
+}
+
+// Fermi distribution function.
+func (env *Environment) Fermi(energy float64) float64 {
+	// special case: zero temperature
+	if env.Beta == math.Inf(1) {
+		if energy <= 0 {
+			return 1.0
+		}
+		return 0.0
+	}
+	// nonzero temperature
+	return 1.0 / (math.Exp(energy*env.Beta) + 1.0)
 }
 
 // Iterate through v and vars simultaneously. vars specifies the names of
@@ -106,6 +119,9 @@ func (env *Environment) Set(v vec.Vector, vars []string) {
 	for i := 0; i < len(vars); i++ {
 		field := ev.FieldByName(vars[i])
 		if field == reflect.Zero(reflect.TypeOf(env)) {
+			continue
+		}
+		if field.Type().Kind() != reflect.Float64 {
 			continue
 		}
 		field.SetFloat(v[i])
