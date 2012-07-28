@@ -35,3 +35,18 @@ func defaultEnv() (*Environment, error) {
 	}
 	return env, nil
 }
+
+// The minimum of env.Xi() should be equal to -env.Mu_h.
+func TestXiMin(t *testing.T) {
+	env, err := defaultEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	worker := func(k vec.Vector) float64 {
+		return env.Xi(k)
+	}
+	min := bzone.Minimum(env.PointsPerSide, 2, worker)
+	if min != -env.Mu_h {
+		t.Fatalf("env.Xi() minimum (%v) is != -Mu_h (%v)", min, env.Mu_h)
+	}
+}

@@ -1,6 +1,9 @@
 package tempAll
 
-import "math"
+import (
+	"math"
+	"reflect"
+)
 import (
 	"../bzone"
 	"../serialize"
@@ -92,4 +95,19 @@ func (env *Environment) Xi(k []float64) float64 {
 // Superconducting gap function.
 func (env *Environment) Delta_h(k vec.Vector) float64 {
 	return 4.0 * (env.T0 + env.Tz) * env.F0 * (math.Sin(k[0]) + float64(env.Alpha)*math.Sin(k[1]))
+}
+
+// Iterate through v and vars simultaneously. vars specifies the names of
+// fields to change in env (they are set to the values given in v).
+// If vars specifies a field not contained in env (or a field of non-float
+// type), the corresponding value is silently ignored.
+func (env *Environment) Set(v vec.Vector, vars []string) {
+	ev := reflect.ValueOf(env)
+	for i := 0; i < len(vars); i++ {
+		field := ev.FieldByName(vars[i])
+		if field == reflect.Zero(reflect.TypeOf(env)) {
+			continue
+		}
+		field.SetFloat(v[i])
+	}
 }

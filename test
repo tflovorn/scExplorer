@@ -1,6 +1,8 @@
 #!/bin/bash
 
+cd vector && go test && cd ..
 cd bzone && go test && cd ..
 cd solve && go test && cd ..
-cd vector && go test && cd ..
+cd serialize && go test && cd ..
 cd tempAll && go test && cd ..
+cd tempZero && go test && cd ..
