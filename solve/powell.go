@@ -52,7 +52,6 @@ import (
 	"fmt"
 	"unsafe"
 )
-
 import vec "../vector"
 
 // Multidimensional root-finder. Implemented by providing an interface to GSL
