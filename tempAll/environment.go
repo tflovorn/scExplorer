@@ -87,7 +87,7 @@ func (env *Environment) setEpsilonMinCache() {
 	env.epsilonMinCache = bzone.Minimum(env.PointsPerSide, 2, worker)
 }
 
-// Single-holon energy minus chemical potential. Minimum is -mu.
+// Single-holon energy minus chemical potential. Minimum is -env.Mu_h.
 func (env *Environment) Xi_h(k []float64) float64 {
 	return env.Epsilon_h(k) - env.Mu_h
 }
@@ -115,7 +115,7 @@ func (env *Environment) Fermi(energy float64) float64 {
 // If vars specifies a field not contained in env (or a field of non-float
 // type), the corresponding value is silently ignored.
 func (env *Environment) Set(v vec.Vector, vars []string) {
-	ev := reflect.ValueOf(env)
+	ev := reflect.ValueOf(env).Elem()
 	for i := 0; i < len(vars); i++ {
 		field := ev.FieldByName(vars[i])
 		if field == reflect.Zero(reflect.TypeOf(env)) {

@@ -11,7 +11,7 @@ import (
 
 // The minimum of env.Epsilon() should be equal to 0.
 func TestEpsilonMin(t *testing.T) {
-	env, err := defaultEnv()
+	env, err := envDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestEpsilonMin(t *testing.T) {
 	}
 }
 
-func defaultEnv() (*Environment, error) {
+func envDefaultEnv() (*Environment, error) {
 	data, err := ioutil.ReadFile("environment_test_env.json")
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func defaultEnv() (*Environment, error) {
 
 // The minimum of env.Xi() should be equal to -env.Mu_h.
 func TestXiMin(t *testing.T) {
-	env, err := defaultEnv()
+	env, err := envDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,5 +48,20 @@ func TestXiMin(t *testing.T) {
 	min := bzone.Minimum(env.PointsPerSide, 2, worker)
 	if min != -env.Mu_h {
 		t.Fatalf("env.Xi() minimum (%v) is != -Mu_h (%v)", min, env.Mu_h)
+	}
+}
+
+// env.Set should actually set values.
+func TestEnvSet(t *testing.T) {
+	env, err := envDefaultEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if env.D1 == 5.0 {
+		env.D1 = 0.1
+	}
+	env.Set([]float64{5.0}, []string{"D1"})
+	if env.D1 != 5.0 {
+		t.Fatalf("env.Set failed to correctly set variable")
 	}
 }

@@ -1,6 +1,8 @@
 package tempAll
 
-import "math"
+import (
+	"math"
+)
 import (
 	"../bzone"
 	"../solve"
@@ -42,7 +44,7 @@ func AbsErrorD1(env *Environment, variables []string) solve.Diffable {
 				grad[i] = 0.0
 			}
 		}
-		return nil, nil
+		return grad, nil
 	}
 	Fdf := func(v vec.Vector) (float64, vec.Vector, error) {
 		f, err := F(v)
