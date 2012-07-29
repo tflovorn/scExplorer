@@ -19,6 +19,18 @@ type DiffSystem struct {
 	Dimension int // length of input vectors and Df output vector
 }
 
+// Create a function which returns the combined result of F(v) and Df(v).
+func SimpleFdf(F vec.FnDim0, Df vec.FnDim1) vec.FnDim0_1 {
+	return func(v vec.Vector) (float64, vec.Vector, error) {
+		f, err := F(v)
+		if err != nil {
+			return f, nil, err
+		}
+		df, err := Df(v)
+		return f, df, err
+	}
+}
+
 // Combine fns into one function, suitable for passing to MultiDim.
 // All funcs passed in must have the same dimension.
 func Combine(fns []Diffable) DiffSystem {

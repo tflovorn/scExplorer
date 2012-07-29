@@ -55,16 +55,7 @@ func RosenbrockDf(a, b float64) (vec.FnDim1, vec.FnDim1) {
 func RosenbrockFdf(a, b float64) (vec.FnDim0_1, vec.FnDim0_1) {
 	f1, f2 := RosenbrockF(a, b)
 	df1, df2 := RosenbrockDf(a, b)
-	fdf1 := func(v vec.Vector) (float64, vec.Vector, error) {
-		vf1, _ := f1(v)
-		vdf1, _ := df1(v)
-		return vf1, vdf1, nil
-	}
-	fdf2 := func(v vec.Vector) (float64, vec.Vector, error) {
-		vf2, _ := f2(v)
-		vdf2, _ := df2(v)
-		return vf2, vdf2, nil
-
-	}
+	fdf1 := SimpleFdf(f1, df1)
+	fdf2 := SimpleFdf(f2, df2)
 	return fdf1, fdf2
 }

@@ -46,14 +46,7 @@ func AbsErrorD1(env *Environment, variables []string) solve.Diffable {
 		}
 		return grad, nil
 	}
-	Fdf := func(v vec.Vector) (float64, vec.Vector, error) {
-		f, err := F(v)
-		if err != nil {
-			return f, nil, err
-		}
-		df, err := Df(v)
-		return f, df, err
-	}
+	Fdf := solve.SimpleFdf(F, Df)
 	return solve.Diffable{F, Df, Fdf, Dimension}
 }
 

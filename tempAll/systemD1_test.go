@@ -24,7 +24,11 @@ func TestSolveAbsErrorD1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if math.Abs(solution[0]-solution_expected) > epsabs {
+	errabs, err := diffD1.F([]float64{env.D1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if math.Abs(solution[0]-solution_expected) > epsabs || errabs > epsabs {
 		t.Fatalf("incorrect D1 solution")
 	}
 }
