@@ -10,7 +10,7 @@ import (
 )
 
 func TestSolveAbsErrorD1(t *testing.T) {
-	solution_expected := -0.7999997428537146
+	solution_expected := -0.7999999888582411
 	env, err := d1DefaultEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -29,7 +29,7 @@ func TestSolveAbsErrorD1(t *testing.T) {
 		t.Fatal(err)
 	}
 	if math.Abs(solution[0]-solution_expected) > epsabs || errabs > epsabs {
-		t.Fatalf("incorrect D1 solution")
+		t.Fatalf("incorrect D1 solution (got %v, expected %v)", solution[0], solution_expected)
 	}
 }
 

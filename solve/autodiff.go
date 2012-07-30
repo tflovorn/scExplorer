@@ -58,16 +58,20 @@ func Derivative(fn vec.FnDim0, v vec.Vector, i int, h, epsabs float64) (float64,
 	fwi := unsafe.Pointer(&fnWithIndex{fn, v, i})
 	x := C.double(v[i])
 	result, abserr := C.double(0.0), C.double(math.MaxFloat64)
-	for float64(abserr) > epsabs && iters < maxIters && hOk(h) {
+	for iters < maxIters && hOk(h) {
 		err := C.centralDeriv(fwi, x, C.double(h), &result, &abserr)
 		if err != C.GSL_SUCCESS {
 			err_str := C.GoString(C.gsl_strerror(err))
 			return float64(result), fmt.Errorf("error in Derivative (GSL): %v\n", err_str)
 		}
+		if float64(abserr) > epsabs {
+			return float64(result), nil
+		}
 		iters++
 		h = hAdvance(h)
 	}
-	return float64(result), nil
+	// if we get here, !hOk(h) || iters == maxIters
+	return float64(result), fmt.Errorf("Derivative exceeded maximum iterations\n")
 }
 
 // Evaluate the go function contained in uservar at x.

@@ -33,7 +33,7 @@ func AbsErrorD1(env *Environment, variables []string) solve.Diffable {
 		for i, varname := range variables {
 			if varname == "D1" {
 				sum := bzone.Sum(L, 2, wrapFunc(env, innerD1D1))
-				grad[i] = 1.0 - (4.0*env.Beta*(env.T0+env.Tz)/N)*sum
+				grad[i] = 1.0 - (4.0*env.Beta*env.T0/N)*sum
 			} else if varname == "Mu_h" {
 				sum := bzone.Sum(L, 2, wrapFunc(env, innerD1Mu_h))
 				grad[i] = (env.Beta / N) * sum
