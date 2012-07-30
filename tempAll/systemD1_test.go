@@ -9,8 +9,9 @@ import (
 	"testing"
 )
 
+// Regression test: solution for D1 in default environment should stay constant
 func TestSolveAbsErrorD1(t *testing.T) {
-	solution_expected := -0.7999999888582411
+	solution_expected := -0.7999999975992615
 	env, err := d1DefaultEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -43,4 +44,29 @@ func d1DefaultEnv() (*Environment, error) {
 		return nil, err
 	}
 	return env, nil
+}
+
+// Df returned by AbsErrorD1 should match automatic derivative
+func TestGradientD1Matches(t *testing.T) {
+	env, err := d1DefaultEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	diffD1 := AbsErrorD1(env, []string{"D1", "Mu_h", "Beta"})
+	v := []float64{env.D1, env.Mu_h, env.Beta}
+	h := 1e-4
+	epsabs := 1e-9
+	exactGrad, err := diffD1.Df(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	estimateGrad, err := solve.Gradient(diffD1.F, v, h, epsabs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 3; i++ {
+		if math.Abs(exactGrad[i]-estimateGrad[i]) > epsabs {
+			t.Fatalf("too large a difference between D1 gradient[%d] estimate (%v) and exact value (%v)", i, estimateGrad[i], exactGrad[i])
+		}
+	}
 }

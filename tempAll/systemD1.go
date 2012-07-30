@@ -27,24 +27,9 @@ func AbsErrorD1(env *Environment, variables []string) solve.Diffable {
 		// set variables from v
 		env.Set(v, variables)
 		// calculate error gradient
-		grad := vec.ZeroVector(Dimension)
-		L := env.PointsPerSide
-		N := float64(L * L)
-		for i, varname := range variables {
-			if varname == "D1" {
-				sum := bzone.Sum(L, 2, wrapFunc(env, innerD1D1))
-				grad[i] = 1.0 - (4.0*env.Beta*env.T0/N)*sum
-			} else if varname == "Mu_h" {
-				sum := bzone.Sum(L, 2, wrapFunc(env, innerD1Mu_h))
-				grad[i] = (env.Beta / N) * sum
-			} else if varname == "Beta" {
-				sum := bzone.Sum(L, 2, wrapFunc(env, innerD1Beta))
-				grad[i] = (-1.0 / N) * sum
-			} else {
-				grad[i] = 0.0
-			}
-		}
-		return grad, nil
+		h := 1e-4
+		epsabs := 1e-9
+		return solve.Gradient(F, v, h, epsabs)
 	}
 	Fdf := solve.SimpleFdf(F, Df)
 	return solve.Diffable{F, Df, Fdf, Dimension}

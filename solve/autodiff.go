@@ -28,9 +28,24 @@ type fnWithIndex struct {
 	i  int
 }
 
+// Gradient of fn at v within tolerance epsabs. h is the initial step size.
+func Gradient(fn vec.FnDim0, v vec.Vector, h, epsabs float64) (vec.Vector, error) {
+	grad := vec.ZeroVector(len(v))
+	// calculate derivative of fn w.r.t. each component of v
+	for i := 0; i < len(v); i++ {
+		deriv, err := Derivative(fn, v, i, h, epsabs)
+		if err != nil {
+			return grad, err
+		}
+		grad[i] = deriv
+	}
+	return grad, nil
+}
+
 // Numerical central derivative of fn(v) with respect to v_i within tolerance
 // epsabs. h is the initial step size.
 func Derivative(fn vec.FnDim0, v vec.Vector, i int, h, epsabs float64) (float64, error) {
+	v_i_initial := v[i]
 	iters, maxIters := 0, 100
 	// results are bad for h too small or too large; we iterate in both directions
 	hMin := h / 1e6
@@ -62,15 +77,18 @@ func Derivative(fn vec.FnDim0, v vec.Vector, i int, h, epsabs float64) (float64,
 		err := C.centralDeriv(fwi, x, C.double(h), &result, &abserr)
 		if err != C.GSL_SUCCESS {
 			err_str := C.GoString(C.gsl_strerror(err))
+			v[i] = v_i_initial
 			return float64(result), fmt.Errorf("error in Derivative (GSL): %v\n", err_str)
 		}
 		if float64(abserr) > epsabs {
+			v[i] = v_i_initial
 			return float64(result), nil
 		}
 		iters++
 		h = hAdvance(h)
 	}
 	// if we get here, !hOk(h) || iters == maxIters
+	v[i] = v_i_initial
 	return float64(result), fmt.Errorf("Derivative exceeded maximum iterations\n")
 }
 
