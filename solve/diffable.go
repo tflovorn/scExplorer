@@ -19,6 +19,16 @@ type DiffSystem struct {
 	Dimension int // length of input vectors and Df output vector
 }
 
+// Create a diffable from F using automatic differentiation. h gives the
+// initial differentiation step size and epsabs gives the error tolerance.
+func SimpleDiffable(F vec.FnDim0, dimension int, h, epsabs float64) Diffable {
+	Df := func(v vec.Vector) (vec.Vector, error) {
+		return Gradient(F, v, h, epsabs)
+	}
+	Fdf := SimpleFdf(F, Df)
+	return Diffable{F, Df, Fdf, dimension}
+}
+
 // Create a function which returns the combined result of F(v) and Df(v).
 func SimpleFdf(F vec.FnDim0, Df vec.FnDim1) vec.FnDim0_1 {
 	return func(v vec.Vector) (float64, vec.Vector, error) {

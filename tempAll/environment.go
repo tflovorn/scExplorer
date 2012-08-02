@@ -97,6 +97,13 @@ func (env *Environment) Delta_h(k vec.Vector) float64 {
 	return 4.0 * (env.T0 + env.Tz) * env.F0 * (math.Sin(k[0]) + float64(env.Alpha)*math.Sin(k[1]))
 }
 
+// Bogolyubov quasiparticle energy.
+func (env *Environment) BogoEnergy(k vec.Vector) float64 {
+	xi := env.Xi_h(k)
+	delta := env.Delta_h(k)
+	return math.Sqrt(xi*xi + delta*delta)
+}
+
 // Fermi distribution function.
 func (env *Environment) Fermi(energy float64) float64 {
 	// Temperature is 0 or e^(Beta*energy) is too big to calculate
