@@ -11,7 +11,7 @@ import (
 
 // Regression test: solution for D1 in default environment should stay constant
 func TestSolveAbsErrorD1(t *testing.T) {
-	solution_expected := 0.023123344686069098
+	solution_expected := 0.023124383659530325
 	env, err := d1DefaultEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -29,8 +29,8 @@ func TestSolveAbsErrorD1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if math.Abs(solution[0]-solution_expected) > epsabs || errabs > epsabs {
-		t.Fatalf("incorrect D1 solution (got %v, expected %v)", solution[0], solution_expected)
+	if math.Abs(solution[0]-solution_expected) > epsabs || math.Abs(errabs) > epsabs {
+		t.Fatalf("incorrect D1 solution (got %v, expected %v); error is %v", solution[0], solution_expected, errabs)
 	}
 }
 
