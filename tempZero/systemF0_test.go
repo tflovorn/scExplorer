@@ -40,7 +40,7 @@ func TestSolveZeroTempSystem(t *testing.T) {
 		t.Fatalf("got error collecting erorrs post-solution")
 	}
 	if math.Abs(errD1) > epsabs || math.Abs(errMu_h) > epsabs || math.Abs(errF0) > epsabs {
-		t.Fatalf("error in (D1, Mu_h, F0) system too large; solution = V; errors = %v, %v, %v", solution, errD1, errMu_h, errF0)
+		t.Fatalf("error in (D1, Mu_h, F0) system too large; solution = %v; errors = %v, %v, %v", solution, errD1, errMu_h, errF0)
 	}
 	// the solution should be the expected one
 	for i := 0; i < 3; i++ {
