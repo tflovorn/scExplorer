@@ -29,39 +29,24 @@ func (s *Series) Len() int {
 func ExtractSeries(dataSet []interface{}, varNames []string) []Series {
 	if len(varNames) < 2 {
 		panic("not enough variable names")
+	} else if len(varNames) == 2 {
+		return extractXY(dataSet, varNames[0], varNames[1])
 	}
 	// iterate through dataSet to create a map x->y for each z
 	maps := make(map[float64]map[float64]float64)
 	zs := make([]float64, 0)
-	no_z_xs, no_z_ymap := make([]float64, 0), make(map[float64]float64)
 	for _, data := range dataSet {
 		val := reflect.ValueOf(data)
 		x := val.FieldByName(varNames[0]).Float()
 		y := val.FieldByName(varNames[1]).Float()
-		if len(varNames) > 2 {
-			z := val.FieldByName(varNames[2]).Float()
-			zmap, ok := maps[z]
-			if !ok {
-				zs = append(zs, z)
-				maps[z] = make(map[float64]float64)
-				zmap = maps[z]
-			}
-			zmap[x] = y
-		} else {
-			no_z_xs = append(no_z_xs, x)
-			no_z_ymap[x] = y
+		z := val.FieldByName(varNames[2]).Float()
+		zmap, ok := maps[z]
+		if !ok {
+			zs = append(zs, z)
+			maps[z] = make(map[float64]float64)
+			zmap = maps[z]
 		}
-	}
-	// if no z is specified, sort the single series and return
-	if len(varNames) == 2 {
-		sort.Float64s(no_z_xs)
-		ys := make([]float64, len(no_z_xs))
-		for i, x := range no_z_xs {
-			ys[i] = no_z_ymap[x]
-		}
-		ret := make([]Series, 1)
-		ret[0] = Series{no_z_xs, ys}
-		return ret
+		zmap[x] = y
 	}
 	// create the slice of Series in ascending-z order
 	sort.Float64s(zs)
@@ -76,9 +61,26 @@ func ExtractSeries(dataSet []interface{}, varNames []string) []Series {
 		sort.Float64s(xs)
 		ys := make([]float64, len(xs))
 		for j, x := range xs {
-			ys[j] = x
+			ys[j] = zmap[x]
 		}
 		ret[i] = Series{xs, ys}
 	}
 	return ret
+}
+
+func extractXY(dataSet []interface{}, varX, varY string) []Series {
+	xs, ymap := make([]float64, 0), make(map[float64]float64)
+	for _, data := range dataSet {
+		val := reflect.ValueOf(data)
+		x := val.FieldByName(varX).Float()
+		y := val.FieldByName(varY).Float()
+		xs = append(xs, x)
+		ymap[x] = y
+	}
+	sort.Float64s(xs)
+	ys := make([]float64, len(xs))
+	for i, x := range xs {
+		ys[i] = ymap[x]
+	}
+	return []Series{Series{xs, ys}}
 }
