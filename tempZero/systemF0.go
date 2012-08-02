@@ -8,8 +8,8 @@ import (
 	vec "../vector"
 )
 
-// Return the absolute error and gradient of the F0 equation w.r.t. the
-// given variables.
+// Return the absolute error and gradient of the order parameter equation
+// w.r.t. the given variables.
 func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 	F := func(v vec.Vector) (float64, error) {
 		env.Set(v, variables)
