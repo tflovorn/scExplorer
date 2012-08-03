@@ -101,3 +101,19 @@ func TestOneAvg(t *testing.T) {
 	}
 
 }
+
+// Does Min return the correct minimum?
+func TestMinQuadratic(t *testing.T) {
+	expected := 0.0
+	checkMin := func(L, d int, epsilon float64) (float64, bool) {
+		fn := func(k vec.Vector) float64 {
+			return k[0]*k[0] + k[1]*k[1]
+		}
+		val := Min(L, d, fn)
+		return val, math.Abs(val-float64(expected)) < epsilon
+	}
+	val, ok := checkMin(16, 2, 1e-9)
+	if !ok {
+		t.Fatalf("Min reported incorrect minimum (got %v, expected %v)", val, expected)
+	}
+}
