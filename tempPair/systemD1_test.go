@@ -1,9 +1,10 @@
-package tempAll
+package tempPair
 
 import (
 	"../solve"
 )
 import (
+	"../tempAll"
 	"io/ioutil"
 	"math"
 	"testing"
@@ -34,12 +35,12 @@ func TestSolveAbsErrorD1(t *testing.T) {
 	}
 }
 
-func d1DefaultEnv() (*Environment, error) {
+func d1DefaultEnv() (*tempAll.Environment, error) {
 	data, err := ioutil.ReadFile("systemD1_test_env.json")
 	if err != nil {
 		return nil, err
 	}
-	env, err := NewEnvironment(string(data))
+	env, err := tempAll.NewEnvironment(string(data))
 	if err != nil {
 		return nil, err
 	}

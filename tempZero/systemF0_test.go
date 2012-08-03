@@ -12,18 +12,18 @@ import (
 
 // Solve a zero-temperature system for the appropriate values of (D1, Mu_h, F0)
 func TestSolveZeroTempSystem(t *testing.T) {
-	expected := []float64{-8.495216944138804e-22, -0.13282516398709052, 0.13096055703120293}
+	expected := []float64{0.05262015728419598, -0.2196381319338274, 0.13093991107236277}
 	env, err := ztDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
 	variables := []string{"D1", "Mu_h", "F0"}
-	diffD1 := tempAll.AbsErrorD1(env, variables)
+	diffD1 := AbsErrorD1(env, variables)
 	diffMu_h := AbsErrorMu_h(env, variables)
 	diffF0 := AbsErrorF0(env, variables)
 	system := solve.Combine([]solve.Diffable{diffD1, diffMu_h, diffF0})
 	start := []float64{env.D1, env.Mu_h, env.F0}
-	epsabs, epsrel := 1e-9, 1e-9
+	epsabs, epsrel := 1e-6, 1e-6
 	solution, err := solve.MultiDim(system, start, epsabs, epsrel)
 	if err != nil {
 		t.Fatal(err)

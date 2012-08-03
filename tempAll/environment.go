@@ -134,3 +134,12 @@ func (env *Environment) Set(v vec.Vector, vars []string) {
 		field.SetFloat(v[i])
 	}
 }
+
+type Wrappable func(*Environment, vec.Vector) float64
+
+// Wrap fn with a function which depends only on a vector
+func WrapFunc(env *Environment, fn Wrappable) bzone.BzFunc {
+	return func(k vec.Vector) float64 {
+		return fn(env, k)
+	}
+}

@@ -18,7 +18,7 @@ func TestSolvePairTempSystem(t *testing.T) {
 		t.Fatal(err)
 	}
 	variables := []string{"D1", "Mu_h", "Beta"}
-	diffD1 := tempAll.AbsErrorD1(env, variables)
+	diffD1 := AbsErrorD1(env, variables)
 	diffMu_h := AbsErrorMu_h(env, variables)
 	diffBeta := AbsErrorBeta(env, variables)
 	system := solve.Combine([]solve.Diffable{diffD1, diffMu_h, diffBeta})
