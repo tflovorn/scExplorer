@@ -7,3 +7,5 @@ cd serialize && go test && cd ..
 cd plots && go test && cd ..
 cd tempAll && go test && cd ..
 cd tempZero && go test && cd ..
+
+./clean

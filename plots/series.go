@@ -23,6 +23,17 @@ func (s *Series) Len() int {
 	return len(s.xs)
 }
 
+func (s *Series) Pairs() [][]float64 {
+	L := s.Len()
+	r := make([][]float64, L)
+	for i := 0; i < L; i++ {
+		r[i] = make([]float64, 2)
+		r[i][0] = s.X(i)
+		r[i][1] = s.Y(i)
+	}
+	return r
+}
+
 // Extract (x, y) points from dataSet where the names of x and y are given by
 // varNames[0] and [1]. varNames[2] ("z") optionally specifies a variable to
 // use to split the data into multiple series.
