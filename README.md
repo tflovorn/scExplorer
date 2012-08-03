@@ -1,12 +1,12 @@
 # Build Requirements
 
-This software uses the [GNU Scientific Library](http://www.gnu.org/software/gsl/). To build on Linux Mint / Ubuntu, the following packages are required in addition to a Go 1 installation:
+This software uses the [GNU Scientific Library](http://www.gnu.org/software/gsl/) and [matplotlib](http://matplotlib.sourceforge.net/). To build on Linux Mint / Ubuntu, the following packages are required in addition to a Go 1 installation:
 
-gsl-bin libgsl0ldbl libgsl0-dev
+gsl-bin libgsl0ldbl libgsl0-dev python-matplotlib
 
 For Fedora the corresponding packages are:
 
-gsl gsl-devel
+gsl gsl-devel python-matplotlib
 
 # References
 
