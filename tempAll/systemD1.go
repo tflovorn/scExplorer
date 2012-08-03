@@ -15,12 +15,11 @@ type Wrappable func(*Environment, vec.Vector) float64
 // variables ("D1", "Mu", and "Beta" have nonzero gradient).
 func AbsErrorD1(env *Environment, variables []string) solve.Diffable {
 	F := func(v vec.Vector) (float64, error) {
-		// set variables from v
 		env.Set(v, variables)
-		// calculate error
 		L := env.PointsPerSide
-		N := float64(L * L)
-		return env.D1 + bzone.Sum(L, 2, WrapFunc(env, innerD1))/N, nil
+		lhs := env.D1
+		rhs := -bzone.Avg(L, 2, WrapFunc(env, innerD1))
+		return lhs - rhs, nil
 	}
 	h := 1e-4
 	epsabs := 1e-9

@@ -11,8 +11,9 @@ func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 	F := func(v vec.Vector) (float64, error) {
 		env.Set(v, variables)
 		L := env.PointsPerSide
-		N := float64(L * L)
-		return env.X - bzone.Sum(L, 2, tempAll.WrapFunc(env, innerMu_h))/N, nil
+		lhs := env.X
+		rhs := bzone.Avg(L, 2, tempAll.WrapFunc(env, innerMu_h))
+		return lhs - rhs, nil
 	}
 	h := 1e-4
 	epsabs := 1e-9

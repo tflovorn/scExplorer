@@ -84,7 +84,7 @@ func (env *Environment) setEpsilonMinCache() {
 	worker := func(k vec.Vector) float64 {
 		return env.epsilonBar(k)
 	}
-	env.epsilonMinCache = bzone.Minimum(env.PointsPerSide, 2, worker)
+	env.epsilonMinCache = bzone.Min(env.PointsPerSide, 2, worker)
 }
 
 // Single-holon energy minus chemical potential. Minimum is -env.Mu_h.

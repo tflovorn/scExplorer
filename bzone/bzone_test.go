@@ -84,3 +84,20 @@ func TestOneSum(t *testing.T) {
 		t.Fatalf("Incorrect one sum value; got %f, expected %f", val, 64*64)
 	}
 }
+
+// Does average return the correct average?
+func TestOneAvg(t *testing.T) {
+	checkOneSum := func(L, d int, epsilon float64) (float64, bool) {
+		expected := 1.0
+		fn := func(k vec.Vector) float64 {
+			return 1.0
+		}
+		val := Avg(L, d, fn)
+		return val, math.Abs(val-float64(expected)) < epsilon
+	}
+	val, ok := checkOneSum(4, 2, 1e-9)
+	if !ok {
+		t.Fatalf("Incorrect one average value; got %f, expected %f", val, 1.0)
+	}
+
+}

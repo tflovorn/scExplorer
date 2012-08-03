@@ -22,8 +22,14 @@ func Sum(pointsPerSide int, dimension int, fn BzFunc) float64 {
 	return bzReduce(add, 0.0, pointsPerSide, dimension, fn)
 }
 
+// Average = Sum / (total number of points)
+func Avg(pointsPerSide int, dimension int, fn BzFunc) float64 {
+	N := math.Pow(float64(pointsPerSide), float64(dimension))
+	return Sum(pointsPerSide, dimension, fn) / N
+}
+
 // Find the minimum of fn over all Brillouin zone points.
-func Minimum(pointsPerSide int, dimension int, fn BzFunc) float64 {
+func Min(pointsPerSide int, dimension int, fn BzFunc) float64 {
 	minimum := func(next, min float64) float64 {
 		if next < min {
 			return next

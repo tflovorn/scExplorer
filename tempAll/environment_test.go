@@ -18,7 +18,7 @@ func TestEpsilonMin(t *testing.T) {
 	worker := func(k vec.Vector) float64 {
 		return env.Epsilon_h(k)
 	}
-	min := bzone.Minimum(env.PointsPerSide, 2, worker)
+	min := bzone.Min(env.PointsPerSide, 2, worker)
 	if min != 0.0 {
 		t.Fatalf("env.Epsilon() minimum (%v) is nonzero", min)
 	}
@@ -45,7 +45,7 @@ func TestXiMin(t *testing.T) {
 	worker := func(k vec.Vector) float64 {
 		return env.Xi_h(k)
 	}
-	min := bzone.Minimum(env.PointsPerSide, 2, worker)
+	min := bzone.Min(env.PointsPerSide, 2, worker)
 	if min != -env.Mu_h {
 		t.Fatalf("env.Xi() minimum (%v) is != -Mu_h (%v)", min, env.Mu_h)
 	}
