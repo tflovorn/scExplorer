@@ -1,18 +1,26 @@
 package plots
 
-/*
 import (
-	"testing"
+	"flag"
 	"os"
+	"testing"
 )
 
+var doPlots = flag.Bool("testPlot", false, "Run test involving plots")
+
 func TestPlotMPLParabola(t *testing.T) {
+	flag.Parse()
+	if !*doPlots {
+		return
+	}
 	xs := []float64{1, 2, 3, 4, 5}
 	ys := []float64{1, 4, 9, 16, 25}
 	data := []Series{Series{xs, ys}}
 	wd, _ := os.Getwd()
-	params := map[string]string{FILE_KEY: wd+"/deleteme.mpljson_test_data"}
+	params := map[string]string{FILE_KEY: wd + "/deleteme.mpljson_test_data"}
 	seriesParams := []map[string]string{map[string]string{}}
-	PlotMPL(data, params, seriesParams)
+	err := PlotMPL(data, params, seriesParams, wd+"/grapher.py")
+	if err != nil {
+		t.Fatalf("error making plot: %v", err)
+	}
 }
-*/

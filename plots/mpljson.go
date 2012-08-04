@@ -18,14 +18,12 @@ type jsonObject map[string]interface{}
 // Plot the given data using matplotlib. Global graph parameters are given
 // by params; series-specific parameters are given by seriesParams.
 // params[FILE_KEY] specifies the path+fileName.
-func PlotMPL(data []Series, params map[string]string, seriesParams []map[string]string) error {
+func PlotMPL(data []Series, params map[string]string, seriesParams []map[string]string, grapherPath string) error {
 	filePath, err := graphDataToFile(data, params, seriesParams)
 	if err != nil {
 		return err
 	}
-	// run python program to create the graph
-	wd, _ := os.Getwd()
-	cmd := exec.Command("/usr/bin/env", "python", wd+"/grapher.py", filePath)
+	cmd := exec.Command("/usr/bin/env", "python", grapherPath, filePath)
 	if err := cmd.Run(); err != nil {
 		return err
 	}

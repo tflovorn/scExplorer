@@ -36,6 +36,15 @@ type Environment struct {
 	lastEpsilonMinD1 float64
 }
 
+type Wrappable func(*Environment, vec.Vector) float64
+
+// Wrap fn with a function which depends only on a vector
+func WrapFunc(env *Environment, fn Wrappable) bzone.BzFunc {
+	return func(k vec.Vector) float64 {
+		return fn(env, k)
+	}
+}
+
 // Create an Environment from the given serialized data.
 func NewEnvironment(jsonData string) (*Environment, error) {
 	// initialize env with input data
@@ -49,6 +58,15 @@ func NewEnvironment(jsonData string) (*Environment, error) {
 	env.lastEpsilonMinD1 = env.D1
 
 	return env, nil
+}
+
+// Convert to string by marshalling to JSON
+func (env *Environment) String() string {
+	marshalled, err := serialize.MakeJSON(env)
+	if err != nil {
+		panic("failed to marshal Environment to JSON")
+	}
+	return marshalled
 }
 
 // Scaled hopping energy
@@ -135,11 +153,20 @@ func (env *Environment) Set(v vec.Vector, vars []string) {
 	}
 }
 
-type Wrappable func(*Environment, vec.Vector) float64
-
-// Wrap fn with a function which depends only on a vector
-func WrapFunc(env *Environment, fn Wrappable) bzone.BzFunc {
-	return func(k vec.Vector) float64 {
-		return fn(env, k)
+// Split env into many copies with different values of the variable given by
+// varName (N values running from min to max).
+func (env *Environment) Split(varName string, N int, min, max float64) ([]*Environment, error) {
+	marshalled := env.String()
+	step := (max - min) / float64(N-1)
+	rets := make([]*Environment, N)
+	for i := 0; i < N; i++ {
+		x := min + float64(i)*step
+		thisCopy, err := NewEnvironment(marshalled)
+		if err != nil {
+			return rets, err
+		}
+		thisCopy.Set([]float64{x}, []string{varName})
+		rets[i] = thisCopy
 	}
+	return rets, nil
 }
