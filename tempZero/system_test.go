@@ -81,10 +81,9 @@ func TestPlotF0VsX(t *testing.T) {
 	solvedEnvsDWave := make([]interface{}, 0)
 	solvedEnvsSWave := make([]interface{}, 0)
 	for _, env := range envs {
-		marshalled := env.String()
 		start := []float64{env.D1, env.Mu_h, env.F0}
 		epsabs, epsrel := 1e-6, 1e-6
-		envD, _ := tempAll.NewEnvironment(marshalled)
+		envD := env.Copy()
 		systemD := ZeroTempSystem(envD)
 		_, err := solve.MultiDim(systemD, start, epsabs, epsrel)
 		if err != nil {
@@ -92,7 +91,7 @@ func TestPlotF0VsX(t *testing.T) {
 		}
 		solvedEnvsDWave = append(solvedEnvsDWave, *envD)
 		if *testPlotS {
-			envS, _ := tempAll.NewEnvironment(marshalled)
+			envS := env.Copy()
 			envS.Alpha = 1
 			systemS := ZeroTempSystem(envS)
 			_, err = solve.MultiDim(systemS, start, epsabs, epsrel)

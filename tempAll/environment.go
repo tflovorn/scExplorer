@@ -1,6 +1,7 @@
 package tempAll
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 )
@@ -37,6 +38,8 @@ type Environment struct {
 }
 
 type Wrappable func(*Environment, vec.Vector) float64
+
+// ===== Utility functions =====
 
 // Wrap fn with a function which depends only on a vector
 func WrapFunc(env *Environment, fn Wrappable) bzone.BzFunc {
@@ -79,6 +82,80 @@ func (env *Environment) String() string {
 	}
 	return marshalled
 }
+
+// Create and return a copy of env
+func (env *Environment) Copy() *Environment {
+	marshalled := env.String()
+	thisCopy, err := NewEnvironment(marshalled)
+	if err != nil {
+		// shouldn't get here (env should always be copyable)
+		panic(err)
+	}
+	return thisCopy
+}
+
+// Iterate through v and vars simultaneously. vars specifies the names of
+// fields to change in env (they are set to the values given in v).
+// Panics if vars specifies a field not contained in env (or a field of
+// non-float type).
+func (env *Environment) Set(v vec.Vector, vars []string) {
+	ev := reflect.ValueOf(env).Elem()
+	for i := 0; i < len(vars); i++ {
+		field := ev.FieldByName(vars[i])
+		if field == reflect.Zero(reflect.TypeOf(env)) {
+			panic(fmt.Sprintf("Field %v not present in Environment", vars[i]))
+		}
+		if field.Type().Kind() != reflect.Float64 {
+			panic(fmt.Sprintf("Field %v is non-float", vars[i]))
+		}
+		field.SetFloat(v[i])
+	}
+}
+
+// Split env into many copies with different values of the variable given by
+// varName (N values running from min to max).
+func (env *Environment) Split(varName string, N int, min, max float64) ([]*Environment, error) {
+	step := (max - min) / float64(N-1)
+	if N == 1 {
+		step = 0
+	}
+	rets := make([]*Environment, N)
+	for i := 0; i < N; i++ {
+		x := min + float64(i)*step
+		thisCopy := env.Copy()
+		thisCopy.Set([]float64{x}, []string{varName})
+		rets[i] = thisCopy
+	}
+	return rets, nil
+}
+
+// Call Split on each env in envs for each var in varNames to create a
+// "Cartesian product" of the desired splits.
+func (env *Environment) MultiSplit(varNames []string, Ns []int, mins, maxs []float64) ([]*Environment, error) {
+	if len(varNames) == 0 {
+		return nil, nil
+	}
+	oneSplit, err := env.Split(varNames[0], Ns[0], mins[0], maxs[0])
+	if err != nil {
+		return nil, err
+	}
+	if len(varNames) == 1 {
+		return oneSplit, nil
+	}
+	ret := make([]*Environment, 0)
+	for _, osEnv := range oneSplit {
+		ms, err := osEnv.MultiSplit(varNames[1:], Ns[1:], mins[1:], maxs[1:])
+		if err != nil {
+			return ret, err
+		}
+		for _, e := range ms {
+			ret = append(ret, e)
+		}
+	}
+	return ret, nil
+}
+
+// ===== Physics functions =====
 
 // Scaled hopping energy
 func (env *Environment) Th() float64 {
@@ -147,69 +224,4 @@ func (env *Environment) Fermi(energy float64) float64 {
 	}
 	// nonzero temperature
 	return 1.0 / (math.Exp(energy*env.Beta) + 1.0)
-}
-
-// Iterate through v and vars simultaneously. vars specifies the names of
-// fields to change in env (they are set to the values given in v).
-// If vars specifies a field not contained in env (or a field of non-float
-// type), the corresponding value is silently ignored.
-func (env *Environment) Set(v vec.Vector, vars []string) {
-	ev := reflect.ValueOf(env).Elem()
-	for i := 0; i < len(vars); i++ {
-		field := ev.FieldByName(vars[i])
-		if field == reflect.Zero(reflect.TypeOf(env)) {
-			continue
-		}
-		if field.Type().Kind() != reflect.Float64 {
-			continue
-		}
-		field.SetFloat(v[i])
-	}
-}
-
-// Split env into many copies with different values of the variable given by
-// varName (N values running from min to max).
-func (env *Environment) Split(varName string, N int, min, max float64) ([]*Environment, error) {
-	marshalled := env.String()
-	step := (max - min) / float64(N-1)
-	if N == 1 {
-		step = 0
-	}
-	rets := make([]*Environment, N)
-	for i := 0; i < N; i++ {
-		x := min + float64(i)*step
-		thisCopy, err := NewEnvironment(marshalled)
-		if err != nil {
-			return rets, err
-		}
-		thisCopy.Set([]float64{x}, []string{varName})
-		rets[i] = thisCopy
-	}
-	return rets, nil
-}
-
-// Call Split on each env in envs for each var in varNames to create a
-// "Cartesian product" of the desired splits.
-func (env *Environment) MultiSplit(varNames []string, Ns []int, mins, maxs []float64) ([]*Environment, error) {
-	if len(varNames) == 0 {
-		return nil, nil
-	}
-	oneSplit, err := env.Split(varNames[0], Ns[0], mins[0], maxs[0])
-	if err != nil {
-		return nil, err
-	}
-	if len(varNames) == 1 {
-		return oneSplit, nil
-	}
-	ret := make([]*Environment, 0)
-	for _, osEnv := range oneSplit {
-		ms, err := osEnv.MultiSplit(varNames[1:], Ns[1:], mins[1:], maxs[1:])
-		if err != nil {
-			return ret, err
-		}
-		for _, e := range ms {
-			ret = append(ret, e)
-		}
-	}
-	return ret, nil
 }
