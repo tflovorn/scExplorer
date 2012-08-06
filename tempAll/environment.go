@@ -114,7 +114,7 @@ func (env *Environment) Set(v vec.Vector, vars []string) {
 
 // Split env into many copies with different values of the variable given by
 // varName (N values running from min to max).
-func (env *Environment) Split(varName string, N int, min, max float64) ([]*Environment, error) {
+func (env *Environment) Split(varName string, N int, min, max float64) []*Environment {
 	step := (max - min) / float64(N-1)
 	if N == 1 {
 		step = 0
@@ -126,33 +126,27 @@ func (env *Environment) Split(varName string, N int, min, max float64) ([]*Envir
 		thisCopy.Set([]float64{x}, []string{varName})
 		rets[i] = thisCopy
 	}
-	return rets, nil
+	return rets
 }
 
 // Call Split on each env in envs for each var in varNames to create a
 // "Cartesian product" of the desired splits.
-func (env *Environment) MultiSplit(varNames []string, Ns []int, mins, maxs []float64) ([]*Environment, error) {
+func (env *Environment) MultiSplit(varNames []string, Ns []int, mins, maxs []float64) []*Environment {
 	if len(varNames) == 0 {
-		return nil, nil
+		return nil
 	}
-	oneSplit, err := env.Split(varNames[0], Ns[0], mins[0], maxs[0])
-	if err != nil {
-		return nil, err
-	}
+	oneSplit := env.Split(varNames[0], Ns[0], mins[0], maxs[0])
 	if len(varNames) == 1 {
-		return oneSplit, nil
+		return oneSplit
 	}
 	ret := make([]*Environment, 0)
 	for _, osEnv := range oneSplit {
-		ms, err := osEnv.MultiSplit(varNames[1:], Ns[1:], mins[1:], maxs[1:])
-		if err != nil {
-			return ret, err
-		}
+		ms := osEnv.MultiSplit(varNames[1:], Ns[1:], mins[1:], maxs[1:])
 		for _, e := range ms {
 			ret = append(ret, e)
 		}
 	}
-	return ret, nil
+	return ret
 }
 
 // ===== Physics functions =====

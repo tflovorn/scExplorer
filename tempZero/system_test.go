@@ -74,10 +74,7 @@ func TestPlotF0VsX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs, err := defaultEnv.MultiSplit([]string{"X", "Tz"}, []int{5, 3}, []float64{0.01, -0.3}, []float64{0.15, 0.3})
-	if err != nil {
-		t.Fatal(err)
-	}
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz"}, []int{5, 3}, []float64{0.01, -0.3}, []float64{0.15, 0.3})
 	solvedEnvsDWave := make([]interface{}, 0)
 	solvedEnvsSWave := make([]interface{}, 0)
 	for _, env := range envs {
