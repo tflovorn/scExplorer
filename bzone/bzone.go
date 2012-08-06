@@ -50,8 +50,8 @@ func bzReduce(combine bzConsumer, start float64, L, d int, fn BzFunc) float64 {
 	work := func(result chan float64) {
 		total := start
 		for {
-			k := <-points
-			if k != nil {
+			k, ok := <-points
+			if ok {
 				total = combine(fn(k), total)
 			} else {
 				break
@@ -98,9 +98,7 @@ func bzPoints(L, d int) <-chan vec.Vector {
 			done = bzAdvance(k, kIndex, start, step, L, d)
 		}
 		// we're done; signal that
-		for {
-			points <- nil
-		}
+		close(points)
 	}()
 	return points
 }

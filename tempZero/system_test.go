@@ -13,7 +13,8 @@ import (
 	"../tempAll"
 )
 
-var doPlots = flag.Bool("testPlot", false, "Run tests involving plots")
+var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
+var testPlotS = flag.Bool("testPlotS", false, "Run tests involving plots for s-wave system")
 
 // Solve a zero-temperature system for the appropriate values of (D1, Mu_h, F0)
 func TestSolveZeroTempSystem(t *testing.T) {
@@ -66,7 +67,7 @@ func ztDefaultEnv() (*tempAll.Environment, error) {
 // Plot evolution of F0 vs X.
 func TestPlotF0VsX(t *testing.T) {
 	flag.Parse()
-	if !*doPlots {
+	if !*testPlot {
 		return
 	}
 	defaultEnv, err := ztDefaultEnv()
@@ -87,24 +88,45 @@ func TestPlotF0VsX(t *testing.T) {
 			envs = append(envs, e)
 		}
 	}
-	solvedEnvs := make([]interface{}, len(envs))
-	for i, env := range envs {
-		system := ZeroTempSystem(env)
+	solvedEnvsDWave := make([]interface{}, 0)
+	solvedEnvsSWave := make([]interface{}, 0)
+	for _, env := range envs {
+		marshalled := env.String()
 		start := []float64{env.D1, env.Mu_h, env.F0}
 		epsabs, epsrel := 1e-6, 1e-6
-		_, err := solve.MultiDim(system, start, epsabs, epsrel)
+		envD, _ := tempAll.NewEnvironment(marshalled)
+		systemD := ZeroTempSystem(envD)
+		_, err := solve.MultiDim(systemD, start, epsabs, epsrel)
 		if err != nil {
 			t.Fatal(err)
 		}
-		solvedEnvs[i] = *env
+		solvedEnvsDWave = append(solvedEnvsDWave, *envD)
+		if *testPlotS {
+			envS, _ := tempAll.NewEnvironment(marshalled)
+			envS.Alpha = 1
+			systemS := ZeroTempSystem(envS)
+			_, err = solve.MultiDim(systemS, start, epsabs, epsrel)
+			if err != nil {
+				continue
+			}
+			solvedEnvsSWave = append(solvedEnvsSWave, *envS)
+		}
 	}
-	series := plots.ExtractSeries(solvedEnvs, []string{"X", "F0", "Tz"})
 	wd, _ := os.Getwd()
-	params := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_F0_x_data"}
-	seriesParams := []map[string]string{map[string]string{"label": "$t_z=-0.3$", "style": "k."}, map[string]string{"label": "$t_z=0.0$", "style": "r."}, map[string]string{"label": "$t_z=0.3$", "style": "b."}}
 	grapherPath := wd + "/../plots/grapher.py"
-	err = plots.PlotMPL(series, params, seriesParams, grapherPath)
+	seriesD := plots.ExtractSeries(solvedEnvsDWave, []string{"X", "F0", "Tz"})
+	paramsD := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_F0_x_dwave_data"}
+	seriesParams := []map[string]string{map[string]string{"label": "$t_z=-0.3$", "style": "k."}, map[string]string{"label": "$t_z=0.0$", "style": "r."}, map[string]string{"label": "$t_z=0.3$", "style": "b."}}
+	err = plots.PlotMPL(seriesD, paramsD, seriesParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making plot: %v", err)
+	}
+	if *testPlotS {
+		seriesS := plots.ExtractSeries(solvedEnvsSWave, []string{"X", "F0", "Tz"})
+		paramsS := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_F0_x_swave_data"}
+		err = plots.PlotMPL(seriesS, paramsS, seriesParams, grapherPath)
+		if err != nil {
+			t.Fatalf("error making plot: %v", err)
+		}
 	}
 }

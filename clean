@@ -1,5 +1,9 @@
 #!/bin/bash
 
-cd plots
-rm deleteme.*
-cd ..
+# brace wrapping to suppress output
+# http://stackoverflow.com/questions/5960567/suppress-the-output-to-screen-in-shell-script
+{
+rm plots/deleteme*
+rm tempZero/deleteme*
+rm tempPair/deleteme*
+} >/dev/null 2>&1

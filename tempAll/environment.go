@@ -53,6 +53,10 @@ func NewEnvironment(jsonData string) (*Environment, error) {
 	if err != nil {
 		return nil, err
 	}
+	// hack to get around JSON's lack of support for Inf
+	if env.Beta == math.MaxFloat64 {
+		env.Beta = math.Inf(1)
+	}
 	// initialize cache
 	env.setEpsilonMinCache()
 	env.lastEpsilonMinD1 = env.D1
@@ -168,6 +172,9 @@ func (env *Environment) Set(v vec.Vector, vars []string) {
 func (env *Environment) Split(varName string, N int, min, max float64) ([]*Environment, error) {
 	marshalled := env.String()
 	step := (max - min) / float64(N-1)
+	if N == 1 {
+		step = 0
+	}
 	rets := make([]*Environment, N)
 	for i := 0; i < N; i++ {
 		x := min + float64(i)*step
