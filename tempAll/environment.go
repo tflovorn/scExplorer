@@ -187,3 +187,29 @@ func (env *Environment) Split(varName string, N int, min, max float64) ([]*Envir
 	}
 	return rets, nil
 }
+
+// Call Split on each env in envs for each var in varNames to create a
+// "Cartesian product" of the desired splits.
+func (env *Environment) MultiSplit(varNames []string, Ns []int, mins, maxs []float64) ([]*Environment, error) {
+	if len(varNames) == 0 {
+		return nil, nil
+	}
+	oneSplit, err := env.Split(varNames[0], Ns[0], mins[0], maxs[0])
+	if err != nil {
+		return nil, err
+	}
+	if len(varNames) == 1 {
+		return oneSplit, nil
+	}
+	ret := make([]*Environment, 0)
+	for _, osEnv := range oneSplit {
+		ms, err := osEnv.MultiSplit(varNames[1:], Ns[1:], mins[1:], maxs[1:])
+		if err != nil {
+			return ret, err
+		}
+		for _, e := range ms {
+			ret = append(ret, e)
+		}
+	}
+	return ret, nil
+}
