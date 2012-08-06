@@ -45,7 +45,7 @@ func TestSolvePairTempSystem(t *testing.T) {
 	}
 	// the solution should be the expected one
 	for i := 0; i < 3; i++ {
-		if solution[i] != expected[i] {
+		if math.Abs(solution[i]-expected[i]) > epsabs {
 			t.Fatalf("unexpected solution; got %v and expected %v", solution, expected)
 		}
 	}

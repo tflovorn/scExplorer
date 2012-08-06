@@ -62,9 +62,16 @@ func NewEnvironment(jsonData string) (*Environment, error) {
 
 // Convert to string by marshalling to JSON
 func (env *Environment) String() string {
+	if env.Beta == math.Inf(1) {
+		// hack to get around JSON's choice to not allow Inf
+		env.Beta = math.MaxFloat64
+	}
 	marshalled, err := serialize.MakeJSON(env)
 	if err != nil {
-		panic("failed to marshal Environment to JSON")
+		panic(err)
+	}
+	if env.Beta == math.MaxFloat64 {
+		env.Beta = math.Inf(1)
 	}
 	return marshalled
 }
@@ -124,8 +131,11 @@ func (env *Environment) BogoEnergy(k vec.Vector) float64 {
 
 // Fermi distribution function.
 func (env *Environment) Fermi(energy float64) float64 {
+	if energy == 0.0 {
+		return 0.5
+	}
 	// Temperature is 0 or e^(Beta*energy) is too big to calculate
-	if env.Beta == math.Inf(1) || env.Beta*energy >= math.Log(math.MaxFloat64) {
+	if env.Beta == math.Inf(1) || env.Beta >= math.Abs(math.MaxFloat64/energy) || math.Abs(env.Beta*energy) >= math.Log(math.MaxFloat64) {
 		if energy <= 0 {
 			return 1.0
 		}
