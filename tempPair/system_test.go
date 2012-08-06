@@ -73,7 +73,7 @@ func TestPlotTpVsX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.Split("X", 10, 0.01, 0.15)
+	envs := defaultEnv.Split("X", 3, 0.01, 0.15)
 	solvedEnvs := make([]interface{}, len(envs))
 	for i, env := range envs {
 		system := PairTempSystem(env)
