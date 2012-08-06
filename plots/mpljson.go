@@ -30,6 +30,23 @@ func PlotMPL(data []Series, params map[string]string, seriesParams []map[string]
 	return nil
 }
 
+// Create a seriesParams for PlotMPL
+func MakeSeriesParams(varLabel, varFmt string, varVals []float64, styles []string) []map[string]string {
+	ret := make([]map[string]string, len(varVals))
+	for i, val := range varVals {
+		label := fmt.Sprintf("$%v="+varFmt+"$", varLabel, val)
+		sp := make(map[string]string)
+		sp["label"] = label
+		if i < len(styles) {
+			sp["style"] = styles[i]
+		} else {
+			sp["style"] = styles[0]
+		}
+		ret[i] = sp
+	}
+	return ret
+}
+
 // Write the graph data to the file specified in params[FILE_KEY]
 func graphDataToFile(data []Series, params map[string]string, seriesParams []map[string]string) (string, error) {
 	// place data in JSON object to be marshalled

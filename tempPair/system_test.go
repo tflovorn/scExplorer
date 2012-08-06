@@ -85,7 +85,7 @@ func TestPlotTpVsX(t *testing.T) {
 		}
 		solvedEnvs[i] = *env
 	}
-	series := plots.ExtractSeries(solvedEnvs, []string{"X", "Beta", "Tz"})
+	series, _ := plots.ExtractSeries(solvedEnvs, []string{"X", "Beta", "Tz"})
 	wd, _ := os.Getwd()
 	params := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_tpx_data"}
 	seriesParams := []map[string]string{map[string]string{}}

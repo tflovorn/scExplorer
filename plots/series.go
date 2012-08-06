@@ -37,11 +37,11 @@ func (s *Series) Pairs() [][]float64 {
 // Extract (x, y) points from dataSet where the names of x and y are given by
 // varNames[0] and [1]. varNames[2] ("z") optionally specifies a variable to
 // use to split the data into multiple series.
-func ExtractSeries(dataSet []interface{}, varNames []string) []Series {
+func ExtractSeries(dataSet []interface{}, varNames []string) ([]Series, []float64) {
 	if len(varNames) < 2 {
-		panic("not enough variable names")
+		panic("not enough variable names for ExtractSeries")
 	} else if len(varNames) == 2 {
-		return extractXY(dataSet, varNames[0], varNames[1])
+		return extractXY(dataSet, varNames[0], varNames[1]), nil
 	}
 	// iterate through dataSet to create a map x->y for each z
 	maps := make(map[float64]map[float64]float64)
@@ -76,7 +76,7 @@ func ExtractSeries(dataSet []interface{}, varNames []string) []Series {
 		}
 		ret[i] = Series{xs, ys}
 	}
-	return ret
+	return ret, zs
 }
 
 func extractXY(dataSet []interface{}, varX, varY string) []Series {

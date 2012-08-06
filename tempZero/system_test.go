@@ -74,7 +74,7 @@ func TestPlotF0VsX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.MultiSplit([]string{"X", "Tz"}, []int{5, 3}, []float64{0.01, -0.3}, []float64{0.15, 0.3})
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz"}, []int{1, 3}, []float64{0.01, -0.3}, []float64{0.15, 0.3})
 	solvedEnvsDWave := make([]interface{}, 0)
 	solvedEnvsSWave := make([]interface{}, 0)
 	for _, env := range envs {
@@ -100,17 +100,19 @@ func TestPlotF0VsX(t *testing.T) {
 	}
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	seriesD := plots.ExtractSeries(solvedEnvsDWave, []string{"X", "F0", "Tz"})
+	styles := []string{"k.", "r.", "b."}
+	seriesD, tzValsD := plots.ExtractSeries(solvedEnvsDWave, []string{"X", "F0", "Tz"})
 	paramsD := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_F0_x_dwave_data"}
-	seriesParams := []map[string]string{map[string]string{"label": "$t_z=-0.3$", "style": "k."}, map[string]string{"label": "$t_z=0.0$", "style": "r."}, map[string]string{"label": "$t_z=0.3$", "style": "b."}}
-	err = plots.PlotMPL(seriesD, paramsD, seriesParams, grapherPath)
+	seriesParamsD := plots.MakeSeriesParams("t_z", "%.1f", tzValsD, styles)
+	err = plots.PlotMPL(seriesD, paramsD, seriesParamsD, grapherPath)
 	if err != nil {
 		t.Fatalf("error making plot: %v", err)
 	}
 	if *testPlotS {
-		seriesS := plots.ExtractSeries(solvedEnvsSWave, []string{"X", "F0", "Tz"})
+		seriesS, tzValsS := plots.ExtractSeries(solvedEnvsSWave, []string{"X", "F0", "Tz"})
 		paramsS := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_F0_x_swave_data"}
-		err = plots.PlotMPL(seriesS, paramsS, seriesParams, grapherPath)
+		seriesParamsS := plots.MakeSeriesParams("t_z", "%.1f", tzValsS, styles)
+		err = plots.PlotMPL(seriesS, paramsS, seriesParamsS, grapherPath)
 		if err != nil {
 			t.Fatalf("error making plot: %v", err)
 		}
