@@ -1,4 +1,5 @@
-// Functions related to traversal of the first Brillouin zone.
+// Functions related to traversal of the first Brillouin zone of a square
+// lattice.
 package bzone
 
 import vec "../vector"

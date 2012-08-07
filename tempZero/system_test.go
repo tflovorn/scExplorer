@@ -101,7 +101,7 @@ func TestPlotF0VsX(t *testing.T) {
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	styles := []string{"k.", "r.", "b."}
-	seriesD, tzValsD := plots.ExtractSeries(solvedEnvsDWave, []string{"X", "F0", "Tz"})
+	seriesD, tzValsD := plots.ExtractSeries(solvedEnvsDWave, []string{"X", "F0", "Tz"}, nil)
 	paramsD := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_F0_x_dwave_data"}
 	seriesParamsD := plots.MakeSeriesParams("t_z", "%.1f", tzValsD, styles)
 	err = plots.PlotMPL(seriesD, paramsD, seriesParamsD, grapherPath)
@@ -109,7 +109,7 @@ func TestPlotF0VsX(t *testing.T) {
 		t.Fatalf("error making plot: %v", err)
 	}
 	if *testPlotS {
-		seriesS, tzValsS := plots.ExtractSeries(solvedEnvsSWave, []string{"X", "F0", "Tz"})
+		seriesS, tzValsS := plots.ExtractSeries(solvedEnvsSWave, []string{"X", "F0", "Tz"}, nil)
 		paramsS := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_F0_x_swave_data"}
 		seriesParamsS := plots.MakeSeriesParams("t_z", "%.1f", tzValsS, styles)
 		err = plots.PlotMPL(seriesS, paramsS, seriesParamsS, grapherPath)
