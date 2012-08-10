@@ -75,27 +75,35 @@ func TestPlotF0VsX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.05, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
+	long := false
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
+	if long {
+		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 3, 3}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
+	}
 	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}}
 	xyLabels := []string{"$x$", "$F_0$"}
 	fileLabel := "deleteme.system_F0_x_dwave_data"
-	err = SolveAndPlot(envs, 1e-6, 1e-6, vars, xyLabels, fileLabel)
+	err = solveAndPlot(envs, 1e-6, 1e-6, vars, xyLabels, fileLabel)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *testPlotS {
-		defaultEnv.Alpha = 1
-		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.05, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
-		fileLabel = "deleteme.system_F0_x_swave_data"
-		err = SolveAndPlot(envs, 1e-6, 1e-6, vars, xyLabels, fileLabel)
-		if err != nil {
-			t.Fatal(err)
-		}
+	if !*testPlotS {
+		return
+	}
+	defaultEnv.Alpha = 1
+	envsS := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
+	if long {
+		envsS = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 3, 3}, []float64{0.05, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
+	}
+	fileLabel = "deleteme.system_F0_x_swave_data"
+	err = solveAndPlot(envsS, 1e-6, 1e-6, vars, xyLabels, fileLabel)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
 // Solve each given Environment and plot it.
-func SolveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plots.GraphVars, xyLabels []string, fileLabel string) error {
+func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plots.GraphVars, xyLabels []string, fileLabel string) error {
 	// iterate through envs and solve each env in-place
 	plotEnvs := make([]interface{}, 0)
 	for _, env := range envs {
