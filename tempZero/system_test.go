@@ -2,6 +2,7 @@ package tempZero
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"math"
 	"os"
@@ -74,47 +75,46 @@ func TestPlotF0VsX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.MultiSplit([]string{"X", "Tz"}, []int{1, 3}, []float64{0.01, -0.3}, []float64{0.15, 0.3})
-	solvedEnvsDWave := make([]interface{}, 0)
-	solvedEnvsSWave := make([]interface{}, 0)
-	for _, env := range envs {
-		start := []float64{env.D1, env.Mu_h, env.F0}
-		epsabs, epsrel := 1e-6, 1e-6
-		envD := env.Copy()
-		systemD := ZeroTempSystem(envD)
-		_, err := solve.MultiDim(systemD, start, epsabs, epsrel)
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.05, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
+	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}}
+	xyLabels := []string{"$x$", "$F_0$"}
+	fileLabel := "deleteme.system_F0_x_dwave_data"
+	err = SolveAndPlot(envs, 1e-6, 1e-6, vars, xyLabels, fileLabel)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if *testPlotS {
+		defaultEnv.Alpha = 1
+		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.05, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
+		fileLabel = "deleteme.system_F0_x_swave_data"
+		err = SolveAndPlot(envs, 1e-6, 1e-6, vars, xyLabels, fileLabel)
 		if err != nil {
 			t.Fatal(err)
 		}
-		solvedEnvsDWave = append(solvedEnvsDWave, *envD)
-		if *testPlotS {
-			envS := env.Copy()
-			envS.Alpha = 1
-			systemS := ZeroTempSystem(envS)
-			_, err = solve.MultiDim(systemS, start, epsabs, epsrel)
-			if err != nil {
-				continue
-			}
-			solvedEnvsSWave = append(solvedEnvsSWave, *envS)
-		}
 	}
+}
+
+// Solve each given Environment and plot it.
+func SolveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plots.GraphVars, xyLabels []string, fileLabel string) error {
+	// iterate through envs and solve each env in-place
+	plotEnvs := make([]interface{}, 0)
+	for _, env := range envs {
+		start := []float64{env.D1, env.Mu_h, env.F0}
+		system := ZeroTempSystem(env)
+		_, err := solve.MultiDim(system, start, epsabs, epsrel)
+		if err != nil {
+			// ignore unsolved envs (may want to report them)
+			continue
+		}
+		plotEnvs = append(plotEnvs, *env)
+	}
+	// plot envs for all combinations of parameters
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	styles := []string{"k.", "r.", "b."}
-	seriesD, tzValsD := plots.ExtractSeries(solvedEnvsDWave, []string{"X", "F0", "Tz"}, nil)
-	paramsD := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_F0_x_dwave_data"}
-	seriesParamsD := plots.MakeSeriesParams("t_z", "%.1f", tzValsD, styles)
-	err = plots.PlotMPL(seriesD, paramsD, seriesParamsD, grapherPath)
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, "xlabel": xyLabels[0], "ylabel": xyLabels[1]}
+	err := plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
 	if err != nil {
-		t.Fatalf("error making plot: %v", err)
+		return fmt.Errorf("error making plots: %v", err)
 	}
-	if *testPlotS {
-		seriesS, tzValsS := plots.ExtractSeries(solvedEnvsSWave, []string{"X", "F0", "Tz"}, nil)
-		paramsS := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_F0_x_swave_data"}
-		seriesParamsS := plots.MakeSeriesParams("t_z", "%.1f", tzValsS, styles)
-		err = plots.PlotMPL(seriesS, paramsS, seriesParamsS, grapherPath)
-		if err != nil {
-			t.Fatalf("error making plot: %v", err)
-		}
-	}
+	return nil
 }

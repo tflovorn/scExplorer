@@ -52,7 +52,7 @@ func MultiPlot(data []interface{}, vars GraphVars, graphParams map[string]string
 func extractParamValues(data []interface{}, vars GraphVars) (map[string][]float64, error) {
 	// get values for vars.Params
 	paramValues := make(map[string][]float64)
-	for d := range data {
+	for _, d := range data {
 		dv := reflect.ValueOf(d)
 		for _, p := range vars.Params {
 			pv := dv.FieldByName(p)
@@ -60,12 +60,13 @@ func extractParamValues(data []interface{}, vars GraphVars) (map[string][]float6
 				return paramValues, fmt.Errorf("Invalid parameter name %s", p)
 			}
 			pf := pv.Float()
-			seenVals, ok := paramValues[p]
+			_, ok := paramValues[p]
 			if !ok {
-				seenVals = make([]float64, 0)
-				paramValues[p] = seenVals
+				paramValues[p] = make([]float64, 0)
 			}
-			seenVals = append(seenVals, pf)
+			if !contains(paramValues[p], pf) {
+				paramValues[p] = append(paramValues[p], pf)
+			}
 		}
 	}
 	// sort param values
@@ -76,10 +77,26 @@ func extractParamValues(data []interface{}, vars GraphVars) (map[string][]float6
 	return paramValues, nil
 }
 
+// Return true if xs contains val and false otherwise
+func contains(xs []float64, val float64) bool {
+	for _, x := range xs {
+		if x == val {
+			return true
+		}
+	}
+	return false
+}
+
 // Return primaryNames, primaryLabels, secondaries. All variables get a
 // chance to be primary; while a variable is primary all possible
 // combinations of secondary variables are iterated through.
 func paramCombinations(allParamValues map[string][]float64, vars GraphVars) ([]string, []string, []map[string]float64) {
+	if len(vars.Params) == 1 {
+		primaryNames := []string{vars.Params[0]}
+		primaryLabels := []string{vars.ParamLabels[0]}
+		secondaries := []map[string]float64{map[string]float64{}}
+		return primaryNames, primaryLabels, secondaries
+	}
 	primaryNames := make([]string, 0)
 	primaryLabels := make([]string, 0)
 	secondaries := make([]map[string]float64, 0)
