@@ -8,6 +8,10 @@ For Fedora the corresponding packages are:
 
 gsl gsl-devel python-matplotlib
 
+A test in this software also requires the Go package [bufbig](http://github.com/farces/dumb). To retrieve this, run:
+
+go get github.com/farces/dumb/bufbig
+
 # References
 
 [S. K. Sarker, PRB 77, 052505 (2008)](http://prb.aps.org/abstract/PRB/v77/i5/e052505)  
