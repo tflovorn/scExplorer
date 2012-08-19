@@ -13,7 +13,8 @@ import (
 	"../tempAll"
 )
 
-var doPlots = flag.Bool("testPlot", false, "Run tests involving plots")
+var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
+var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 
 // Solve a pair-temperature system for the appropriate values of (D1,Mu_h,Beta)
 func TestSolvePairTempSystem(t *testing.T) {
@@ -65,30 +66,24 @@ func ptDefaultEnv() (*tempAll.Environment, error) {
 // Plot evolution of Tp vs X.
 func TestPlotTpVsX(t *testing.T) {
 	flag.Parse()
-	if !*doPlots {
+	if !*testPlot {
 		return
 	}
 	defaultEnv, err := ptDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.Split("X", 3, 0.01, 0.15)
-	solvedEnvs := make([]interface{}, len(envs))
-	for i, env := range envs {
-		system, start := PairTempSystem(env)
-		epsabs, epsrel := 1e-9, 1e-9
-		_, err := solve.MultiDim(system, start, epsabs, epsrel)
-		if err != nil {
-			t.Fatal(err)
-		}
-		solvedEnvs[i] = *env
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
+	if *longPlot {
+		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 3, 3}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	}
-	series, _ := plots.ExtractSeries(solvedEnvs, []string{"X", "Beta", "Tz"}, nil)
+	vars := plots.GraphVars{"X", "Beta", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}}
+	fileLabel := "deleteme.system_tp_x_data"
+	plotEnvs, _ := tempAll.MultiSolve(envs, 1e-9, 1e-9, PairTempSystem)
 	wd, _ := os.Getwd()
-	params := map[string]string{plots.FILE_KEY: wd + "/deleteme.system_tpx_data"}
-	seriesParams := []map[string]string{map[string]string{}}
 	grapherPath := wd + "/../plots/grapher.py"
-	err = plots.PlotMPL(series, params, seriesParams, grapherPath)
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$\\beta$"}
+	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making plot: %v", err)
 	}

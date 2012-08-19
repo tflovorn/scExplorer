@@ -16,6 +16,7 @@ import (
 
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var testPlotS = flag.Bool("testPlotS", false, "Run tests involving plots for s-wave system")
+var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 
 // Solve a zero-temperature system for the appropriate values of (D1, Mu_h, F0)
 func TestSolveZeroTempSystem(t *testing.T) {
@@ -74,9 +75,8 @@ func TestPlotF0VsX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	long := false
 	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
-	if long {
+	if *longPlot {
 		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 3, 3}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	}
 	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}}
@@ -91,7 +91,7 @@ func TestPlotF0VsX(t *testing.T) {
 	}
 	defaultEnv.Alpha = 1
 	envsS := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
-	if long {
+	if *longPlot {
 		envsS = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 3, 3}, []float64{0.05, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	}
 	fileLabel = "deleteme.system_F0_x_swave_data"
@@ -107,7 +107,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 	// plot envs for all combinations of parameters
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, "xlabel": xyLabels[0], "ylabel": xyLabels[1]}
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: xyLabels[0], plots.YLABEL_KEY: xyLabels[1]}
 	err := plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
 	if err != nil {
 		return fmt.Errorf("error making plots: %v", err)
