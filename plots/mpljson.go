@@ -11,6 +11,8 @@ import (
 const FILE_KEY = "graph_filepath"
 const SERIES_KEY = "series"
 const DATA_KEY = "data"
+const XLABEL_KEY = "xlabel"
+const YLABEL_KEY = "ylabel"
 
 // A map compatible with the JSON object type
 type jsonObject map[string]interface{}

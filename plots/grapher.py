@@ -62,6 +62,8 @@ def make_graph(graph_data):
     fontprop = FontProperties(size=graph_data["legend_fontsize"])
     axes.legend(loc=graph_data["legend_loc"], title=graph_data["legend_title"],
                 prop=fontprop)
+    axes.set_xlabel(graph_data["xlabel"], size="large")
+    axes.set_ylabel(graph_data["ylabel"], size="large")
     _save_figure(graph_data, fig)
     return fig, axes
     

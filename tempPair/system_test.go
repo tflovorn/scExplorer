@@ -22,8 +22,7 @@ func TestSolvePairTempSystem(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	system := PairTempSystem(env)
-	start := []float64{env.D1, env.Mu_h, env.Beta}
+	system, start := PairTempSystem(env)
 	epsabs, epsrel := 1e-9, 1e-9
 	solution, err := solve.MultiDim(system, start, epsabs, epsrel)
 	if err != nil {
@@ -76,8 +75,7 @@ func TestPlotTpVsX(t *testing.T) {
 	envs := defaultEnv.Split("X", 3, 0.01, 0.15)
 	solvedEnvs := make([]interface{}, len(envs))
 	for i, env := range envs {
-		system := PairTempSystem(env)
-		start := []float64{env.D1, env.Mu_h, env.Beta}
+		system, start := PairTempSystem(env)
 		epsabs, epsrel := 1e-9, 1e-9
 		_, err := solve.MultiDim(system, start, epsabs, epsrel)
 		if err != nil {

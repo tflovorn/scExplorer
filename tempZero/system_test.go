@@ -24,8 +24,7 @@ func TestSolveZeroTempSystem(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	system := ZeroTempSystem(env)
-	start := []float64{env.D1, env.Mu_h, env.F0}
+	system, start := ZeroTempSystem(env)
 	epsabs, epsrel := 1e-6, 1e-6
 	solution, err := solve.MultiDim(system, start, epsabs, epsrel)
 	if err != nil {
@@ -104,18 +103,7 @@ func TestPlotF0VsX(t *testing.T) {
 
 // Solve each given Environment and plot it.
 func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plots.GraphVars, xyLabels []string, fileLabel string) error {
-	// iterate through envs and solve each env in-place
-	plotEnvs := make([]interface{}, 0)
-	for _, env := range envs {
-		start := []float64{env.D1, env.Mu_h, env.F0}
-		system := ZeroTempSystem(env)
-		_, err := solve.MultiDim(system, start, epsabs, epsrel)
-		if err != nil {
-			// ignore unsolved envs (may want to report them)
-			continue
-		}
-		plotEnvs = append(plotEnvs, *env)
-	}
+	plotEnvs, _ := tempAll.MultiSolve(envs, epsabs, epsrel, ZeroTempSystem)
 	// plot envs for all combinations of parameters
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"

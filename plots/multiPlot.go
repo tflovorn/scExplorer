@@ -22,6 +22,7 @@ type GraphVars struct {
 // graphParams[FILE_KEY] must specify a file path for output. grapherPath
 // must specify the location of the Python graphing script.
 func MultiPlot(data []interface{}, vars GraphVars, graphParams map[string]string, grapherPath string) error {
+	data = stripNils(data)
 	// we need to know the values of vars.Params to set up constraint
 	allParamValues, err := extractParamValues(data, vars)
 	if err != nil {
@@ -47,6 +48,16 @@ func MultiPlot(data []interface{}, vars GraphVars, graphParams map[string]string
 	}
 
 	return nil
+}
+
+func stripNils(data []interface{}) []interface{} {
+	ret := make([]interface{}, 0)
+	for _, d := range data {
+		if d != nil {
+			ret = append(ret, d)
+		}
+	}
+	return ret
 }
 
 func extractParamValues(data []interface{}, vars GraphVars) (map[string][]float64, error) {
