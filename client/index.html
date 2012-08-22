@@ -16,7 +16,7 @@
     }
 
     .padded-label {
-      padding-right: 1em;
+      padding-right: 2em;
     }
     .align-top {
       vertical-align: top;
@@ -41,10 +41,31 @@
           <input type="button" name="solveBatch" value="Solve Batch" />
         </td>
         <td class="align-top">
-          <textarea id="environment" rows="20" cols="80"></textarea><br />
+          <textarea id="environment" rows="10" cols="80"></textarea><br />
+        </td>
+      </tr>
+      <tr>
+        <td class="padded-label">
+          <label for="batches">Solved Batches</label>
+        </td>
+        <td class="padded-label">
+          <label for="selectedBatches">Selected Batches</label>
+        </td>
+      </tr>
+      <tr>
+        <td class="align-top">
+          <select id="batches" size="5">
+            <option value="temporary">Temporary</option>
+          </select><br /><br />
+          <input type="button" name="saveBatches" value="Save Selection" /><br />
+          <input type="button" name="loadBatches" value="Load Batches" />
+        </td>
+        <td class="align-top">
+          <textarea id="selectedBatches" rows="20" cols="80"></textarea><br />
         </td>
       </tr>
     </table>
+
 <!--    <script type="application/dart" src="client_chatroom.dart"></script>
 <script src="http://dart.googlecode.com/svn/branches/bleeding_edge/dart/client/dart.js"></script> --!>
   </body>
