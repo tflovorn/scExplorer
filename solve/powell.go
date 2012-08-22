@@ -79,7 +79,8 @@ func go_f(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
 	gofn := *((*DiffSystem)(fn))
 	val, err := gofn.F(VecFromGSL(x))
 	if err != nil {
-		// TODO: handle error
+		// assume that if F returns an error, x is outside the domain
+		return C.GSL_EDOM
 	}
 	VecToGSL(val, f)
 	return C.GSL_SUCCESS
@@ -90,7 +91,8 @@ func go_df(x C.const_gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
 	gofn := (*DiffSystem)(fn)
 	val, err := gofn.Df(VecFromGSL(x))
 	if err != nil {
-		// TODO: handle error
+		// same assumption as go_f
+		return C.GSL_EDOM
 	}
 	MatrixToGSL(val, J)
 	return C.GSL_SUCCESS
@@ -101,7 +103,8 @@ func go_fdf(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector, J *C.gsl_m
 	gofn := (*DiffSystem)(fn)
 	val, grad, err := gofn.Fdf(VecFromGSL(x))
 	if err != nil {
-		// TODO: handle error
+		// same assumption as go_f
+		return C.GSL_EDOM
 	}
 	VecToGSL(val, f)
 	MatrixToGSL(grad, J)

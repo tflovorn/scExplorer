@@ -82,7 +82,7 @@ func TestPlotTpVsX(t *testing.T) {
 	plotEnvs, _ := tempAll.MultiSolve(envs, 1e-9, 1e-9, PairTempSystem)
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$\\beta$"}
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$\\beta_p$"}
 	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making plot: %v", err)
