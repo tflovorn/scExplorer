@@ -99,7 +99,8 @@ func go_val(x C.double, uservar unsafe.Pointer) C.double {
 	f.v[f.i] = float64(x)
 	val, err := f.fn(f.v)
 	if err != nil {
-		// TODO: handle error
+		// assume x is outside the domain
+		return C.GSL_EDOM
 	}
 	return C.double(val)
 }
