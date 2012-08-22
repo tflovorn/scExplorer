@@ -2,5 +2,6 @@
 *.swo
 pkg
 src
+bin
 deleteme.*
 scExplorer

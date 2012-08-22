@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>scExplorer Web Client</title>
+
+    <style>
+    html {
+      height: 100%;
+    }
+    body {
+      height: 100%;
+      margin: 2;   
+      background-repeat: no-repeat;
+      background: #cbccc8;
+    }
+
+    .padded-label {
+      padding-right: 1em;
+    }
+    .align-top {
+      vertical-align: top;
+    }
+    </style>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <td class="padded-label">
+          <label for="calcType">Calculation Type</label>
+        </td>
+        <td class="padded-label">
+          <label for="environment">Environment</label>
+        </td>
+      </tr>
+      <tr>
+        <td class="align-top">
+          <select id="calcType" size="5">
+            <option value="temporary">Temporary</option>
+          </select><br /><br />
+          <input type="button" name="solveBatch" value="Solve Batch" />
+        </td>
+        <td class="align-top">
+          <textarea id="environment" rows="20" cols="80"></textarea><br />
+        </td>
+      </tr>
+    </table>
+<!--    <script type="application/dart" src="client_chatroom.dart"></script>
+<script src="http://dart.googlecode.com/svn/branches/bleeding_edge/dart/client/dart.js"></script> --!>
+  </body>
+</html>

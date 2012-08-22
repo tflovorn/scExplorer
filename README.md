@@ -17,3 +17,5 @@ go get github.com/farces/dumb/bufbig
 [S. K. Sarker, PRB 77, 052505 (2008)](http://prb.aps.org/abstract/PRB/v77/i5/e052505)  
 [S. K. Sarker and T. Lovorn, PRB 82, 014504 (2010)](http://prb.aps.org/abstract/PRB/v82/i1/e014504)  
 [S. K. Sarker and T. Lovorn, PRB 85, 144502 (2012)](http://prb.aps.org/abstract/PRB/v85/i14/e144502)
+
+WebSocket implementation inspired by [chat-websocket-dart](https://github.com/financeCoding/chat-websocket-dart) and [go-websocket-sample](https://github.com/ukai/go-websocket-sample).
