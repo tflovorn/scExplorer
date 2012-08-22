@@ -25,12 +25,16 @@
   </head>
   <body>
     <table>
+      <!-- Batch calculation input -->
       <tr>
         <td class="padded-label">
           <label for="calcType">Calculation Type</label>
         </td>
         <td class="padded-label">
           <label for="environment">Environment</label>
+        </td>
+        <td class="padded-label">
+          <label for="envDefaults">Environment Defaults</label>
         </td>
       </tr>
       <tr>
@@ -43,7 +47,13 @@
         <td class="align-top">
           <textarea id="environment" rows="10" cols="80"></textarea><br />
         </td>
+        <td class="align-top">
+          <select id="envDefaults" size="2">
+             <option value="temporary">Temporary</option>
+          </select>
+        </td>
       </tr>
+      <!-- Manipulation of computed batches -->
       <tr>
         <td class="padded-label">
           <label for="batches">Solved Batches</label>
@@ -58,12 +68,48 @@
             <option value="temporary">Temporary</option>
           </select><br /><br />
           <input type="button" name="saveBatches" value="Save Selection" /><br />
-          <input type="button" name="loadBatches" value="Load Batches" />
+          <input type="button" name="loadBatches" value="Load Batches" /><br />
+          <!-- TODO: this should come with an "are you sure? y/n" popup -->
+          <input type="button" name="cancelBatch" value="Cancel Batch" />
         </td>
         <td class="align-top">
           <textarea id="selectedBatches" rows="20" cols="80"></textarea><br />
         </td>
       </tr>
+    </table>
+    <!-- Plotting functionality -->
+    <table>
+      <tr>
+        <td class="padded-label">
+          <label for="plotFileTypes">File Types</label>
+        </td>
+        <td class="padded-label">
+          <label for="plotSeriesStyles">Series Styles</label>
+        </td>
+        <td class="padded-label">
+          <label for="plotBundles">Plot Bundles</label>
+        </td>
+      </tr>
+      <tr>
+        <td class="align-top">
+          <select id="plotFileTypes" size=2>
+            <option value="png">png</option>
+          </select><br /><br />
+          <input type="button" name="makePlots" value="Make Plots" />
+        </td>
+        <td class="align-top">
+          <textarea id="plotSeriesStyles" rows="4" cols="20"></textarea><br />
+          <!-- TODO: add onclick event to radio buttons to set styles -->
+          <input type="radio" name="style-radio" value="colors" checked />Colors<br />
+          <input type="radio" name="style-radio" value="lines" />Lines
+        </td>
+        <td class="align-top">
+          <select id="plotBundles" size=5>
+            <option value="temporary">Temporary</option>
+          </select><br /><br />
+          <input type="button" name="savePlotBundle" value="Save Bundle" />
+        </td>
+      </td>
     </table>
 
 <!--    <script type="application/dart" src="client_chatroom.dart"></script>
