@@ -10,9 +10,8 @@ import (
 func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 	F := func(v vec.Vector) (float64, error) {
 		env.Set(v, variables)
-		L := env.PointsPerSide
 		lhs := env.X
-		rhs := bzone.Avg(L, 2, tempAll.WrapFunc(env, innerMu_h))
+		rhs := X1(env)
 		return lhs - rhs, nil
 	}
 	h := 1e-4
@@ -20,6 +19,11 @@ func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
 
-func innerMu_h(env *tempAll.Environment, k vec.Vector) float64 {
+func X1(env *tempAll.Environment) float64 {
+	L := env.PointsPerSide
+	return bzone.Avg(L, 2, tempAll.WrapFunc(env, innerX1))
+}
+
+func innerX1(env *tempAll.Environment, k vec.Vector) float64 {
 	return env.Fermi(env.Xi_h(k))
 }
