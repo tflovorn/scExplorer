@@ -23,6 +23,15 @@ func (v Vector) Add(u Vector) Vector {
 	return r
 }
 
+// Return a new vector created by multiplying each element of `v` by `x`.
+func (v Vector) Mul(x float64) Vector {
+	r := ZeroVector(len(v))
+	for i := 0; i < len(v); i++ {
+		r[i] = x * v[i]
+	}
+	return r
+}
+
 // Check if v is equal to u.
 func (v Vector) Equals(u Vector) bool {
 	if len(v) != len(u) {
