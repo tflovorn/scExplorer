@@ -30,10 +30,11 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 }
 
 func Nu(env *tempAll.Environment) (float64, error) {
-	a, b, err := OmegaCoeffs(env)
+	cs, err := OmegaCoeffs(env)
 	if err != nil {
 		return 0.0, err
 	}
+	a, b := cs[0], cs[2] // ignore produced value for ay and mu_b
 	integrand := func(y float64) float64 {
 		return math.Sqrt(y) / (math.Exp(y) - 1.0)
 	}
