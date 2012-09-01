@@ -2,6 +2,7 @@ package tempCrit
 
 import "math"
 import (
+	"../solve"
 	"../tempAll"
 	vec "../vector"
 )
@@ -12,24 +13,31 @@ func OmegaCoeffs(env *tempAll.Environment) (float64, float64, error) {
 	return 0.0, 0.0, nil
 }
 
-// Calculate (omega_+(k), omega_-(k)) by finding zeros of 1 - lambda_+/-
-func Omega(env *tempAll.Environment, k vec.Vector) (float64, float64) {
-	return 0.0, 0.0
+// Calculate omega_+(k) by finding zeros of 1 - lambda_+
+func OmegaPlus(env *tempAll.Environment, k vec.Vector) (float64, error) {
+	lp := lambdaPlusFn(env, k)
+	return solve.OneDimDiffRoot(lp, 0.01, 1e-9, 1e-9)
+}
+
+// Calculate omega_-(k) by finding zeros of 1 - lambda_-
+func OmegaMinus(env *tempAll.Environment, k vec.Vector) (float64, error) {
+	lm := lambdaMinusFn(env, k)
+	return solve.OneDimDiffRoot(lm, 0.01, 1e-9, 1e-9)
 }
 
 // Create a function which calculates 1 - lambda_+(k, omega) with fixed k
-func lambdaPlusFn(env *tempAll.Environment, k vec.Vector) func(float64) float64 {
-	return func(omega float64) float64 {
+func lambdaPlusFn(env *tempAll.Environment, k vec.Vector) func(float64) (float64, error) {
+	return func(omega float64) (float64, error) {
 		u, v := lambdaParts(env, k, omega)
-		return 1.0 - (u + v)
+		return 1.0 - (u + v), nil
 	}
 }
 
 // Create a function which calculates 1 - lambda_-(k, omega) with fixed k
-func lambdaMinusFn(env *tempAll.Environment, k vec.Vector) func(float64) float64 {
-	return func(omega float64) float64 {
+func lambdaMinusFn(env *tempAll.Environment, k vec.Vector) func(float64) (float64, error) {
+	return func(omega float64) (float64, error) {
 		u, v := lambdaParts(env, k, omega)
-		return 1.0 - (u - v)
+		return 1.0 - (u - v), nil
 	}
 }
 
