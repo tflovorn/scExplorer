@@ -12,7 +12,7 @@ import (
 
 // Regression test: solution for D1 in default environment should stay constant
 func TestSolveAbsErrorD1(t *testing.T) {
-	solution_expected := 0.023124383659530325
+	solution_expected := 0.05139504320378395
 	env, err := d1DefaultEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -20,8 +20,8 @@ func TestSolveAbsErrorD1(t *testing.T) {
 	diffD1 := AbsErrorD1(env, []string{"D1"})
 	system := solve.Combine([]solve.Diffable{diffD1})
 	start := []float64{env.D1}
-	epsabs := 1e-9
-	epsrel := 1e-9
+	epsabs := 1e-8
+	epsrel := 1e-8
 	solution, err := solve.MultiDim(system, start, epsabs, epsrel)
 	if err != nil {
 		t.Fatal(err)

@@ -18,7 +18,7 @@ var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 
 // Solve a pair-temperature system for the appropriate values of (D1,Mu_h,Beta)
 func TestSolvePairTempSystem(t *testing.T) {
-	expected := []float64{0.039375034674567204, -0.31027533095383564, 2.317368820443076}
+	expected := []float64{0.04287358467304004, -0.3927161711585197, 2.2902594921928188}
 	env, err := ptDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
