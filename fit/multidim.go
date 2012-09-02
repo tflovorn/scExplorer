@@ -6,9 +6,9 @@ package fit
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multifit_nlin.h>
-extern int go_f(const gsl_vector*, void*, gsl_vector*);
-extern int go_df(const gsl_vector*, void*, gsl_matrix*);
-extern int go_fdf(const gsl_vector*, void*, gsl_vector*, gsl_matrix*);
+extern int fit_go_f(const gsl_vector*, void*, gsl_vector*);
+extern int fit_go_df(const gsl_vector*, void*, gsl_matrix*);
+extern int fit_go_fdf(const gsl_vector*, void*, gsl_vector*, gsl_matrix*);
 
 #define MAX_ITERS 1000
 
@@ -24,7 +24,7 @@ static int multiFit(void * uservar, gsl_vector * start, double epsabs, double ep
 	size_t iter = 0;
 	const size_t p = start->size;
 
-	gsl_multifit_function_fdf f = {&go_f, &go_df, &go_fdf, n, p, uservar};
+	gsl_multifit_function_fdf f = {&fit_go_f, &fit_go_df, &fit_go_fdf, n, p, uservar};
 	T = gsl_multifit_fdfsolver_lmsder;
 	s = gsl_multifit_fdfsolver_alloc(T, n, p);
 	gsl_multifit_fdfsolver_set(s, &f, start);
@@ -80,8 +80,8 @@ func MultiDim(F FitErrF, Df FitErrDf, n int, start vec.Vector, epsAbs, epsRel fl
 	return solution, nil
 }
 
-//export go_f
-func go_f(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
+//export fit_go_f
+func fit_go_f(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
 	gofn := *((*FitData)(fn))
 	gx := vecFromGSL(x)
 	for i := 0; i < gofn.N; i++ {
@@ -96,14 +96,14 @@ func go_f(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
 	return C.GSL_SUCCESS
 }
 
-//export go_df
-func go_df(x C.const_gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
+//export fit_go_df
+func fit_go_df(x C.const_gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
 	gofn := (*FitData)(fn)
 	gx := vecFromGSL(x)
 	for i := 0; i < gofn.N; i++ {
 		val, err := gofn.Df(gx, i)
 		if err != nil {
-			// same assumption as go_f
+			// same assumption as fit_go_f
 			return C.GSL_EDOM
 		}
 		gslval := C.gsl_vector_alloc(x.size)
@@ -114,13 +114,13 @@ func go_df(x C.const_gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
 	return C.GSL_SUCCESS
 }
 
-//export go_fdf
-func go_fdf(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector, J *C.gsl_matrix) C.int {
-	err := go_f(x, fn, f)
+//export fit_go_fdf
+func fit_go_fdf(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector, J *C.gsl_matrix) C.int {
+	err := fit_go_f(x, fn, f)
 	if err != C.GSL_SUCCESS {
 		return err
 	}
-	return go_df(x, fn, J)
+	return fit_go_df(x, fn, J)
 }
 
 // The following are copy-pasted from solve since the Go compiler complains

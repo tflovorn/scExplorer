@@ -8,7 +8,7 @@ import (
 import vec "../vector"
 
 func TestFitParabola(t *testing.T) {
-	epsAbs, epsRel := 1e-6, 1e-6
+	epsAbs, epsRel := 1e-9, 1e-9
 	ax, ay, b, mu_b := 1.01, 0.99, 0.1, -0.01
 	guess := []float64{2.0, 0.5, 0.5, 0.0}
 	omegaGenerator := func(k vec.Vector) float64 {

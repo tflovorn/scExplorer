@@ -7,9 +7,9 @@ package solve
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multiroots.h>
-extern int go_f(const gsl_vector*, void *, gsl_vector*);
-extern int go_df(const gsl_vector*, void *, gsl_matrix*);
-extern int go_fdf(const gsl_vector*, void *, gsl_vector*, gsl_matrix*);
+extern int powell_go_f(const gsl_vector*, void *, gsl_vector*);
+extern int powell_go_df(const gsl_vector*, void *, gsl_matrix*);
+extern int powell_go_fdf(const gsl_vector*, void *, gsl_vector*, gsl_matrix*);
 
 #define MAX_ITERS 1000
 
@@ -25,7 +25,7 @@ static int powellSolve(void * uservar, gsl_vector * start, double epsabs, double
 	size_t iter = 0;
 	const size_t n = start->size;
 
-	gsl_multiroot_function_fdf f = {&go_f, &go_df, &go_fdf, n, uservar};
+	gsl_multiroot_function_fdf f = {&powell_go_f, &powell_go_df, &powell_go_fdf, n, uservar};
 	T = gsl_multiroot_fdfsolver_hybridsj;
 	s = gsl_multiroot_fdfsolver_alloc(T, n);
 	gsl_multiroot_fdfsolver_set(s, &f, start);
@@ -74,10 +74,11 @@ func MultiDim(fn DiffSystem, start vec.Vector, epsAbs, epsRel float64) (vec.Vect
 	return solution, nil
 }
 
-//export go_f
-func go_f(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
+//export powell_go_f
+func powell_go_f(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
 	gofn := *((*DiffSystem)(fn))
-	val, err := gofn.F(VecFromGSL(x))
+	gx := VecFromGSL(x)
+	val, err := gofn.F(gx)
 	if err != nil {
 		// assume that if F returns an error, x is outside the domain
 		return C.GSL_EDOM
@@ -86,8 +87,8 @@ func go_f(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int {
 	return C.GSL_SUCCESS
 }
 
-//export go_df
-func go_df(x C.const_gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
+//export powell_go_df
+func powell_go_df(x C.const_gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
 	gofn := (*DiffSystem)(fn)
 	val, err := gofn.Df(VecFromGSL(x))
 	if err != nil {
@@ -98,8 +99,8 @@ func go_df(x C.const_gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
 	return C.GSL_SUCCESS
 }
 
-//export go_fdf
-func go_fdf(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector, J *C.gsl_matrix) C.int {
+//export powell_go_fdf
+func powell_go_fdf(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector, J *C.gsl_matrix) C.int {
 	gofn := (*DiffSystem)(fn)
 	val, grad, err := gofn.Fdf(VecFromGSL(x))
 	if err != nil {
