@@ -66,7 +66,7 @@ func MultiDim(fn DiffSystem, start vec.Vector, epsAbs, epsRel float64) (vec.Vect
 	err := C.powellSolve(cfn, cstart, C.double(epsAbs), C.double(epsRel), csolution)
 	if err != C.GSL_SUCCESS {
 		err_str := C.GoString(C.gsl_strerror(err))
-		return nil, fmt.Errorf("error in MultiDim (GSL): %v\n", err_str)
+		return nil, fmt.Errorf("error in solve.MultiDim: %v\n", err_str)
 	}
 	solution := VecFromGSL(csolution)
 	C.gsl_vector_free(csolution)
