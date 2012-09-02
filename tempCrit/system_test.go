@@ -15,7 +15,7 @@ import (
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
 func TestSolveCritTempSystem(t *testing.T) {
-	expected := []vec.Vector{[]float64{0.039375034674567204, -0.31027533095383564}, []float64{2.317368820443076}}
+	expected := []vec.Vector{[]float64{0.014086347876131155, -0.5397102198293126}, []float64{3.0438101868565246}}
 	env, err := ctDefaultEnv()
 	if err != nil {
 		t.Fatal(err)

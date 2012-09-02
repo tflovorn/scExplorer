@@ -80,7 +80,7 @@ func Derivative(fn vec.FnDim0, v vec.Vector, i int, h, epsabs float64) (float64,
 			v[i] = v_i_initial
 			return float64(result), fmt.Errorf("error in Derivative (GSL): %v\n", err_str)
 		}
-		if float64(abserr) > epsabs {
+		if float64(abserr) < epsabs {
 			v[i] = v_i_initial
 			return float64(result), nil
 		}
