@@ -18,7 +18,7 @@ import (
 // The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
 // we expect ax == ay.
 func OmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
-	points := makeOmegaCoeffsPoints()
+	points := omegaCoeffsPoints()
 	// evaluate omega_+(k) at each point
 	omegas := make([]float64, len(points))
 	for i, q := range points {
@@ -51,11 +51,12 @@ func OmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
 		return []float64{-qx2, -qy2, -qz2, 1.0}, nil
 	}
 	// fit coefficients to omega_+ data
-	return fit.MultiDim(errFuncF, errFuncDf, len(points), 4)
+	guess := []float64{env.T0, env.T0, env.Tz, env.Mu_b}
+	return fit.MultiDim(errFuncF, errFuncDf, len(points), guess, 1e-6, 1e-6)
 }
 
-// Return a list of all points to survey in fitting omega(q) coefficients.
-func makeOmegaCoeffsPoints() []vec.Vector {
+// Return a list of all k points surveyed by OmegaCoeffs().
+func omegaCoeffsPoints() []vec.Vector {
 	sk := 0.1 // small value of k
 	ssk := sk / math.Sqrt(2)
 	// unique point
