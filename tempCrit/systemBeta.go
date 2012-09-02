@@ -20,7 +20,7 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 			return 0.0, errors.New("NaN in input")
 		}
 		env.Set(v, variables)
-		fmt.Printf("D1 = %f, Mu_h = %f, Beta = %f\n", env.D1, env.Mu_h, v[0])
+		fmt.Printf("D1 = %f, Mu_h = %f, Beta = %f\n", env.D1, env.Mu_h, env.Beta)
 		x1 := tempPair.X1(env)
 		fmt.Printf("x = %f; x1 = %f\n", env.X, x1)
 		nu, err := Nu(env)
@@ -34,8 +34,8 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 		fmt.Printf("beta lhs = %f; rhs = %f\n", lhs, rhs)
 		return lhs - rhs, nil
 	}
-	h := 1e-2
-	epsabs := 1e-2
+	h := 1e-6
+	epsabs := 1e-4
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
 
