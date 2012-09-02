@@ -1,5 +1,7 @@
 package vector
 
+import "math"
+
 type Vector []float64
 type FnDim0 func(Vector) (float64, error)
 type FnDim1 func(Vector) (Vector, error)
@@ -43,4 +45,14 @@ func (v Vector) Equals(u Vector) bool {
 		}
 	}
 	return true
+}
+
+// Return true iff one or more elements of v is NaN.
+func (v Vector) ContainsNaN() bool {
+	for i := 0; i < len(v); i++ {
+		if math.IsNaN(v[i]) {
+			return true
+		}
+	}
+	return false
 }

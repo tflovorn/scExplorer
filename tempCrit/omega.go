@@ -1,7 +1,7 @@
 package tempCrit
 
 import (
-	"errors"
+	"fmt"
 	"math"
 )
 import (
@@ -18,6 +18,39 @@ import (
 // The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
 // we expect ax == ay.
 func OmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
+	return simpleOmegaCoeffs(env)
+}
+
+func simpleOmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
+	zero := vec.ZeroVector(3)
+	sk := 0.1
+	xb := []float64{sk, 0.0, 0.0}
+	yb := []float64{0.0, sk, 0.0}
+	zb := []float64{0.0, 0.0, sk}
+	m_mu_b, err := OmegaPlus(env, zero)
+	if err != nil {
+		return nil, err
+	}
+	mu_b := -m_mu_b
+	oax, err := OmegaPlus(env, xb)
+	if err != nil {
+		return nil, err
+	}
+	ax := (oax + mu_b) / (sk * sk)
+	oay, err := OmegaPlus(env, yb)
+	if err != nil {
+		return nil, err
+	}
+	ay := (oay + mu_b) / (sk * sk)
+	ob, err := OmegaPlus(env, zb)
+	if err != nil {
+		return nil, err
+	}
+	b := (ob + mu_b) / (sk * sk)
+	return []float64{ax, ay, b, mu_b}, nil
+}
+
+func omegaCoeffsFromFit(env *tempAll.Environment) (vec.Vector, error) {
 	points := omegaCoeffsPoints()
 	// evaluate omega_+(k) at each point
 	omegas := make([]float64, len(points))
@@ -28,12 +61,10 @@ func OmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
 			return nil, err
 		}
 	}
+	fmt.Println("got omegas")
 	// fit's error for point `i` with fit data `cs`
 	errFuncF := func(cs vec.Vector, i int) (float64, error) {
 		// cs = {ax, ay, b, mu_b}
-		if cs[0] < 0 || cs[1] < 0 || cs[2] < 0 || cs[3] > 0 {
-			return 0.0, errors.New("invalid parameter")
-		}
 		qx2 := math.Pow(points[i][0], 2.0)
 		qy2 := math.Pow(points[i][1], 2.0)
 		qz2 := math.Pow(points[i][2], 2.0)
@@ -42,9 +73,6 @@ func OmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
 	// derivative of fit's error
 	errFuncDf := func(cs vec.Vector, i int) (vec.Vector, error) {
 		// cs = {ax, ay, b, mu_b}
-		if cs[0] < 0 || cs[1] < 0 || cs[2] < 0 || cs[3] > 0 {
-			return nil, errors.New("invalid parameter")
-		}
 		qx2 := math.Pow(points[i][0], 2.0)
 		qy2 := math.Pow(points[i][1], 2.0)
 		qz2 := math.Pow(points[i][2], 2.0)
@@ -52,7 +80,7 @@ func OmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
 	}
 	// fit coefficients to omega_+ data
 	guess := []float64{env.T0, env.T0, env.Tz, env.Mu_b}
-	return fit.MultiDim(errFuncF, errFuncDf, len(points), guess, 1e-6, 1e-6)
+	return fit.MultiDim(errFuncF, errFuncDf, len(points), guess, 1e-3, 1e-3)
 }
 
 // Return a list of all k points surveyed by OmegaCoeffs().
@@ -113,7 +141,7 @@ func lambdaParts(env *tempAll.Environment, k vec.Vector, omega float64) (float64
 	cx, cy, cz := math.Cos(k[0]), math.Cos(k[1]), math.Cos(k[2])
 	Ex := 2.0 * (env.T0*cy + env.Tz*cz)
 	Ey := 2.0 * (env.T0*cx + env.Tz*cz)
-	Pis := Pi(env, k, omega)
+	Pis := Pi(env, []float64{k[0], k[1]}, omega)
 	u := 0.5 * (Ex*Pis[0] + Ey*Pis[2])
 	v := math.Sqrt(0.25*math.Pow(Ex*Pis[0]-Ey*Pis[2], 2.0) + Ex*Ey*math.Pow(Pis[1], 2.0))
 	return u, v

@@ -1,8 +1,8 @@
 package solve
 
 import (
-	"testing"
 	"math"
+	"testing"
 )
 import vec "../vector"
 
@@ -18,7 +18,7 @@ func TestIterativeRosenbrock(t *testing.T) {
 	}
 	for i, vec := range expected {
 		for j, val := range vec {
-			if math.Abs(solutions[i][j] - val) > epsAbs[i] {
+			if math.Abs(solutions[i][j]-val) > epsAbs[i] {
 				t.Fatalf("incorrect Rosenbrock(1.0, 1.0) solution: %v", solutions)
 			}
 		}

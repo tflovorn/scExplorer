@@ -1,13 +1,16 @@
 package tempCrit
 
-import "math"
+import (
+	"math"
+)
 import (
 	"../bzone"
 	"../tempAll"
 	vec "../vector"
 )
 
-// Evaluate the retarded pair Green's function Pi_R(k, omega)_{xx, xy, yy}
+// Evaluate the retarded pair Green's function Pi_R(q, omega)_{xx, xy, yy}.
+// q must be a two-dimensional vector.
 func Pi(env *tempAll.Environment, q vec.Vector, omega float64) vec.Vector {
 	piInner := func(k vec.Vector) vec.Vector {
 		xp := env.Xi_h(k.Add(q.Mul(0.5)))
