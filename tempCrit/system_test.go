@@ -1,16 +1,22 @@
 package tempCrit
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"math"
+	"os"
 	"testing"
 )
 import (
+	"../plots"
 	"../solve"
 	"../tempAll"
 	"../tempPair"
 )
+
+var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
+var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
@@ -75,4 +81,41 @@ func ctDefaultEnv() (*tempAll.Environment, error) {
 		return nil, err
 	}
 	return env, nil
+}
+
+// Plot evolution of Tc vs X.
+func TestPlotTcVsX(t *testing.T) {
+	flag.Parse()
+	if !*testPlot {
+		return
+	}
+	defaultEnv, err := ctDefaultEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.05, 0.05, 0.05}, []float64{0.15, 0.1, 0.1})
+	if *longPlot {
+		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.01, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
+	}
+	vars := plots.GraphVars{"X", "Beta", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}}
+	fileLabel := "deleteme.system_tc_x_data"
+
+	eps := 1e-6
+	// Beta should be above pair beta
+	_, _ = tempAll.MultiSolve(envs, eps, eps, tempPair.PairTempSystem)
+	for _, env := range envs {
+		env.Beta += 0.1
+	}
+	// better omega(q) fit if we solve for D1/Mu first
+	_, _ = tempAll.MultiSolve(envs, eps, eps, CritTempD1MuSystem)
+	// solve the full system
+	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, CritTempFullSystem)
+
+	wd, _ := os.Getwd()
+	grapherPath := wd + "/../plots/grapher.py"
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$\\beta_c$"}
+	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making plot: %v", err)
+	}
 }

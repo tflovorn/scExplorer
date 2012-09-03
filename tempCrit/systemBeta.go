@@ -52,7 +52,7 @@ func Nu(env *tempAll.Environment) (float64, error) {
 	}
 	ymax := -2.0 * env.Beta * env.Mu_h
 	ymax = math.Min(ymax, 100.0) // exclude large ymax for convergence
-	t := 1e-8
+	t := 1e-7
 	integral, abserr, err := integrate.Qags(integrand, 0.0, ymax, t, t)
 	if err != nil {
 		return 0.0, err
