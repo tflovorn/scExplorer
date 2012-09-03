@@ -1,7 +1,6 @@
 package tempCrit
 
 import (
-	"fmt"
 	"math"
 )
 import (
@@ -61,7 +60,6 @@ func omegaCoeffsFromFit(env *tempAll.Environment) (vec.Vector, error) {
 			return nil, err
 		}
 	}
-	fmt.Println("got omegas")
 	// fit's error for point `i` with fit data `cs`
 	errFuncF := func(cs vec.Vector, i int) (float64, error) {
 		// cs = {ax, ay, b, mu_b}

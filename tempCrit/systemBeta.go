@@ -20,9 +20,7 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 			return 0.0, errors.New("NaN in input")
 		}
 		env.Set(v, variables)
-		fmt.Printf("D1 = %f, Mu_h = %f, Beta = %f\n", env.D1, env.Mu_h, env.Beta)
 		x1 := tempPair.X1(env)
-		fmt.Printf("x = %f; x1 = %f\n", env.X, x1)
 		nu, err := Nu(env)
 		if err != nil {
 			fmt.Printf("error from Nu: %v\n", err)
@@ -31,7 +29,6 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 		x2 := nu / math.Pow(env.Beta, 3.0/2.0)
 		lhs := env.X
 		rhs := x1 + x2
-		fmt.Printf("beta lhs = %f; rhs = %f\n", lhs, rhs)
 		return lhs - rhs, nil
 	}
 	h := 1e-6
@@ -41,9 +38,7 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 
 func Nu(env *tempAll.Environment) (float64, error) {
 	cs, err := OmegaCoeffs(env)
-	fmt.Printf("omega coeffs = %f\n", cs)
 	if err != nil {
-		fmt.Printf("omega coeffs err = %s\n", err)
 		return 0.0, err
 	}
 	a, b := cs[0], cs[2] // ignore produced value for ay and mu_b

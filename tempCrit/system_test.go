@@ -2,7 +2,6 @@ package tempCrit
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"math"
 	"os"
@@ -68,7 +67,6 @@ func TestSolveCritTempSystem(t *testing.T) {
 		}
 	}
 
-	fmt.Println(solution)
 }
 
 func ctDefaultEnv() (*tempAll.Environment, error) {
