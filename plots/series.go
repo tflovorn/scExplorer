@@ -36,8 +36,11 @@ func (s *Series) Pairs() [][]float64 {
 
 // Extract (x, y) points from dataSet where the names of x and y are given by
 // varNames[0] and [1]. varNames[2] ("z") optionally specifies a variable to
-// use to split the data into multiple series.
-func ExtractSeries(dataSet []interface{}, varNames []string, constraints map[string]float64) ([]Series, []float64) {
+// use to split the data into multiple series. `constraints` specifies
+// parameter values to include; for example if constraints = {"Tz": 0.1}, only
+// data points with Tz = 0.1 will be extracted. If the name of y is given as
+// the empty string, `YFunc` is used to obtain a value for y instead.
+func ExtractSeries(dataSet []interface{}, varNames []string, constraints map[string]float64, YFunc func(interface{}) float64) ([]Series, []float64) {
 	if len(varNames) < 2 {
 		panic("not enough variable names for ExtractSeries")
 	} else if len(varNames) == 2 {
@@ -62,7 +65,12 @@ func ExtractSeries(dataSet []interface{}, varNames []string, constraints map[str
 		}
 		// constraints fit; keep point
 		x := val.FieldByName(varNames[0]).Float()
-		y := val.FieldByName(varNames[1]).Float()
+		var y float64
+		if varNames[1] != "" {
+			y = val.FieldByName(varNames[1]).Float()
+		} else {
+			y = YFunc(data)
+		}
 		z := val.FieldByName(varNames[2]).Float()
 		zmap, ok := maps[z]
 		if !ok {

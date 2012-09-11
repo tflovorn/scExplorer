@@ -219,3 +219,9 @@ func (env *Environment) Fermi(energy float64) float64 {
 	// nonzero temperature
 	return 1.0 / (math.Exp(energy*env.Beta) + 1.0)
 }
+
+// Extract the temperature from env
+func GetTemp(data interface{}) float64 {
+	env := data.(Environment)
+	return 1.0 / env.Beta
+}

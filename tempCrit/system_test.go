@@ -16,6 +16,7 @@ import (
 
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
+var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")
 
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
@@ -91,11 +92,15 @@ func TestPlotTcVsX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.05, 0.05, 0.05}, []float64{0.15, 0.1, 0.1})
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.05, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
 	if *longPlot {
-		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.01, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
+		if !*tinyX {
+			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.01, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
+		} else {
+			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.001, 0.05, 0.05}, []float64{0.01, 0.1, 0.1})
+		}
 	}
-	vars := plots.GraphVars{"X", "Beta", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}}
+	vars := plots.GraphVars{"X", "", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, tempAll.GetTemp}
 	fileLabel := "deleteme.system_tc_x_data"
 
 	eps := 1e-6
@@ -111,7 +116,7 @@ func TestPlotTcVsX(t *testing.T) {
 
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$\\beta_c$"}
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_c$"}
 	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making plot: %v", err)

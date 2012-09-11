@@ -79,7 +79,7 @@ func TestPlotF0VsX(t *testing.T) {
 	if *longPlot {
 		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 3, 3}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	}
-	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}}
+	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil}
 	xyLabels := []string{"$x$", "$F_0$"}
 	fileLabel := "deleteme.system_F0_x_dwave_data"
 	err = solveAndPlot(envs, 1e-6, 1e-6, vars, xyLabels, fileLabel)
