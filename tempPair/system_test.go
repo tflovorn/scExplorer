@@ -92,4 +92,14 @@ func TestPlotTpVsX(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error making plot: %v", err)
 	}
+	fileLabel = "deleteme.system_mu_x_data"
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
+	vars.Y = "Mu_h"
+	vars.YFunc = nil
+	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making Mu_h plot: %v", err)
+	}
+
 }
