@@ -17,7 +17,11 @@ import (
 // The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
 // we expect ax == ay.
 func OmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
-	return simpleOmegaCoeffs(env)
+	fit, err := omegaCoeffsFromFit(env)
+	if err != nil {
+		return nil, err
+	}
+	return fit, nil
 }
 
 func simpleOmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
@@ -53,32 +57,20 @@ func omegaCoeffsFromFit(env *tempAll.Environment) (vec.Vector, error) {
 	points := omegaCoeffsPoints()
 	// evaluate omega_+(k) at each point
 	omegas := make([]float64, len(points))
+	X := make([]vec.Vector, len(points))
 	for i, q := range points {
 		var err error
 		omegas[i], err = OmegaPlus(env, q)
 		if err != nil {
 			return nil, err
 		}
+		X[i] = vec.ZeroVector(4)
+		X[i][0] = q[0] * q[0]
+		X[i][1] = q[1] * q[1]
+		X[i][2] = q[2] * q[2]
+		X[i][3] = -1
 	}
-	// fit's error for point `i` with fit data `cs`
-	errFuncF := func(cs vec.Vector, i int) (float64, error) {
-		// cs = {ax, ay, b, mu_b}
-		qx2 := math.Pow(points[i][0], 2.0)
-		qy2 := math.Pow(points[i][1], 2.0)
-		qz2 := math.Pow(points[i][2], 2.0)
-		return omegas[i] - (cs[0]*qx2 + cs[1]*qy2 + cs[2]*qz2 - cs[3]), nil
-	}
-	// derivative of fit's error
-	errFuncDf := func(cs vec.Vector, i int) (vec.Vector, error) {
-		// cs = {ax, ay, b, mu_b}
-		qx2 := math.Pow(points[i][0], 2.0)
-		qy2 := math.Pow(points[i][1], 2.0)
-		qz2 := math.Pow(points[i][2], 2.0)
-		return []float64{-qx2, -qy2, -qz2, 1.0}, nil
-	}
-	// fit coefficients to omega_+ data
-	guess := []float64{env.T0, env.T0, env.Tz, env.Mu_b}
-	return fit.MultiDim(errFuncF, errFuncDf, len(points), guess, 1e-3, 1e-3)
+	return fit.Linear(omegas, X), nil
 }
 
 // Return a list of all k points surveyed by OmegaCoeffs().
