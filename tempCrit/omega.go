@@ -75,7 +75,7 @@ func omegaCoeffsFromFit(env *tempAll.Environment) (vec.Vector, error) {
 
 // Return a list of all k points surveyed by OmegaCoeffs().
 func omegaCoeffsPoints() []vec.Vector {
-	sk := 0.1 // small value of k
+	sk := 0.01 // small value of k
 	ssk := sk / math.Sqrt(2)
 	// unique point
 	zero := vec.ZeroVector(3)

@@ -21,7 +21,7 @@ var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
 func TestSolveCritTempSystem(t *testing.T) {
-	expected := []float64{0.013794882886651256, -0.5412082255261342, 3.060408749779061}
+	expected := []float64{0.014125547376598968, -0.5395087501929456, 3.041610098848195}
 	env, err := ctDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
