@@ -20,7 +20,7 @@ var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 
 // Solve a zero-temperature system for the appropriate values of (D1, Mu_h, F0)
 func TestSolveZeroTempSystem(t *testing.T) {
-	expected := []float64{0.0559103273571301, -0.2787775756761219, 0.13007412625306825}
+	expected := []float64{0.0559102390308629, -0.2787791186202057, 0.13007410720612345}
 	env, err := ztDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
