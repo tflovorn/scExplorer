@@ -2,11 +2,9 @@ package bzone
 
 import vec "../vector"
 
-import "github.com/farces/dumb/bufbig"
 import (
 	"fmt"
 	"math"
-	"math/big"
 	"testing"
 )
 
@@ -14,22 +12,10 @@ import (
 func TestTotalNumberOfPoints(t *testing.T) {
 	// Return true if the number of points is correct on a lattice with 
 	// side length L and dimension d.
-	checkNumPoints := func(L, d int) (*big.Int, bool) {
-		expected := big.NewInt(pow(L, d))
+	checkNumPoints := func(L, d int) (int, bool) {
+		expected := pow(L, d)
 		points := bzPoints(L, d)
-		i := bufbig.NewBigAccumulator()
-		for {
-			p := <-points
-			//fmt.Printf("p = %v\n", p)
-			if p != nil {
-				i.AddInt(1)
-			} else {
-				break
-			}
-		}
-		iv := i.Value()
-		// x.Cmp(y) returns sgn(x - y)
-		return iv, iv.Cmp(expected) == 0
+		return len(points), len(points)-int(expected) == 0
 	}
 	N := 4
 	count, correct := checkNumPoints(N, 2)
@@ -38,15 +24,6 @@ func TestTotalNumberOfPoints(t *testing.T) {
 		msg += fmt.Sprintf("Got %d, expected %d\n", count, int64(N*N))
 		t.Fatal(msg)
 	}
-}
-
-// Return x^y
-func pow(x, y int) int64 {
-	r := int64(1)
-	for i := 0; i < y; i++ {
-		r *= int64(x)
-	}
-	return r
 }
 
 // Sum over product of sin(k_i) terms should be 0.

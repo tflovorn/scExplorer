@@ -34,19 +34,10 @@ func VectorSum(pointsPerSide, gridDim, fnDim int, fn BzVectorFunc) vec.Vector {
 
 func bzVectorReduce(combine bzVectorConsumer, start vec.Vector, L, d int, fn BzVectorFunc) vec.Vector {
 	points := bzPoints(L, d)
-	work := func(result chan vec.Vector) {
-		total := start
-		for {
-			k, ok := <-points
-			if ok {
-				total = combine(fn(k), total)
-			} else {
-				break
-			}
-		}
-		result <- total
+	total := start
+	for i := 0; i < len(points); i++ {
+		k := points[i]
+		total = combine(fn(k), total)
 	}
-	result := make(chan vec.Vector)
-	go work(result)
-	return <-result
+	return total
 }

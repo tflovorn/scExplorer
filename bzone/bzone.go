@@ -2,9 +2,10 @@
 // lattice.
 package bzone
 
+import (
+	"math"
+)
 import vec "../vector"
-
-import "math"
 
 type BzFunc func(k vec.Vector) float64
 type bzConsumer func(next, total float64) float64
@@ -48,59 +49,50 @@ func Min(pointsPerSide int, dimension int, fn BzFunc) float64 {
 // independently of bzPoints.
 func bzReduce(combine bzConsumer, start float64, L, d int, fn BzFunc) float64 {
 	points := bzPoints(L, d)
-	work := func(result chan float64) {
-		total := start
-		for {
-			k, ok := <-points
-			if ok {
-				total = combine(fn(k), total)
-			} else {
-				break
-			}
-		}
-		result <- total
+	total := start
+	for i := 0; i < len(points); i++ {
+		k := points[i]
+		total = combine(fn(k), total)
 	}
-	// set up worker
-	result := make(chan float64)
-	go work(result)
-	// collect the results
-	return <-result
+	return total
 }
 
-// Produce a channel whose values cover each Brillouin zone point once. 
-// After all points have been traversed, the channel's values are nil.
-// TODO: it would be nice to cache the result of this to avoid many
-// re-generations for the same arguments.
-func bzPoints(L, d int) <-chan vec.Vector {
-	points := make(chan vec.Vector)
+var pointsCache map[int]map[int][]vec.Vector = make(map[int]map[int][]vec.Vector)
+
+// Produce a a slice of vectors whose values cover each first Brillouin zone
+// point once. 
+func bzPoints(L, d int) []vec.Vector {
+	cachedL, okL := pointsCache[L]
+	if okL {
+		cachedD, okD := cachedL[d]
+		if okD {
+			return cachedD
+		}
+	} else {
+		pointsCache[L] = make(map[int][]vec.Vector)
+	}
+	points := make([]vec.Vector, pow(L, d))
 	// start is the minumum value of any component of a point
 	start := -math.Pi
 	// (finish - step) is the maximum value of any component of a point
 	finish := -start
 	// step is the separation between point components
 	step := (finish - start) / float64(L)
-
-	go func() {
-		k := vec.ZeroVector(d)
-		kIndex := make([]int, d)
-		// set initial value for k
-		for i := 0; i < d; i++ {
-			k[i] = start
-			kIndex[i] = 0
-		}
-		// iterate over Brillouin zone
-		done := false
-		for {
-			if !done {
-				points <- k
-			} else {
-				break
-			}
-			done = bzAdvance(k, kIndex, start, step, L, d)
-		}
-		// we're done; signal that
-		close(points)
-	}()
+	k := vec.ZeroVector(d)
+	kIndex := make([]int, d)
+	// set initial value for k
+	for i := 0; i < d; i++ {
+		k[i] = start
+		kIndex[i] = 0
+	}
+	// iterate over Brillouin zone
+	done := false
+	for i := 0; !done; i++ {
+		points[i] = vec.ZeroVector(len(k))
+		copy(points[i], k)
+		done = bzAdvance(k, kIndex, start, step, L, d)
+	}
+	pointsCache[L][d] = points
 	return points
 }
 
@@ -132,4 +124,13 @@ func bzAdvance(k vec.Vector, kIndex []int, start, step float64, L, d int) bool {
 		kIndex[i] = 0
 	}
 	return false
+}
+
+// Return x^y
+func pow(x, y int) int64 {
+	r := int64(1)
+	for i := 0; i < y; i++ {
+		r *= int64(x)
+	}
+	return r
 }

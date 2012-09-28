@@ -6,7 +6,7 @@ import (
 )
 import vec "../vector"
 
-func BzVectorAvgOnes(t *testing.T) {
+func TestBzVectorAvgOnes(t *testing.T) {
 	fn := func(k vec.Vector) vec.Vector {
 		return []float64{1.0, 2.0}
 	}
@@ -18,7 +18,7 @@ func BzVectorAvgOnes(t *testing.T) {
 	}
 }
 
-func BzVectorAvgSin(t *testing.T) {
+func TestBzVectorAvgSin(t *testing.T) {
 	fn := func(k vec.Vector) vec.Vector {
 		return []float64{math.Sin(k[0]), math.Sin(k[1])}
 	}
