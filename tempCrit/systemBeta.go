@@ -55,5 +55,5 @@ func Nu(env *tempAll.Environment) (float64, error) {
 	if math.Abs(abserr) > t*10 {
 		err = fmt.Errorf("nu integral too innaccurate (abserr = %e)", abserr)
 	}
-	return integral / (4.0 * math.Pow(math.Pi, 2.0) * a * math.Sqrt(b)), err
+	return integral / (2.0 * math.Pow(math.Pi, 2.0) * a * math.Sqrt(b)), err
 }
