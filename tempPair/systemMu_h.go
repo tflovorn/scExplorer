@@ -19,6 +19,7 @@ func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
 
+// Concentration of unpaired holons
 func X1(env *tempAll.Environment) float64 {
 	L := env.PointsPerSide
 	return bzone.Avg(L, 2, tempAll.WrapFunc(env, innerX1))

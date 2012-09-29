@@ -21,12 +21,11 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 		}
 		env.Set(v, variables)
 		x1 := tempPair.X1(env)
-		nu, err := Nu(env)
+		x2, err := X2(env)
 		if err != nil {
-			fmt.Printf("error from Nu: %v\n", err)
+			fmt.Printf("error from X2(): %v\n", err)
 			return 0.0, err
 		}
-		x2 := nu / math.Pow(env.Beta, 3.0/2.0)
 		lhs := env.X
 		rhs := x1 + x2
 		return lhs - rhs, nil
@@ -36,16 +35,36 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
 
-func Nu(env *tempAll.Environment) (float64, error) {
+// Concentration of paired holons
+func X2(env *tempAll.Environment) (float64, error) {
+	nu, err := nu(env)
+	if err != nil {
+		return 0.0, err
+	}
+	x2 := nu / math.Pow(env.Beta, 3.0/2.0)
+	return x2, nil
+}
+
+// Equivalent to X2(); for use with graphing functions
+func GetX2(data interface{}) float64 {
+	env := data.(tempAll.Environment)
+	X2, err := X2(&env)
+	if err != nil {
+		panic(err)
+	}
+	return X2
+}
+
+func nu(env *tempAll.Environment) (float64, error) {
 	cs, err := OmegaCoeffs(env)
 	if err != nil {
 		return 0.0, err
 	}
 	a, b := cs[0], cs[2] // ignore produced value for ay and mu_b
 	integrand := func(y float64) float64 {
-		return math.Sqrt(y) / (math.Exp(y) - 1.0)
+		return math.Sqrt(y) / (math.Exp(y-env.Beta*env.Mu_b) - 1.0)
 	}
-	ymax := -2.0 * env.Beta * env.Mu_h
+	ymax := env.Beta * (-2.0*env.Mu_h + env.Mu_b)
 	ymax = math.Min(ymax, 100.0) // exclude large ymax for convergence
 	t := 1e-7
 	integral, abserr, err := integrate.Qags(integrand, 0.0, ymax, t, t)

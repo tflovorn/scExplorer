@@ -26,6 +26,7 @@ func TestSolveCritTempSystem(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	env.PointsPerSide = 32
 	// our guess for beta should be a bit above Beta_p
 	epsabsPair, epsrelPair := 1e-9, 1e-9
 	pairSystem, pairStart := tempPair.PairTempSystem(env)

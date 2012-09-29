@@ -7,6 +7,7 @@ import (
 	vec "../vector"
 )
 
+// For use with solve.Iterative:
 func CritTempStages(env *tempAll.Environment) ([]solve.DiffSystem, []vec.Vector, func([]vec.Vector)) {
 	vars0 := []string{"D1", "Mu_h"}
 	vars1 := []string{"Beta"}
@@ -25,6 +26,8 @@ func CritTempStages(env *tempAll.Environment) ([]solve.DiffSystem, []vec.Vector,
 	return stages, start, accept
 }
 
+// For use with solve.MultiDim:
+// T_c convergence is better if we solve for D1 and Mu_h first.
 func CritTempD1MuSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	variables := []string{"D1", "Mu_h"}
 	diffD1 := tempPair.AbsErrorD1(env, variables)
@@ -33,6 +36,8 @@ func CritTempD1MuSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) 
 	start := []float64{env.D1, env.Mu_h}
 	return system, start
 }
+
+// For use with solve.MultiDim: full T_c system.
 func CritTempFullSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	variables := []string{"D1", "Mu_h", "Beta"}
 	diffD1 := tempPair.AbsErrorD1(env, variables)
