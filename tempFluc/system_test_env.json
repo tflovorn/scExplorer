@@ -1,5 +1,5 @@
 {
-  "PointsPerSide": 64,
+  "PointsPerSide": 32,
   "X": 0.08,
   "T0": 1.0,
   "Thp": 0.1,

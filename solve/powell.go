@@ -90,7 +90,8 @@ func powell_go_f(x C.const_gsl_vector, fn unsafe.Pointer, f *C.gsl_vector) C.int
 //export powell_go_df
 func powell_go_df(x C.const_gsl_vector, fn unsafe.Pointer, J *C.gsl_matrix) C.int {
 	gofn := (*DiffSystem)(fn)
-	val, err := gofn.Df(VecFromGSL(x))
+	gx := VecFromGSL(x)
+	val, err := gofn.Df(gx)
 	if err != nil {
 		// same assumption as go_f
 		return C.GSL_EDOM

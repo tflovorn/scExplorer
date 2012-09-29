@@ -115,6 +115,7 @@ func TestPlotTcVsX(t *testing.T) {
 	// solve the full system
 	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, CritTempFullSystem)
 
+	// Tc vs x plots
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_c$"}
@@ -122,6 +123,7 @@ func TestPlotTcVsX(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error making Tc plot: %v", err)
 	}
+	// Mu_h vs x plots
 	fileLabel = "deleteme.system_mu_x_data"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"

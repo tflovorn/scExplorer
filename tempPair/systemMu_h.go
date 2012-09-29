@@ -14,8 +14,8 @@ func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 		rhs := X1(env)
 		return lhs - rhs, nil
 	}
-	h := 1e-4
-	epsabs := 1e-9
+	h := 1e-6
+	epsabs := 1e-4
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
 

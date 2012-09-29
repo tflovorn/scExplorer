@@ -65,6 +65,10 @@ func nu(env *tempAll.Environment) (float64, error) {
 		return math.Sqrt(y) / (math.Exp(y-env.Beta*env.Mu_b) - 1.0)
 	}
 	ymax := env.Beta * (-2.0*env.Mu_h + env.Mu_b)
+	if ymax <= 0.0 {
+		fmt.Println("ymax <= 0.0: Mu_h = %f; Mu_b = %f\n", env.Mu_h, env.Mu_b)
+		return 0.0, nil
+	}
 	ymax = math.Min(ymax, 100.0) // exclude large ymax for convergence
 	t := 1e-7
 	integral, abserr, err := integrate.Qags(integrand, 0.0, ymax, t, t)

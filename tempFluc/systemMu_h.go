@@ -1,6 +1,8 @@
 package tempFluc
 
-import "math"
+import (
+	"math"
+)
 import (
 	"../bzone"
 	"../solve"
@@ -16,8 +18,8 @@ func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 		rhs := bzone.Avg(L, 2, tempAll.WrapFunc(env, innerMu_h))
 		return lhs - rhs, nil
 	}
-	h := 1e-4
-	epsabs := 1e-9
+	h := 1e-6
+	epsabs := 1e-4
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
 
