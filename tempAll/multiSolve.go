@@ -1,6 +1,7 @@
 package tempAll
 
 import (
+	"fmt"
 	"runtime"
 )
 import "../solve"
@@ -46,6 +47,7 @@ func MultiSolve(envs []*Environment, epsabs, epsrel float64, st Systemer) ([]int
 			if err != nil {
 				solvedEnvs[j] = nil
 				errs[j] = err
+				fmt.Printf("Error: %v; produced while solving env: %v\n", err, envs[j])
 			} else {
 				solvedEnvs[j] = *envs[j]
 				errs[j] = nil

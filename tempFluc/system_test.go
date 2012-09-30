@@ -37,9 +37,9 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.0, 0.05, 0.05}, []float64{-0.25, 0.1, 0.1})
+	envs := defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{2, 2, 2, 2}, []float64{0.0, 0.05, 0.05, 0.04}, []float64{-0.25, 0.1, 0.1, 0.08})
 	if *longPlot {
-		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp"}, []int{20, 2, 2}, []float64{0.0, 0.05, 0.05}, []float64{-1.0, 0.1, 0.1})
+		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{20, 2, 2, 4}, []float64{0.0, 0.05, 0.05, 0.025}, []float64{-1.0, 0.1, 0.1, 0.1})
 	}
 
 	eps := 1e-6
@@ -54,7 +54,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, FlucTempFullSystem)
 
 	// X2 vs Mu_b plots
-	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, tempCrit.GetX2}
+	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp", "X"}, []string{"t_z", "t_h^{\\prime}", "$x$"}, tempCrit.GetX2}
 	fileLabel := "deleteme.system_x2_mu_b_data"
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"

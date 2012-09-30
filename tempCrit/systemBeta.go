@@ -66,7 +66,7 @@ func nu(env *tempAll.Environment) (float64, error) {
 	}
 	ymax := env.Beta * (-2.0*env.Mu_h + env.Mu_b)
 	if ymax <= 0.0 {
-		fmt.Println("ymax <= 0.0: Mu_h = %f; Mu_b = %f\n", env.Mu_h, env.Mu_b)
+		fmt.Printf("ymax <= 0.0: Mu_h = %f; Mu_b = %f\n", env.Mu_h, env.Mu_b)
 		return 0.0, nil
 	}
 	ymax = math.Min(ymax, 100.0) // exclude large ymax for convergence
