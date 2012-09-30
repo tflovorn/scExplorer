@@ -21,7 +21,7 @@ var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
 func TestSolveCritTempSystem(t *testing.T) {
-	expected := []float64{0.006080314078142117, -0.581166987598472, 3.76162538532017}
+	expected := []float64{0.006080304981042737, -0.5811670351695094, 3.7616266303862695}
 	env, err := ctDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -49,8 +49,8 @@ func TestSolveCritTempSystem(t *testing.T) {
 		t.Fatal(err)
 	}
 	// MultiDim should leave env in solved state
-	if solution[0] != env.D1 || solution[1] != env.Mu_h || solution[2] != env.Beta {
-		t.Fatalf("Env fails to match solution")
+	if math.Abs(solution[0]-env.D1) > epsabs || math.Abs(solution[1]-env.Mu_h) > epsabs || math.Abs(solution[2]-env.Beta) > epsabs {
+		t.Fatalf("Env fails to match solution; env = %v; solution = %v", env, solution)
 	}
 	// the solution we got should give 0 error within tolerances
 	solutionAbsErr, err := system.F(solution)
