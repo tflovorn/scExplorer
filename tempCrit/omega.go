@@ -10,7 +10,7 @@ import (
 	vec "../vector"
 )
 
-type omegaFunc func(*tempAll.Environment, vec.Vector) (float64, error)
+type OmegaFunc func(*tempAll.Environment, vec.Vector) (float64, error)
 
 // Calculate the coefficients in the small-q pair dispersion relation:
 //
@@ -18,7 +18,7 @@ type omegaFunc func(*tempAll.Environment, vec.Vector) (float64, error)
 //
 // The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
 // we expect ax == ay.
-func OmegaFit(env *tempAll.Environment, fn omegaFunc) (vec.Vector, error) {
+func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
 	points := omegaCoeffsPoints()
 	// evaluate omega_+(k) at each point
 	omegas := make([]float64, len(points))
