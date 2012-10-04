@@ -65,7 +65,7 @@ func GetX2(data interface{}) float64 {
 }
 
 func nu(env *tempAll.Environment) (float64, error) {
-	cs, err := OmegaCoeffs(env)
+	cs, err := OmegaFit(env, OmegaPlus)
 	if err != nil {
 		return 0.0, err
 	}

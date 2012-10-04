@@ -10,50 +10,15 @@ import (
 	vec "../vector"
 )
 
+type omegaFunc func(*tempAll.Environment, vec.Vector) (float64, error)
+
 // Calculate the coefficients in the small-q pair dispersion relation:
 //
 // omega(q) = ax*q_x^2 + ay*q_y^2 + b*q_z^2 - mu_b
 //
 // The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
 // we expect ax == ay.
-func OmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
-	fit, err := omegaCoeffsFromFit(env)
-	if err != nil {
-		return nil, err
-	}
-	return fit, nil
-}
-
-func simpleOmegaCoeffs(env *tempAll.Environment) (vec.Vector, error) {
-	zero := vec.ZeroVector(3)
-	sk := 0.1
-	xb := []float64{sk, 0.0, 0.0}
-	yb := []float64{0.0, sk, 0.0}
-	zb := []float64{0.0, 0.0, sk}
-	m_mu_b, err := OmegaPlus(env, zero)
-	if err != nil {
-		return nil, err
-	}
-	mu_b := -m_mu_b
-	oax, err := OmegaPlus(env, xb)
-	if err != nil {
-		return nil, err
-	}
-	ax := (oax + mu_b) / (sk * sk)
-	oay, err := OmegaPlus(env, yb)
-	if err != nil {
-		return nil, err
-	}
-	ay := (oay + mu_b) / (sk * sk)
-	ob, err := OmegaPlus(env, zb)
-	if err != nil {
-		return nil, err
-	}
-	b := (ob + mu_b) / (sk * sk)
-	return []float64{ax, ay, b, mu_b}, nil
-}
-
-func omegaCoeffsFromFit(env *tempAll.Environment) (vec.Vector, error) {
+func OmegaFit(env *tempAll.Environment, fn omegaFunc) (vec.Vector, error) {
 	points := omegaCoeffsPoints()
 	// evaluate omega_+(k) at each point
 	omegas := make([]float64, len(points))
