@@ -62,14 +62,14 @@ func TestPlotTpVsX(t *testing.T) {
 	}
 
 	eps := 1e-9
-	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, PairTempSolve)
+	plotEnvs, errs := tempAll.MultiSolve(envs, eps, eps, PairTempSolve)
 
 	vars := plots.GraphVars{"X", "", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, tempAll.GetTemp}
 	fileLabel := "deleteme.system_tp_x_data"
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_p$"}
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making plot: %v", err)
 	}
@@ -78,7 +78,7 @@ func TestPlotTpVsX(t *testing.T) {
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
 	vars.Y = "Mu_h"
 	vars.YFunc = nil
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Mu_h plot: %v", err)
 	}

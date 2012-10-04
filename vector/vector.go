@@ -56,3 +56,15 @@ func (v Vector) ContainsNaN() bool {
 	}
 	return false
 }
+
+// Return the maximum of the absolute values of the vector's components.
+func (v Vector) AbsMax() float64 {
+	max := -math.MaxFloat64
+	for i := 0; i < len(v); i++ {
+		val := math.Abs(v[i])
+		if val > max {
+			max = val
+		}
+	}
+	return max
+}

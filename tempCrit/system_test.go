@@ -66,13 +66,13 @@ func TestPlotTcVsX(t *testing.T) {
 
 	eps := 1e-6
 	// solve the full system
-	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, CritTempSolve)
+	plotEnvs, errs := tempAll.MultiSolve(envs, eps, eps, CritTempSolve)
 
 	// Tc vs x plots
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_c$"}
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Tc plot: %v", err)
 	}
@@ -82,7 +82,7 @@ func TestPlotTcVsX(t *testing.T) {
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
 	vars.Y = "Mu_h"
 	vars.YFunc = nil
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Mu_h plot: %v", err)
 	}

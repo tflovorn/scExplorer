@@ -83,19 +83,19 @@ func TestPlotF0VsX(t *testing.T) {
 
 // Solve each given Environment and plot it.
 func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plots.GraphVars, xyLabels []string, fileLabelF0, fileLabelMu string) error {
-	plotEnvs, _ := tempAll.MultiSolve(envs, epsabs, epsrel, ZeroTempSolve)
+	plotEnvs, errs := tempAll.MultiSolve(envs, epsabs, epsrel, ZeroTempSolve)
 	// plot envs for all combinations of parameters
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelF0, plots.XLABEL_KEY: xyLabels[0], plots.YLABEL_KEY: xyLabels[1]}
-	err := plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		return fmt.Errorf("error making plots: %v", err)
 	}
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelMu
 	graphParams[plots.YLABEL_KEY] = xyLabels[2]
 	vars.Y = "Mu_h"
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		return fmt.Errorf("error making plots: %v", err)
 	}

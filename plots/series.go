@@ -40,7 +40,7 @@ func (s *Series) Pairs() [][]float64 {
 // parameter values to include; for example if constraints = {"Tz": 0.1}, only
 // data points with Tz = 0.1 will be extracted. If the name of y is given as
 // the empty string, `YFunc` is used to obtain a value for y instead.
-func ExtractSeries(dataSet []interface{}, varNames []string, constraints map[string]float64, YFunc func(interface{}) float64) ([]Series, []float64) {
+func ExtractSeries(dataSet []interface{}, errs []error, varNames []string, constraints map[string]float64, YFunc func(interface{}) float64) ([]Series, []float64) {
 	if len(varNames) < 2 {
 		panic("not enough variable names for ExtractSeries")
 	} else if len(varNames) == 2 {
@@ -49,7 +49,10 @@ func ExtractSeries(dataSet []interface{}, varNames []string, constraints map[str
 	// iterate through dataSet to create a map x->y for each z
 	maps := make(map[float64]map[float64]float64)
 	zs := make([]float64, 0)
-	for _, data := range dataSet {
+	for i, data := range dataSet {
+		if errs[i] != nil {
+			continue
+		}
 		val := reflect.ValueOf(data)
 		// check that constraints hold for this point
 		ok := true

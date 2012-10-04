@@ -23,10 +23,10 @@ type GraphVars struct {
 // Create a plot for each combination of vars.Params contained in data.
 // graphParams[FILE_KEY] must specify a file path for output. grapherPath
 // must specify the location of the Python graphing script.
-func MultiPlot(data []interface{}, vars GraphVars, graphParams map[string]string, grapherPath string) error {
+func MultiPlot(data []interface{}, errs []error, vars GraphVars, graphParams map[string]string, grapherPath string) error {
 	data = stripNils(data)
 	// we need to know the values of vars.Params to set up constraint
-	allParamValues, err := extractParamValues(data, vars)
+	allParamValues, err := extractParamValues(data, errs, vars)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func MultiPlot(data []interface{}, vars GraphVars, graphParams map[string]string
 		}
 		graphParams[FILE_KEY] = basePath + extraPath
 
-		series, primaryVals := ExtractSeries(data, []string{vars.X, vars.Y, primaryNames[i]}, secondaries[i], vars.YFunc)
+		series, primaryVals := ExtractSeries(data, errs, []string{vars.X, vars.Y, primaryNames[i]}, secondaries[i], vars.YFunc)
 		sp := MakeSeriesParams(primaryLabels[i], "%.3f", primaryVals, DEFAULT_STYLES)
 		err := PlotMPL(series, graphParams, sp, grapherPath)
 		if err != nil {
@@ -62,10 +62,13 @@ func stripNils(data []interface{}) []interface{} {
 	return ret
 }
 
-func extractParamValues(data []interface{}, vars GraphVars) (map[string][]float64, error) {
+func extractParamValues(data []interface{}, errs []error, vars GraphVars) (map[string][]float64, error) {
 	// get values for vars.Params
 	paramValues := make(map[string][]float64)
-	for _, d := range data {
+	for i, d := range data {
+		if errs[i] != nil {
+			continue
+		}
 		dv := reflect.ValueOf(d)
 		for _, p := range vars.Params {
 			pv := dv.FieldByName(p)

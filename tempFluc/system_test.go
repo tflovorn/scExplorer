@@ -51,14 +51,14 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{2, 2, 2, 2}, []float64{0.0, 0.05, 0.05, 0.04}, []float64{-0.25, 0.1, 0.1, 0.08})
+	envs := defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{0.0, 0.05, 0.1, 0.1}, []float64{-1.0, 0.1, 0.1, 0.1})
 	if *longPlot {
 		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{20, 2, 2, 4}, []float64{0.0, 0.05, 0.05, 0.025}, []float64{-1.0, 0.1, 0.1, 0.1})
 	}
 
 	// solve the full system
 	eps := 1e-6
-	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
+	plotEnvs, errs := tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
 
 	// X2 vs Mu_b plots
 	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp", "X"}, []string{"t_z", "t_h^{\\prime}", "x"}, tempCrit.GetX2}
@@ -66,7 +66,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$\\mu_b$", plots.YLABEL_KEY: "$x_2$"}
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Mu_b plot: %v", err)
 	}
@@ -75,7 +75,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$T$"
 	vars.YFunc = tempAll.GetTemp
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making T plot: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
 	vars.Y = "Mu_h"
 	vars.YFunc = nil
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Mu_h plot: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestPlotX2Collapse(t *testing.T) {
 	envs := defaultEnv.MultiSplit([]string{"Mu_b"}, []int{20}, []float64{-0.75}, []float64{-0.9})
 
 	eps := 1e-6
-	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
+	plotEnvs, errs := tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
 
 	// X2 vs Mu_b plots
 	vars := plots.GraphVars{"Mu_b", "", []string{"Tz"}, []string{"t_z"}, tempCrit.GetX2}
@@ -115,7 +115,7 @@ func TestPlotX2Collapse(t *testing.T) {
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$\\mu_b$", plots.YLABEL_KEY: "$x_2$"}
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Mu_b plot: %v", err)
 	}
@@ -124,7 +124,7 @@ func TestPlotX2Collapse(t *testing.T) {
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$T$"
 	vars.YFunc = tempAll.GetTemp
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making T plot: %v", err)
 	}
@@ -134,7 +134,7 @@ func TestPlotX2Collapse(t *testing.T) {
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
 	vars.Y = "Mu_h"
 	vars.YFunc = nil
-	err = plots.MultiPlot(plotEnvs, vars, graphParams, grapherPath)
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Mu_h plot: %v", err)
 	}

@@ -69,6 +69,10 @@ func MultiDim(fn DiffSystem, start vec.Vector, epsAbs, epsRel float64) (vec.Vect
 		return nil, fmt.Errorf("error in solve.MultiDim: %v\n", err_str)
 	}
 	solution := VecFromGSL(csolution)
+	val, solveErr := fn.F(solution)
+	if solveErr != nil || val.AbsMax() > epsAbs {
+		return nil, fmt.Errorf("solution is inaccurate; absolute error = %v", val)
+	}
 	C.gsl_vector_free(csolution)
 	C.gsl_vector_free(cstart)
 	return solution, nil
