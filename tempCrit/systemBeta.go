@@ -54,7 +54,7 @@ func X2(env *tempAll.Environment) (float64, error) {
 	return x2, nil
 }
 
-// Equivalent to X2(); for use with graphing functions
+// Equivalent to X2(); for use as YFunc in a plots.GraphVars
 func GetX2(data interface{}) float64 {
 	env := data.(tempAll.Environment)
 	X2, err := X2(&env)

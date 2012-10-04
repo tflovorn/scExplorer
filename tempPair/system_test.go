@@ -9,7 +9,6 @@ import (
 )
 import (
 	"../plots"
-	"../solve"
 	"../tempAll"
 )
 
@@ -24,29 +23,26 @@ func TestSolvePairTempSystem(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	system, start := PairTempSystem(env)
-	epsabs, epsrel := 1e-9, 1e-9
-	solution, err := solve.MultiDim(system, start, epsabs, epsrel)
-	if err != nil {
-		t.Fatal(err)
-	}
+	eps := 1e-9
+	solution, err := PairTempSolve(env, eps, eps)
 	// MultiDim should leave env in solved state
 	if solution[0] != env.D1 || solution[1] != env.Mu_h || solution[2] != env.Beta {
 		t.Fatalf("Env fails to match solution")
 	}
 	// the solution we got should give 0 error within tolerances
+	system, _ := PairTempSystem(env)
 	solutionAbsErr, err := system.F(solution)
 	if err != nil {
 		t.Fatalf("got error collecting erorrs post-solution")
 	}
 	for i := 0; i < len(solutionAbsErr); i++ {
-		if math.Abs(solutionAbsErr[i]) > epsabs {
+		if math.Abs(solutionAbsErr[i]) > eps {
 			t.Fatalf("error in pair temp system too large; solution = %v; error[%d] = %v", solution, i, solutionAbsErr[i])
 		}
 	}
 	// the solution should be the expected one
 	for i := 0; i < 3; i++ {
-		if math.Abs(solution[i]-expected[i]) > epsabs {
+		if math.Abs(solution[i]-expected[i]) > eps {
 			t.Fatalf("unexpected solution; got %v and expected %v", solution, expected)
 		}
 	}
@@ -82,9 +78,12 @@ func TestPlotTpVsX(t *testing.T) {
 			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.001, 0.05, 0.05}, []float64{0.01, 0.1, 0.1})
 		}
 	}
+
+	eps := 1e-9
+	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, PairTempSolve)
+
 	vars := plots.GraphVars{"X", "", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, tempAll.GetTemp}
 	fileLabel := "deleteme.system_tp_x_data"
-	plotEnvs, _ := tempAll.MultiSolve(envs, 1e-9, 1e-9, PairTempSystem)
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_p$"}

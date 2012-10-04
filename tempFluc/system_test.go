@@ -10,7 +10,6 @@ import (
 	"../plots"
 	"../tempAll"
 	"../tempCrit"
-	"../tempPair"
 )
 
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
@@ -43,16 +42,9 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{20, 2, 2, 4}, []float64{0.0, 0.05, 0.05, 0.025}, []float64{-1.0, 0.1, 0.1, 0.1})
 	}
 
-	eps := 1e-6
-	// Beta should be near pair beta
-	_, _ = tempAll.MultiSolve(envs, eps, eps, tempPair.PairTempSystem)
-	for _, env := range envs {
-		env.Beta += 0.1
-	}
-	// better omega(q) fit if we solve for D1/Mu first
-	_, _ = tempAll.MultiSolve(envs, eps, eps, FlucTempD1MuSystem)
 	// solve the full system
-	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, FlucTempFullSystem)
+	eps := 1e-6
+	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
 
 	// X2 vs Mu_b plots
 	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp", "X"}, []string{"t_z", "t_h^{\\prime}", "x"}, tempCrit.GetX2}
@@ -101,15 +93,7 @@ func TestPlotX2Collapse(t *testing.T) {
 	envs := defaultEnv.MultiSplit([]string{"Mu_b"}, []int{20}, []float64{-0.75}, []float64{-0.9})
 
 	eps := 1e-6
-	// Beta should be near pair beta
-	_, _ = tempAll.MultiSolve(envs, eps, eps, tempPair.PairTempSystem)
-	for _, env := range envs {
-		env.Beta += 0.1
-	}
-	// better omega(q) fit if we solve for D1/Mu first
-	_, _ = tempAll.MultiSolve(envs, eps, eps, FlucTempD1MuSystem)
-	// solve the full system
-	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, FlucTempFullSystem)
+	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
 
 	// X2 vs Mu_b plots
 	vars := plots.GraphVars{"Mu_b", "", []string{"Tz"}, []string{"t_z"}, tempCrit.GetX2}

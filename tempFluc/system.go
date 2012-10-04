@@ -5,6 +5,7 @@ import (
 	"../tempAll"
 	"../tempCrit"
 	"../tempPair"
+	vec "../vector"
 )
 
 // For use with solve.MultiDim:
@@ -27,4 +28,29 @@ func FlucTempFullSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) 
 	system := solve.Combine([]solve.Diffable{diffD1, diffMu_h, diffBeta})
 	start := []float64{env.D1, env.Mu_h, env.Beta}
 	return system, start
+}
+
+// Looks just like CritTempSolve
+func FlucTempSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	// our guess for beta should be a bit above Beta_p
+	pairSystem, pairStart := tempPair.PairTempSystem(env)
+	_, err := solve.MultiDim(pairSystem, pairStart, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	env.Beta += 0.1
+	// solve crit temp system for reasonable values of Mu and D1 first
+	system, start := FlucTempD1MuSystem(env)
+	_, err = solve.MultiDim(system, start, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	// solve the full crit temp system
+	system, start = FlucTempFullSystem(env)
+	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	return solution, nil
+
 }

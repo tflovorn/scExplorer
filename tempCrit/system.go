@@ -47,3 +47,27 @@ func CritTempFullSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) 
 	start := []float64{env.D1, env.Mu_h, env.Beta}
 	return system, start
 }
+
+// Solve the environment under the conditions at T = T_c.
+func CritTempSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	// our guess for beta should be a bit above Beta_p
+	pairSystem, pairStart := tempPair.PairTempSystem(env)
+	_, err := solve.MultiDim(pairSystem, pairStart, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	env.Beta += 0.1
+	// solve crit temp system for reasonable values of Mu and D1 first
+	system, start := CritTempD1MuSystem(env)
+	_, err = solve.MultiDim(system, start, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	// solve the full crit temp system
+	system, start = CritTempFullSystem(env)
+	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	return solution, nil
+}

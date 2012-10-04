@@ -9,9 +9,7 @@ import (
 )
 import (
 	"../plots"
-	"../solve"
 	"../tempAll"
-	"../tempPair"
 )
 
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
@@ -21,50 +19,34 @@ var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
 func TestSolveCritTempSystem(t *testing.T) {
-	expected := []float64{0.006080304981042737, -0.5811670351695094, 3.7616266303862695}
+	expected := []float64{0.006080247734355484, -0.5811672165041258, 3.7616200554351473}
 	env, err := ctDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	env.PointsPerSide = 32
-	// our guess for beta should be a bit above Beta_p
-	epsabsPair, epsrelPair := 1e-9, 1e-9
-	pairSystem, pairStart := tempPair.PairTempSystem(env)
-	_, err = solve.MultiDim(pairSystem, pairStart, epsabsPair, epsrelPair)
-	if err != nil {
-		t.Fatal(err)
-	}
-	env.Beta += 1.5
-	epsabs, epsrel := 1e-6, 1e-6
-	// solve crit temp system for reasonable values of Mu and D1 first
-	system, start := CritTempD1MuSystem(env)
-	solution, err := solve.MultiDim(system, start, epsabs, epsrel)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// solve the full crit temp system
-	system, start = CritTempFullSystem(env)
-	solution, err = solve.MultiDim(system, start, epsabs, epsrel)
+	eps := 1e-6
+	solution, err := CritTempSolve(env, eps, eps)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// MultiDim should leave env in solved state
-	if math.Abs(solution[0]-env.D1) > epsabs || math.Abs(solution[1]-env.Mu_h) > epsabs || math.Abs(solution[2]-env.Beta) > epsabs {
+	if math.Abs(solution[0]-env.D1) > eps || math.Abs(solution[1]-env.Mu_h) > eps || math.Abs(solution[2]-env.Beta) > eps {
 		t.Fatalf("Env fails to match solution; env = %v; solution = %v", env, solution)
 	}
 	// the solution we got should give 0 error within tolerances
+	system, _ := CritTempFullSystem(env)
 	solutionAbsErr, err := system.F(solution)
 	if err != nil {
 		t.Fatalf("got error collecting erorrs post-solution")
 	}
 	for i := 0; i < len(solutionAbsErr); i++ {
-		if math.Abs(solutionAbsErr[i]) > epsabs {
+		if math.Abs(solutionAbsErr[i]) > eps {
 			t.Fatalf("error in pair temp system too large; solution = %v; error[%d] = %v", solution, i, solutionAbsErr[i])
 		}
 	}
 	// the solution should be the expected one
 	for i := 0; i < 3; i++ {
-		if math.Abs(solution[i]-expected[i]) > epsabs {
+		if math.Abs(solution[i]-expected[i]) > eps {
 			t.Fatalf("unexpected solution; got %v and expected %v", solution, expected)
 		}
 	}
@@ -93,7 +75,7 @@ func TestPlotTcVsX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.05, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{4, 1, 1}, []float64{0.025, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
 	if *longPlot {
 		if !*tinyX {
 			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.01, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
@@ -105,15 +87,8 @@ func TestPlotTcVsX(t *testing.T) {
 	fileLabel := "deleteme.system_tc_x_data"
 
 	eps := 1e-6
-	// Beta should be above pair beta
-	_, _ = tempAll.MultiSolve(envs, eps, eps, tempPair.PairTempSystem)
-	for _, env := range envs {
-		env.Beta += 0.1
-	}
-	// better omega(q) fit if we solve for D1/Mu first
-	_, _ = tempAll.MultiSolve(envs, eps, eps, CritTempD1MuSystem)
 	// solve the full system
-	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, CritTempFullSystem)
+	plotEnvs, _ := tempAll.MultiSolve(envs, eps, eps, CritTempSolve)
 
 	// Tc vs x plots
 	wd, _ := os.Getwd()
