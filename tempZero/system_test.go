@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"math"
 	"os"
 	"testing"
 )
@@ -20,35 +19,15 @@ var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 // Solve a zero-temperature system for the appropriate values of (D1, Mu_h, F0)
 func TestSolveZeroTempSystem(t *testing.T) {
 	expected := []float64{0.055910261243245905, -0.27877890663573984, 0.13007419282082078}
+	vars := []string{"D1", "Mu_h", "F0"}
+	eps := 1e-9
 	env, err := ztDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	eps := 1e-9
-	solution, err := ZeroTempSolve(env, eps, eps)
+	err = tempAll.VerifySolution(env, ZeroTempSolve, ZeroTempSystem, vars, eps, eps, expected)
 	if err != nil {
 		t.Fatal(err)
-	}
-	// solver should leave env in solved state
-	if solution[0] != env.D1 || solution[1] != env.Mu_h || solution[2] != env.F0 {
-		t.Fatalf("Env fails to match solution; expected %v; got %v", solution, env)
-	}
-	// the solution we got should give 0 error within tolerances
-	system, _ := ZeroTempSystem(env)
-	solutionAbsErr, err := system.F(solution)
-	if err != nil {
-		t.Fatalf("got error collecting erorrs post-solution")
-	}
-	for i := 0; i < len(solutionAbsErr); i++ {
-		if math.Abs(solutionAbsErr[i]) > eps {
-			t.Fatalf("error in T=0 system too large; solution = %v; error[%d] = %v", solution, i, solutionAbsErr[i])
-		}
-	}
-	// the solution should be the expected one
-	for i := 0; i < 3; i++ {
-		if math.Abs(solution[i]-expected[i]) > eps {
-			t.Fatalf("unexpected solution; got %v and expected %v", solution, expected)
-		}
 	}
 }
 

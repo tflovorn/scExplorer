@@ -3,7 +3,6 @@ package tempCrit
 import (
 	"flag"
 	"io/ioutil"
-	"math"
 	"os"
 	"testing"
 )
@@ -20,37 +19,16 @@ var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")
 // (D1,Mu_h,Beta)
 func TestSolveCritTempSystem(t *testing.T) {
 	expected := []float64{0.006080247734355484, -0.5811672165041258, 3.7616200554351473}
+	vars := []string{"D1", "Mu_h", "Beta"}
+	eps := 1e-6
 	env, err := ctDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	eps := 1e-6
-	solution, err := CritTempSolve(env, eps, eps)
+	err = tempAll.VerifySolution(env, CritTempSolve, CritTempFullSystem, vars, eps, eps, expected)
 	if err != nil {
 		t.Fatal(err)
 	}
-	// MultiDim should leave env in solved state
-	if math.Abs(solution[0]-env.D1) > eps || math.Abs(solution[1]-env.Mu_h) > eps || math.Abs(solution[2]-env.Beta) > eps {
-		t.Fatalf("Env fails to match solution; env = %v; solution = %v", env, solution)
-	}
-	// the solution we got should give 0 error within tolerances
-	system, _ := CritTempFullSystem(env)
-	solutionAbsErr, err := system.F(solution)
-	if err != nil {
-		t.Fatalf("got error collecting erorrs post-solution")
-	}
-	for i := 0; i < len(solutionAbsErr); i++ {
-		if math.Abs(solutionAbsErr[i]) > eps {
-			t.Fatalf("error in pair temp system too large; solution = %v; error[%d] = %v", solution, i, solutionAbsErr[i])
-		}
-	}
-	// the solution should be the expected one
-	for i := 0; i < 3; i++ {
-		if math.Abs(solution[i]-expected[i]) > eps {
-			t.Fatalf("unexpected solution; got %v and expected %v", solution, expected)
-		}
-	}
-
 }
 
 func ctDefaultEnv() (*tempAll.Environment, error) {

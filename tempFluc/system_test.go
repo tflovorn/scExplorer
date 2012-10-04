@@ -16,6 +16,20 @@ var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var collapsePlot = flag.Bool("collapsePlot", false, "Run collapsing x2 version of plot tests")
 
+func TestSolveFlucSystem(t *testing.T) {
+	expected := []float64{0.01528254341161195, -0.5836650552913586, 2.8046166250459126}
+	vars := []string{"D1", "Mu_h", "Beta"}
+	eps := 1e-6
+	env, err := flucDefaultEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = tempAll.VerifySolution(env, FlucTempSolve, FlucTempFullSystem, vars, eps, eps, expected)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func flucDefaultEnv() (*tempAll.Environment, error) {
 	data, err := ioutil.ReadFile("system_test_env.json")
 	if err != nil {

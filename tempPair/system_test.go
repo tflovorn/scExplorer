@@ -3,7 +3,6 @@ package tempPair
 import (
 	"flag"
 	"io/ioutil"
-	"math"
 	"os"
 	"testing"
 )
@@ -19,32 +18,15 @@ var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")
 // Solve a pair-temperature system for the appropriate values of (D1,Mu_h,Beta)
 func TestSolvePairTempSystem(t *testing.T) {
 	expected := []float64{0.04287358467304004, -0.3927161711585197, 2.2902594921928188}
+	vars := []string{"D1", "Mu_h", "Beta"}
+	eps := 1e-9
 	env, err := ptDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	eps := 1e-9
-	solution, err := PairTempSolve(env, eps, eps)
-	// MultiDim should leave env in solved state
-	if solution[0] != env.D1 || solution[1] != env.Mu_h || solution[2] != env.Beta {
-		t.Fatalf("Env fails to match solution")
-	}
-	// the solution we got should give 0 error within tolerances
-	system, _ := PairTempSystem(env)
-	solutionAbsErr, err := system.F(solution)
+	err = tempAll.VerifySolution(env, PairTempSolve, PairTempSystem, vars, eps, eps, expected)
 	if err != nil {
-		t.Fatalf("got error collecting erorrs post-solution")
-	}
-	for i := 0; i < len(solutionAbsErr); i++ {
-		if math.Abs(solutionAbsErr[i]) > eps {
-			t.Fatalf("error in pair temp system too large; solution = %v; error[%d] = %v", solution, i, solutionAbsErr[i])
-		}
-	}
-	// the solution should be the expected one
-	for i := 0; i < 3; i++ {
-		if math.Abs(solution[i]-expected[i]) > eps {
-			t.Fatalf("unexpected solution; got %v and expected %v", solution, expected)
-		}
+		t.Fatal(err)
 	}
 }
 
