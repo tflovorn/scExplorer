@@ -42,7 +42,7 @@ func MultiPlot(data []interface{}, vars GraphVars, graphParams map[string]string
 		graphParams[FILE_KEY] = basePath + extraPath
 
 		series, primaryVals := ExtractSeries(data, []string{vars.X, vars.Y, primaryNames[i]}, secondaries[i], vars.YFunc)
-		sp := MakeSeriesParams(primaryLabels[i], "%.2f", primaryVals, DEFAULT_STYLES)
+		sp := MakeSeriesParams(primaryLabels[i], "%.3f", primaryVals, DEFAULT_STYLES)
 		err := PlotMPL(series, graphParams, sp, grapherPath)
 		if err != nil {
 			return err
