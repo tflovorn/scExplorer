@@ -17,7 +17,7 @@ var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var collapsePlot = flag.Bool("collapsePlot", false, "Run collapsing x2 version of plot tests")
 
 func TestSolveFlucSystem(t *testing.T) {
-	expected := []float64{0.01528254341161195, -0.5836650552913586, 2.8046166250459126}
+	expected := []float64{0.016408369320337683, -0.577887582817862, 2.7507795016260976}
 	vars := []string{"D1", "Mu_h", "Beta"}
 	eps := 1e-6
 	env, err := flucDefaultEnv()

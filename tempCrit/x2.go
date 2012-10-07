@@ -43,6 +43,14 @@ func nu(env *tempAll.Environment) (float64, error) {
 		fmt.Printf("ymax <= 0.0: Mu_h = %f; Mu_b = %f\n", env.Mu_h, env.Mu_b)
 		return 0.0, nil
 	}
+	upper_a := math.Sqrt(ymax / (2.0 * env.Beta * a))
+	if upper_a > math.Pi {
+		ymax = 2.0 * env.Beta * a * math.Pow(math.Pi, 2.0)
+	}
+	upper_b := math.Sqrt(ymax / (env.Beta * b))
+	if upper_b > math.Pi {
+		ymax = env.Beta * b * math.Pow(math.Pi, 2.0)
+	}
 	ymax = math.Min(ymax, 100.0) // exclude large ymax for convergence
 	t := 1e-7
 	integral, abserr, err := integrate.Qags(integrand, 0.0, ymax, t, t)
