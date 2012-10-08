@@ -29,12 +29,15 @@ func LoadEnvCache(cachePath string) ([]interface{}, []error, error) {
 	ifErrs := cache["errs"].([]interface{})
 	errs := make([]error, len(ifErrs))
 	for i, err := range ifErrs {
-		errs[i] = errors.New(err.(string))
+		strErr := err.(string)
+		if strErr != "" {
+			errs[i] = errors.New(err.(string))
+		}
 	}
 	return data, errs, nil
 }
 
-func SaveEnvCache(cachePath string, data []*Environment, errs []error) error {
+func SaveEnvCache(cachePath string, data []interface{}, errs []error) error {
 	cache := make(map[string]interface{})
 	cache["data"] = data
 	errStrings := make([]string, len(errs))

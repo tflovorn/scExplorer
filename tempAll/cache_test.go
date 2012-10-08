@@ -9,14 +9,16 @@ import (
 func TestSaveAndLoadCache(t *testing.T) {
 	wd, _ := os.Getwd()
 	cachePath := wd + "/deleteme.cache_test"
-	data := make([]*Environment, 1)
-	errs := make([]error, 1)
+	data := make([]interface{}, 2)
+	errs := make([]error, 2)
 	env, err := envDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
 	data[0] = env
+	data[1] = env
 	errs[0] = errors.New("cache test error")
+	errs[1] = nil
 	err = SaveEnvCache(cachePath, data, errs)
 	if err != nil {
 		t.Fatal(err)
@@ -25,7 +27,7 @@ func TestSaveAndLoadCache(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if loadedErrs[0].Error() != "cache test error" {
+	if loadedErrs[0].Error() != "cache test error" || loadedErrs[1] != nil {
 		t.Fatalf("incorrect error loaded")
 	}
 	loadedEnv := loadedData[0].(*Environment)
