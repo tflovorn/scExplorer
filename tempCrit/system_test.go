@@ -15,17 +15,18 @@ var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")
 
+var defaultEnvSolution = []float64{0.006313529847651742, -0.5799465112706572, 3.7274821095549844}
+
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
 func TestSolveCritTempSystem(t *testing.T) {
-	expected := []float64{0.006313529847651742, -0.5799465112706572, 3.7274821095549844}
 	vars := []string{"D1", "Mu_h", "Beta"}
 	eps := 1e-6
 	env, err := ctDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = tempAll.VerifySolution(env, CritTempSolve, CritTempFullSystem, vars, eps, eps, expected)
+	err = tempAll.VerifySolution(env, CritTempSolve, CritTempFullSystem, vars, eps, eps, defaultEnvSolution)
 	if err != nil {
 		t.Fatal(err)
 	}
