@@ -75,8 +75,6 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Printf("%v\n", plotEnvs)
-		fmt.Printf("%v\n", errs)
 	} else {
 		envs, err := flucDefaultEnvSet(*longPlot)
 		if err != nil {

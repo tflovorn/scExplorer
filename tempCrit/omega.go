@@ -19,7 +19,7 @@ type OmegaFunc func(*tempAll.Environment, vec.Vector) (float64, error)
 // The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
 // we expect ax == ay.
 func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
-	points := omegaCoeffsPoints()
+	points := omegaCoeffsPoints(3)
 	// evaluate omega_+(k) at each point
 	omegas := make([]float64, len(points))
 	X := make([]vec.Vector, len(points))
@@ -39,7 +39,7 @@ func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
 }
 
 // Return a list of all k points surveyed by OmegaCoeffs().
-func omegaCoeffsPoints() []vec.Vector {
+func omegaCoeffsPoints(numRadial int) []vec.Vector {
 	sk := 0.01 // small value of k
 	ssk := sk / math.Sqrt(2)
 	// unique point
@@ -53,10 +53,9 @@ func omegaCoeffsPoints() []vec.Vector {
 	yzb := []float64{0.0, ssk, ssk}
 	basis := []vec.Vector{xb, yb, zb, xyb, xzb, yzb}
 	// create points from basis
-	numRadialPoints := 3
 	points := []vec.Vector{zero}
 	for _, v := range basis {
-		for i := 1; i <= numRadialPoints; i++ {
+		for i := 1; i <= numRadial; i++ {
 			points = append(points, v.Mul(float64(i)))
 		}
 	}
