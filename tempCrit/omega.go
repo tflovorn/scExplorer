@@ -25,7 +25,7 @@ func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
 	X := make([]vec.Vector, len(points))
 	for i, q := range points {
 		var err error
-		omegas[i], err = OmegaPlus(env, q)
+		omegas[i], err = fn(env, q)
 		if err != nil {
 			return nil, err
 		}
@@ -66,13 +66,15 @@ func omegaCoeffsPoints() []vec.Vector {
 // Calculate omega_+(k) by finding zeros of 1 - lambda_+
 func OmegaPlus(env *tempAll.Environment, k vec.Vector) (float64, error) {
 	lp := lambdaPlusFn(env, k)
-	return solve.OneDimDiffRoot(lp, 0.01, 1e-9, 1e-9)
+	root, err := solve.OneDimDiffRoot(lp, 0.01, 1e-9, 1e-9)
+	return root, err
 }
 
 // Calculate omega_-(k) by finding zeros of 1 - lambda_-
 func OmegaMinus(env *tempAll.Environment, k vec.Vector) (float64, error) {
 	lm := lambdaMinusFn(env, k)
-	return solve.OneDimDiffRoot(lm, 0.01, 1e-9, 1e-9)
+	root, err := solve.OneDimDiffRoot(lm, 0.01, 1e-9, 1e-9)
+	return root, err
 }
 
 // Create a function which calculates 1 - lambda_+(k, omega) with fixed k
@@ -87,7 +89,8 @@ func lambdaPlusFn(env *tempAll.Environment, k vec.Vector) func(float64) (float64
 func lambdaMinusFn(env *tempAll.Environment, k vec.Vector) func(float64) (float64, error) {
 	return func(omega float64) (float64, error) {
 		u, v := lambdaParts(env, k, omega)
-		return 1.0 - (u - v), nil
+		lm := 1.0 - (u - v)
+		return lm, nil
 	}
 }
 
