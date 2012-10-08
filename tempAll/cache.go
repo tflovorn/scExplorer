@@ -24,7 +24,7 @@ func LoadEnvCache(cachePath string) ([]interface{}, []error, error) {
 		env := new(Environment)
 		md := d.(map[string]interface{})
 		serialize.CopyValues(&md, env)
-		data[i] = env
+		data[i] = *env
 	}
 	ifErrs := cache["errs"].([]interface{})
 	errs := make([]error, len(ifErrs))
