@@ -30,7 +30,7 @@ func TestSaveAndLoadCache(t *testing.T) {
 	if loadedErrs[0].Error() != "cache test error" || loadedErrs[1] != nil {
 		t.Fatalf("incorrect error loaded")
 	}
-	loadedEnv := loadedData[0].(*Environment)
+	loadedEnv := loadedData[0].(Environment)
 	if loadedEnv.X != env.X || loadedEnv.Alpha != env.Alpha {
 		t.Fatalf("incorrect Environment loaded")
 	}
