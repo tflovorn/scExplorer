@@ -12,7 +12,7 @@ func CopyFromJSON(jsonData string, object interface{}) error {
 	if err != nil {
 		return err
 	}
-	copyValues(jsonObject, object)
+	CopyValues(jsonObject, object)
 	return nil
 }
 
@@ -46,7 +46,7 @@ func MakeJSON(object interface{}) (string, error) {
 
 // Look at each key in jsonObject and copy thats key's value into the
 // corresponding field in object.
-func copyValues(jsonObject *map[string]interface{}, object interface{}) {
+func CopyValues(jsonObject *map[string]interface{}, object interface{}) {
 	// dereference the object pointer
 	objectValue := reflect.Indirect(reflect.ValueOf(object))
 	// iterate over all fields in the JSON object

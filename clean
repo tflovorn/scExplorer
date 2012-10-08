@@ -4,6 +4,7 @@
 # http://stackoverflow.com/questions/5960567/suppress-the-output-to-screen-in-shell-script
 {
 rm plots/deleteme*
+rm tempAll/deleteme*
 rm tempZero/deleteme*
 rm tempPair/deleteme*
 rm tempCrit/deleteme*
