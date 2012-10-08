@@ -1,6 +1,7 @@
 package plots
 
 import (
+	"math"
 	"reflect"
 	"sort"
 )
@@ -70,9 +71,19 @@ func ExtractSeries(dataSet []interface{}, errs []error, varNames []string, const
 		x := val.FieldByName(varNames[0]).Float()
 		var y float64
 		if varNames[1] != "" {
-			y = val.FieldByName(varNames[1]).Float()
+			yval := val.FieldByName(varNames[1])
+			if yval.IsValid() {
+				y = yval.Float()
+			} else {
+				y = 0.0
+			}
 		} else {
 			y = YFunc(data)
+		}
+		if math.IsNaN(y) {
+			// replace with default values
+			// might want to be smarter about this
+			y = 0.0
 		}
 		z := val.FieldByName(varNames[2]).Float()
 		zmap, ok := maps[z]
