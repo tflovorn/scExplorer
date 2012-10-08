@@ -13,25 +13,21 @@ func ZeroVector(dimension int) Vector {
 	return v
 }
 
-// Create a new vector equal to v + u.
-func (v Vector) Add(u Vector) Vector {
-	if len(v) != len(u) {
+// Set u = u + v
+func (v Vector) Add(u *Vector) {
+	if len(v) != len(*u) {
 		panic("cannot add vectors of different lengths")
 	}
-	r := ZeroVector(len(v))
 	for i := 0; i < len(v); i++ {
-		r[i] = v[i] + u[i]
+		(*u)[i] = v[i] + (*u)[i]
 	}
-	return r
 }
 
-// Return a new vector created by multiplying each element of `v` by `x`.
-func (v Vector) Mul(x float64) Vector {
-	r := ZeroVector(len(v))
+// Set u = x * v
+func (v Vector) Mul(x float64, u *Vector) {
 	for i := 0; i < len(v); i++ {
-		r[i] = x * v[i]
+		(*u)[i] = x * v[i]
 	}
-	return r
 }
 
 // Check if v is equal to u.

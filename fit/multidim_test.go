@@ -70,7 +70,10 @@ func parabolaTestPoints() []vec.Vector {
 	points := []vec.Vector{zero}
 	for _, v := range basis {
 		for i := 1; i <= numRadialPoints; i++ {
-			points = append(points, v.Mul(float64(i)))
+			pt := vec.ZeroVector(len(v))
+			copy(pt, v)
+			pt.Mul(float64(i), &pt)
+			points = append(points, pt)
 		}
 	}
 	return points

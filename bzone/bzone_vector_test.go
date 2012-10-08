@@ -7,8 +7,9 @@ import (
 import vec "../vector"
 
 func TestBzVectorAvgOnes(t *testing.T) {
-	fn := func(k vec.Vector) vec.Vector {
-		return []float64{1.0, 2.0}
+	fn := func(k vec.Vector, out *vec.Vector) {
+		(*out)[0] = 1.0
+		(*out)[1] = 2.0
 	}
 	N := 8
 	avg := VectorAvg(N, 2, 2, fn)
@@ -19,8 +20,9 @@ func TestBzVectorAvgOnes(t *testing.T) {
 }
 
 func TestBzVectorAvgSin(t *testing.T) {
-	fn := func(k vec.Vector) vec.Vector {
-		return []float64{math.Sin(k[0]), math.Sin(k[1])}
+	fn := func(k vec.Vector, out *vec.Vector) {
+		(*out)[0] = math.Sin(k[0])
+		(*out)[1] = math.Sin(k[1])
 	}
 	N := 16
 	avg := VectorAvg(N, 2, 2, fn)

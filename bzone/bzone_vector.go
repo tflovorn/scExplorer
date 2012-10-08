@@ -3,8 +3,8 @@ package bzone
 import "math"
 import vec "../vector"
 
-type BzVectorFunc func(k vec.Vector) vec.Vector
-type bzVectorConsumer func(next, total vec.Vector) vec.Vector
+type BzVectorFunc func(k vec.Vector, out *vec.Vector)
+type bzVectorConsumer func(next vec.Vector, total *vec.Vector)
 
 func VectorAvg(pointsPerSide, gridDim, fnDim int, fn BzVectorFunc) vec.Vector {
 	N := math.Pow(float64(pointsPerSide), float64(gridDim))
@@ -18,26 +18,27 @@ func VectorAvg(pointsPerSide, gridDim, fnDim int, fn BzVectorFunc) vec.Vector {
 
 func VectorSum(pointsPerSide, gridDim, fnDim int, fn BzVectorFunc) vec.Vector {
 	c := vec.ZeroVector(fnDim)
-	add := func(next, total vec.Vector) vec.Vector {
-		r := vec.ZeroVector(fnDim)
+	add := func(next vec.Vector, total *vec.Vector) {
 		for i := 0; i < fnDim; i++ {
+			x := (*total)[i]
 			y := next[i] - c[i]
-			t := total[i] + y
-			c[i] = (t - total[i]) - y
-			r[i] = t
+			t := x + y
+			c[i] = (t - x) - y
+			(*total)[i] = t
 		}
-		return r
 	}
 	start := vec.ZeroVector(fnDim)
-	return bzVectorReduce(add, start, pointsPerSide, gridDim, fn)
+	return bzVectorReduce(add, start, pointsPerSide, gridDim, fnDim, fn)
 }
 
-func bzVectorReduce(combine bzVectorConsumer, start vec.Vector, L, d int, fn BzVectorFunc) vec.Vector {
+func bzVectorReduce(combine bzVectorConsumer, start vec.Vector, L, d, fnDim int, fn BzVectorFunc) vec.Vector {
 	points := bzPoints(L, d)
 	total := start
+	out := vec.ZeroVector(fnDim)
 	for i := 0; i < len(points); i++ {
 		k := points[i]
-		total = combine(fn(k), total)
+		fn(k, &out)
+		combine(out, &total)
 	}
 	return total
 }
