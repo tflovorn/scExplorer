@@ -1,11 +1,9 @@
 package tempCrit
 
 import (
-	"fmt"
 	"math"
 )
 import (
-	"../integrate"
 	"../tempAll"
 )
 
@@ -34,31 +32,8 @@ func nu(env *tempAll.Environment) (float64, error) {
 	if err != nil {
 		return 0.0, err
 	}
-	a, b := cs[0], cs[2] // ignore produced value for ay and mu_b
 	integrand := func(y float64) float64 {
-		return math.Sqrt(y) / (math.Exp(y-env.Beta*env.Mu_b) - 1.0)
+		return 2.0 * math.Sqrt(y) / (math.Exp(y-env.Beta*env.Mu_b) - 1.0)
 	}
-	ymax := env.Beta * (-2.0*env.Mu_h + env.Mu_b)
-	if ymax <= 0.0 {
-		fmt.Printf("ymax <= 0.0: Mu_h = %f; Mu_b = %f\n", env.Mu_h, env.Mu_b)
-		return 0.0, nil
-	}
-	upper_a := math.Sqrt(ymax / (2.0 * env.Beta * a))
-	if upper_a > math.Pi {
-		ymax = 2.0 * env.Beta * a * math.Pow(math.Pi, 2.0)
-	}
-	upper_b := math.Sqrt(ymax / (env.Beta * b))
-	if upper_b > math.Pi {
-		ymax = env.Beta * b * math.Pow(math.Pi, 2.0)
-	}
-	ymax = math.Min(ymax, 100.0) // exclude large ymax for convergence
-	t := 1e-7
-	integral, abserr, err := integrate.Qags(integrand, 0.0, ymax, t, t)
-	if err != nil {
-		return 0.0, err
-	}
-	if math.Abs(abserr) > t*10 {
-		err = fmt.Errorf("nu integral too innaccurate (abserr = %e)", abserr)
-	}
-	return integral / (2.0 * math.Pow(math.Pi, 2.0) * a * math.Sqrt(b)), err
+	return OmegaIntegralY(env, cs, integrand)
 }
