@@ -46,7 +46,7 @@ func TestOmegaPlusFitAccuracy(t *testing.T) {
 	omegaApprox := func(k vec.Vector) float64 {
 		return oc[0]*k[0]*k[0] + oc[1]*k[1]*k[1] + oc[2]*k[2]*k[2] - oc[3]
 	}
-	testPoints := omegaCoeffsPoints(50)
+	testPoints := omegaCoeffsPoints(50, 1e-4)
 	for _, k := range testPoints {
 		omega, err := OmegaPlus(env, k)
 		if err != nil {

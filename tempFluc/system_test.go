@@ -24,7 +24,7 @@ func TestSolveFlucSystem(t *testing.T) {
 		return
 	}
 
-	expected := []float64{0.016408369320337683, -0.577887582817862, 2.7507795016260976}
+	expected := []float64{0.01641117207484104, -0.5778732097622065, 2.750651000225305}
 	vars := []string{"D1", "Mu_h", "Beta"}
 	eps := 1e-6
 	env, err := flucDefaultEnv()
@@ -35,6 +35,28 @@ func TestSolveFlucSystem(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestSolveFlucSystem_LargeMu_b(t *testing.T) {
+	// if we're plotting, don't care about this regression test
+	if *testPlot {
+		return
+	}
+
+	expected := []float64{0.03111888952733449, -0.7703427043601353, 1.6592097071488823}
+	vars := []string{"D1", "Mu_h", "Beta"}
+	eps := 1e-6
+	env, err := flucDefaultEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	env.Mu_b = -0.7
+	env.Tz = 0.05
+	err = tempAll.VerifySolution(env, FlucTempSolve, FlucTempFullSystem, vars, eps, eps, expected)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }
 
 func flucDefaultEnv() (*tempAll.Environment, error) {
@@ -55,7 +77,7 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 		return nil, err
 	}
 	if long {
-		return defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{20, 2, 2, 2}, []float64{0.0, 0.05, 0.05, 0.04}, []float64{-1.0, 0.1, 0.1, 0.08}), nil
+		return defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{20, 2, 2, 4}, []float64{0.0, 0.05, 0.05, 0.025}, []float64{-1.0, 0.1, 0.1, 0.1}), nil
 	}
 	return defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{0.0, 0.05, 0.1, 0.1}, []float64{-1.0, 0.1, 0.1, 0.1}), nil
 }

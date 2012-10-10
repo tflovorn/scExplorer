@@ -1,6 +1,7 @@
 package tempCrit
 
 import (
+	"fmt"
 	"math"
 )
 import (
@@ -19,28 +20,39 @@ type OmegaFunc func(*tempAll.Environment, vec.Vector) (float64, error)
 // The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
 // we expect ax == ay.
 func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
-	points := omegaCoeffsPoints(3)
-	// evaluate omega_+(k) at each point
-	omegas := make([]float64, len(points))
-	X := make([]vec.Vector, len(points))
-	for i, q := range points {
-		var err error
-		omegas[i], err = fn(env, q)
-		if err != nil {
-			return nil, err
-		}
-		X[i] = vec.ZeroVector(4)
-		X[i][0] = q[0] * q[0]
-		X[i][1] = q[1] * q[1]
-		X[i][2] = q[2] * q[2]
-		X[i][3] = -1
+	points := omegaCoeffsPoints(3, 1e-4)
+	fit, err := omegaFitHelper(env, fn, points)
+	if err != nil {
+		return nil, err
 	}
-	return fit.Linear(omegas, X), nil
+	return fit, nil
+}
+
+func omegaFitHelper(env *tempAll.Environment, fn OmegaFunc, points []vec.Vector) (vec.Vector, error) {
+	// evaluate omega_+(k) at each point
+	omegas := []float64{}
+	Xs := []vec.Vector{}
+	for _, q := range points {
+		omega, err := fn(env, q)
+		if err != nil {
+			continue
+		}
+		X := vec.ZeroVector(4)
+		X[0] = q[0] * q[0]
+		X[1] = q[1] * q[1]
+		X[2] = q[2] * q[2]
+		X[3] = -1
+		Xs = append(Xs, X)
+		omegas = append(omegas, omega)
+	}
+	if len(omegas) < 3 {
+		return nil, fmt.Errorf("not enough omega_+ values can be found")
+	}
+	return fit.Linear(omegas, Xs), nil
 }
 
 // Return a list of all k points surveyed by OmegaCoeffs().
-func omegaCoeffsPoints(numRadial int) []vec.Vector {
-	sk := 0.01 // small value of k
+func omegaCoeffsPoints(numRadial int, sk float64) []vec.Vector {
 	ssk := sk / math.Sqrt(2)
 	// unique point
 	zero := vec.ZeroVector(3)

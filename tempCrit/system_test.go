@@ -15,7 +15,7 @@ var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")
 
-var defaultEnvSolution = []float64{0.006313529847651742, -0.5799465112706572, 3.7274821095549844}
+var defaultEnvSolution = []float64{0.006316132112386478, -0.5799328990719926, 3.727109277361983}
 
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
