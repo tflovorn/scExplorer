@@ -7,12 +7,17 @@ import (
 	"../bzone"
 	"../solve"
 	"../tempAll"
+	"../tempPair"
 	vec "../vector"
 )
 
 func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 	F := func(v vec.Vector) (float64, error) {
 		env.Set(v, variables)
+		if -env.Mu_b > -2.0*env.Mu_h {
+			// when |Mu_b| is this large, no longer have pairs
+			return env.X - tempPair.X1(env), nil
+		}
 		L := env.PointsPerSide
 		lhs := 0.5 / (env.T0 + env.Tz)
 		rhs := bzone.Avg(L, 2, tempAll.WrapFunc(env, innerMu_h))
