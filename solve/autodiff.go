@@ -92,6 +92,15 @@ func Derivative(fn vec.FnDim0, v vec.Vector, i int, h, epsabs float64) (float64,
 	return float64(result), fmt.Errorf("Derivative exceeded maximum iterations\n")
 }
 
+// Derivative of `fn` at `x` to precision `espAbs`; use initial step size `h`
+func OneDimDerivative(fn Func1D, x, h, epsAbs float64) (float64, error) {
+	F := func(v vec.Vector) (float64, error) {
+		return fn(v[0])
+	}
+	xv := []float64{x}
+	return Derivative(F, xv, 0, h, epsAbs)
+}
+
 // Evaluate the go function contained in uservar at x.
 //export go_val
 func go_val(x C.double, uservar unsafe.Pointer) C.double {
