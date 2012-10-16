@@ -1,6 +1,7 @@
 package tempFluc
 
 import (
+	"fmt"
 	"math"
 )
 import (
@@ -12,18 +13,61 @@ import (
 
 type SpecificHeatEnv struct {
 	tempAll.Environment
-	SH_K1, SH_K2, SH_N1, SH_N2 float64
+	X2, SH_12 float64
 }
 
-func SpecificHeat_K1(env *tempAll.Environment) float64 {
+// Holon and pair specific heat per site.
+func SpecificHeat12(env *tempAll.Environment) (float64, error) {
+	xMu, err := dXdMu_h(env)
+	if err != nil {
+		return 0.0, err
+	}
+	fmt.Printf("xMu = %e;\n", xMu)
+	MuT, err := dMu_hdT(env)
+	if err != nil {
+		return 0.0, err
+	}
+	fmt.Printf("MuT = %e;\n", MuT)
+	varyMu := (env.X + env.Mu_h*xMu) * MuT
+	K12, err := specificHeat_K12(env)
+	if err != nil {
+		return 0.0, err
+	}
+	xT, err := dXdT(env)
+	if err != nil {
+		return 0.0, err
+	}
+	fmt.Printf("xT = %e;\n", xT)
+	constMu := K12 + env.Mu_h*xT
+	return varyMu + constMu, nil
+}
+
+// Holon and pair specific heat per site; constant x, <K>-dependant part.
+func specificHeat_K12(env *tempAll.Environment) (float64, error) {
+	oc, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
+	if err != nil {
+		return 0.0, err
+	}
+	K2, err := specificHeat_K2_Integral(env, oc)
+	if err != nil {
+		return 0.0, err
+	}
+	return specificHeat_K1(env) + K2, nil
+}
+
+// Holon specific heat per site from <K>.
+// Excludes constant term cancelled by K2.
+func specificHeat_K1(env *tempAll.Environment) float64 {
 	inner := func(k vec.Vector) float64 {
 		a1 := 1.0 + math.Exp(-env.Beta*env.Xi_h(k))
 		return math.Log(a1)
 	}
-	return bzone.Sum(env.PointsPerSide, 3, inner)
+	return bzone.Avg(env.PointsPerSide, 3, inner)
 }
 
-func SpecificHeat_K2_FromSum(env *tempAll.Environment) float64 {
+// Pair specific heat per site from <K>.
+// Excludes constant term cancelled by K1.
+func specificHeat_K2_FromSum(env *tempAll.Environment) float64 {
 	inner := func(k vec.Vector) float64 {
 		omega, err := tempCrit.OmegaPlus(env, k)
 		// omega cutoff ~ beginning of holon continuum
@@ -35,51 +79,13 @@ func SpecificHeat_K2_FromSum(env *tempAll.Environment) float64 {
 		a2 := 1.0 - math.Exp(-env.Beta*omega)
 		return -math.Log(a2)
 	}
-	return bzone.Sum(env.PointsPerSide, 3, inner)
-
+	return bzone.Avg(env.PointsPerSide, 3, inner)
 }
 
-func SpecificHeat_K2_Integral(env *tempAll.Environment, omegaCoeffs []float64) (float64, error) {
+// Pair specific heat from <K> (fast version). Excludes constant term.
+func specificHeat_K2_Integral(env *tempAll.Environment, omegaCoeffs []float64) (float64, error) {
 	integrand := func(y float64) float64 {
 		return -math.Sqrt(y) * math.Log(1.0-math.Exp(-y+env.Beta*env.Mu_b)) / math.Pow(env.Beta, 1.5)
-	}
-	return tempCrit.OmegaIntegralY(env, omegaCoeffs, integrand)
-}
-
-func SpecificHeat_N1(env *tempAll.Environment) float64 {
-	inner := func(k vec.Vector) float64 {
-		bx := env.Beta * env.Xi_h(k)
-		f1 := 1.0 / (math.Exp(bx) + 1.0)
-		a1 := env.Beta * f1 * (1.0 + f1*(1.0+(bx+1.0)*math.Exp(bx)))
-		return env.Mu_h * a1
-	}
-	return bzone.Sum(env.PointsPerSide, 3, inner)
-}
-
-func SpecificHeat_N2_FromSum(env *tempAll.Environment) float64 {
-	inner := func(k vec.Vector) float64 {
-		omega, err := tempCrit.OmegaPlus(env, k)
-		// omega cutoff ~ beginning of holon continuum
-		if err != nil || omega > -2.0*env.Mu_h {
-			// only holons contributing
-			return 0.0
-		}
-		// holons + pairs
-		bo := env.Beta * omega
-		n2 := 1.0 / (math.Exp(bo))
-		a2 := env.Beta * n2 * (1.0 + n2*((bo+1.0)*math.Exp(bo)-1.0))
-		return env.Mu_b * a2
-	}
-	return bzone.Sum(env.PointsPerSide, 3, inner)
-}
-
-func SpecificHeat_N2_Integral(env *tempAll.Environment, omegaCoeffs []float64) (float64, error) {
-	integrand := func(y float64) float64 {
-		coeff := env.Mu_b / math.Pow(env.Beta, 0.5)
-		x := math.Exp(y - env.Beta*env.Mu_b)
-		ix := 1.0 / (x - 1.0)
-		inner := ix * (1.0 + ((y-env.Beta*env.Mu_b+1.0)*x-1.0)*ix)
-		return coeff * math.Sqrt(y) * inner
 	}
 	return tempCrit.OmegaIntegralY(env, omegaCoeffs, integrand)
 }
