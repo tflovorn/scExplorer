@@ -5,10 +5,8 @@ import (
 	"math"
 )
 import (
-	"../bzone"
+	"../solve"
 	"../tempAll"
-	"../tempCrit"
-	vec "../vector"
 )
 
 type SpecificHeatEnv struct {
@@ -16,76 +14,104 @@ type SpecificHeatEnv struct {
 	X2, SH_12 float64
 }
 
-// Holon and pair specific heat per site.
-func SpecificHeat12(env *tempAll.Environment) (float64, error) {
-	xMu, err := dXdMu_h(env)
+// Specific heat at constant volume due to holons and pairs
+func HolonSpecificHeat(env *tempAll.Environment) (float64, error) {
+	v_dMudT, err := dMu_hdT(env)
 	if err != nil {
 		return 0.0, err
 	}
-	fmt.Printf("xMu = %e;\n", xMu)
-	MuT, err := dMu_hdT(env)
+	v_dUdMu, err := dUdMu_h(env)
 	if err != nil {
 		return 0.0, err
 	}
-	fmt.Printf("MuT = %e;\n", MuT)
-	varyMu := (env.X + env.Mu_h*xMu) * MuT
-	K12, err := specificHeat_K12(env)
+	v_dUdT, err := dUdT(env)
 	if err != nil {
 		return 0.0, err
 	}
-	xT, err := dXdT(env)
-	if err != nil {
-		return 0.0, err
-	}
-	fmt.Printf("xT = %e;\n", xT)
-	constMu := K12 + env.Mu_h*xT
-	return varyMu + constMu, nil
+	return v_dUdMu*v_dMudT + v_dUdT, nil
 }
 
-// Holon and pair specific heat per site; constant x, <K>-dependant part.
-func specificHeat_K12(env *tempAll.Environment) (float64, error) {
-	oc, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
-	if err != nil {
-		return 0.0, err
-	}
-	K2, err := specificHeat_K2_Integral(env, oc)
-	if err != nil {
-		return 0.0, err
-	}
-	return specificHeat_K1(env) + K2, nil
-}
-
-// Holon specific heat per site from <K>.
-// Excludes constant term cancelled by K2.
-func specificHeat_K1(env *tempAll.Environment) float64 {
-	inner := func(k vec.Vector) float64 {
-		a1 := 1.0 + math.Exp(-env.Beta*env.Xi_h(k))
-		return math.Log(a1)
-	}
-	return bzone.Avg(env.PointsPerSide, 3, inner)
-}
-
-// Pair specific heat per site from <K>.
-// Excludes constant term cancelled by K1.
-func specificHeat_K2_FromSum(env *tempAll.Environment) float64 {
-	inner := func(k vec.Vector) float64 {
-		omega, err := tempCrit.OmegaPlus(env, k)
-		// omega cutoff ~ beginning of holon continuum
-		if err != nil || omega > -2.0*env.Mu_h {
-			// only holons contributing
-			return 0.0
+// Partial derivative of Mu_h with respect to T; x and V held constant.
+func dMu_hdT(env *tempAll.Environment) (float64, error) {
+	// F gets Mu_h given Beta
+	F := func(Beta float64) (float64, error) {
+		// save the environment state before changing it
+		// (don't want one call of F to affect the next)
+		oD1, oMu_h, oBeta, oMu_b := env.D1, env.Mu_h, env.Beta, env.Mu_b
+		env.Beta = Beta
+		// fix free variables
+		eps := 1e-9
+		_, err := SolveD1Mu_hMu_b(env, eps, eps)
+		if err != nil {
+			return 0.0, err
 		}
-		// holons + pairs
-		a2 := 1.0 - math.Exp(-env.Beta*omega)
-		return -math.Log(a2)
+		Mu_h := env.Mu_h
+		// restore the environment
+		env.D1, env.Mu_h, env.Beta, env.Mu_b = oD1, oMu_h, oBeta, oMu_b
+		return Mu_h, nil
 	}
-	return bzone.Avg(env.PointsPerSide, 3, inner)
+	h := 1e-5
+	epsAbs := 1e-4
+	deriv, err := solve.OneDimDerivative(F, env.Beta, h, epsAbs)
+	return -math.Pow(env.Beta, 2.0) * deriv, err
 }
 
-// Pair specific heat from <K> (fast version). Excludes constant term.
-func specificHeat_K2_Integral(env *tempAll.Environment, omegaCoeffs []float64) (float64, error) {
-	integrand := func(y float64) float64 {
-		return -math.Sqrt(y) * math.Log(1.0-math.Exp(-y+env.Beta*env.Mu_b)) / math.Pow(env.Beta, 1.5)
+// Partial derivative of U with respect to Mu_h; T and V held constant.
+func dUdMu_h(env *tempAll.Environment) (float64, error) {
+	// F gets U given Mu_h (allow x to vary; constant Beta)
+	F := func(Mu_h float64) (float64, error) {
+		// save the environment state before changing it
+		// (don't want one call of F to affect the next)
+		oD1, oMu_h, oX, oMu_b := env.D1, env.Mu_h, env.X, env.Mu_b
+		env.Mu_h = Mu_h
+		fmt.Printf("in dU/dMu_h; dMu_h = %e\n", Mu_h-oMu_h)
+		// fix free variables
+		eps := 1e-9
+		_, err := SolveD1Mu_bX(env, eps, eps)
+		if err != nil {
+			return 0.0, err
+		}
+		// get result and restore the environment
+		U, err := HolonEnergy(env)
+		if err != nil {
+			return 0.0, err
+		}
+		env.D1, env.Mu_h, env.X, env.Mu_b = oD1, oMu_h, oX, oMu_b
+		fmt.Printf("U = %e\n", U)
+		return U, nil
 	}
-	return tempCrit.OmegaIntegralY(env, omegaCoeffs, integrand)
+	h := 1e-4
+	epsAbs := 1e-3
+	deriv, err := solve.OneDimDerivative(F, env.Mu_h, h, epsAbs)
+	return deriv, err
+}
+
+// Partial derivative of U with respect to T; Mu_h and V held constant.
+func dUdT(env *tempAll.Environment) (float64, error) {
+	// F gets U given Beta (allow x to vary; constant Mu_h)
+	F := func(Beta float64) (float64, error) {
+		// save the environment state before changing it
+		// (don't want one call of F to affect the next)
+		oD1, oBeta, oX, oMu_b := env.D1, env.Beta, env.X, env.Mu_b
+		env.Beta = Beta
+		fmt.Printf("in xT; dBeta = %e\n", Beta-oBeta)
+		// fix free variables
+		eps := 1e-9
+		_, err := SolveD1Mu_bX(env, eps, eps)
+		if err != nil {
+			return 0.0, err
+		}
+		// get result and restore the environment
+		U, err := HolonEnergy(env)
+		if err != nil {
+			return 0.0, err
+		}
+		env.D1, env.Beta, env.X, env.Mu_b = oD1, oBeta, oX, oMu_b
+		fmt.Printf("U = %e\n", U)
+		return U, nil
+	}
+	h := 1e-4
+	epsAbs := 1e-3
+	deriv, err := solve.OneDimDerivative(F, env.Beta, h, epsAbs)
+	return -math.Pow(env.Beta, 2.0) * deriv, err
 }

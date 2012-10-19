@@ -11,7 +11,7 @@ func TestHolonEnergy(t *testing.T) {
 		return
 	}
 
-	expected := -0.054547366037055935
+	expected := -0.054519481332429724
 	env, err := flucDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -24,6 +24,6 @@ func TestHolonEnergy(t *testing.T) {
 		t.Fatal(err)
 	}
 	if energy != expected {
-		t.Fatalf("unexpected energy value %f", energy)
+		t.Fatalf("unexpected energy value %v", energy)
 	}
 }

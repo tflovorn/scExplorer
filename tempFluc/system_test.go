@@ -131,7 +131,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		if X2 == 0.0 {
 			continue
 		}
-		sh_12, err := SpecificHeat12(&env)
+		sh_12, err := HolonSpecificHeat(&env)
 		if err != nil {
 			fmt.Println(err)
 			continue

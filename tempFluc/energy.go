@@ -15,14 +15,11 @@ import (
 // Calculate U_{12}/N = <H_{12}>/N
 // 	= (d/dBeta)_(Mu_h,V)(Beta*Omega_{12})/N + Mu_h * X
 // where H_{12} etc. are contributions due to individual and paired holons.
+// The derivative is given up to absolute error 1e-4.
 func HolonEnergy(env *tempAll.Environment) (float64, error) {
 	if env.Mu_b == 0.0 {
 		return 0.0, errors.New("Holon pair energy is singular at Mu_b = 0")
 	}
-	// make sure env is solved under (D1, Mu_b, Beta) system
-	eps := 1e-9
-	_, err := FlucTempSolve(env, eps, eps)
-
 	// F(Beta) = Beta*Omega_{12}(Beta).
 	// Derivative will hold Mu_h fixed and allow X and Mu_b to vary.
 	F := func(Beta float64) (float64, error) {
@@ -31,8 +28,11 @@ func HolonEnergy(env *tempAll.Environment) (float64, error) {
 		oD1, oBeta, oX, oMu_b := env.D1, env.Beta, env.X, env.Mu_b
 		env.Beta = Beta
 		// fix free variables
-		eps = 1e-9
-		_, err = SolveD1Mu_bX(env, eps, eps)
+		eps := 1e-9
+		_, err := SolveD1Mu_bX(env, eps, eps)
+		if err != nil {
+			return 0.0, err
+		}
 		// get the result
 		unpaired := freeEnergyHolonUnpaired(env)
 		paired, err := freeEnergyHolonPaired(env)
@@ -44,7 +44,7 @@ func HolonEnergy(env *tempAll.Environment) (float64, error) {
 		return unpaired + paired, nil
 	}
 	h := 1e-5
-	epsAbs := 1e-3
+	epsAbs := 1e-4
 	deriv, err := solve.OneDimDerivative(F, env.Beta, h, epsAbs)
 	if err != nil {
 		return 0.0, err
