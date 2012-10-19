@@ -5,9 +5,11 @@ import (
 	"testing"
 )
 
+var checkEnergy = flag.Bool("checkEnergy", false, "Check if default env has correct energy")
+
 func TestHolonEnergy(t *testing.T) {
 	flag.Parse()
-	if *testPlot {
+	if !*checkEnergy {
 		return
 	}
 

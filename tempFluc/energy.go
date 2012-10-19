@@ -2,6 +2,7 @@ package tempFluc
 
 import (
 	"errors"
+	"fmt"
 	"math"
 )
 import (
@@ -17,6 +18,7 @@ import (
 // where H_{12} etc. are contributions due to individual and paired holons.
 // The derivative is given up to absolute error 1e-4.
 func HolonEnergy(env *tempAll.Environment) (float64, error) {
+	pip := 0
 	if env.Mu_b == 0.0 {
 		return 0.0, errors.New("Holon pair energy is singular at Mu_b = 0")
 	}
@@ -41,10 +43,12 @@ func HolonEnergy(env *tempAll.Environment) (float64, error) {
 		}
 		// restore the environment
 		env.D1, env.Beta, env.X, env.Mu_b = oD1, oBeta, oX, oMu_b
+		fmt.Println("pip", pip)
+		pip += 1
 		return unpaired + paired, nil
 	}
-	h := 1e-5
-	epsAbs := 1e-4
+	h := 1e-8
+	epsAbs := 1e-9
 	deriv, err := solve.OneDimDerivative(F, env.Beta, h, epsAbs)
 	if err != nil {
 		return 0.0, err
@@ -52,6 +56,16 @@ func HolonEnergy(env *tempAll.Environment) (float64, error) {
 
 	U := deriv + env.Mu_h*env.X
 	return U, nil
+}
+
+// Beta*Omega/N
+func BetaOmega(env *tempAll.Environment) (float64, error) {
+	p1 := freeEnergyHolonUnpaired(env)
+	p2, err := freeEnergyHolonPaired(env)
+	if err != nil {
+		return 0.0, err
+	}
+	return p1 + p2, nil
 }
 
 // Beta*Omega_{1}/N
