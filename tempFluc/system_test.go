@@ -18,26 +18,30 @@ var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var loadCache = flag.Bool("loadCache", false, "load cached data instead of re-generating")
 var collapsePlot = flag.Bool("collapsePlot", false, "Run collapsing x2 version of plot tests")
 
+var defaultEnvSolution = []float64{0.01641117207484104, -0.5778732097622065, 2.750651000225305}
+
 func TestSolveFlucSystem(t *testing.T) {
+	flag.Parse()
+
 	// if we're plotting, don't care about this regression test
 	if *testPlot {
 		return
 	}
-
-	expected := []float64{0.01641117207484104, -0.5778732097622065, 2.750651000225305}
 	vars := []string{"D1", "Mu_h", "Beta"}
 	eps := 1e-6
 	env, err := flucDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = tempAll.VerifySolution(env, FlucTempSolve, FlucTempFullSystem, vars, eps, eps, expected)
+	err = tempAll.VerifySolution(env, FlucTempSolve, FlucTempFullSystem, vars, eps, eps, defaultEnvSolution)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestSolveFlucSystem_LargeMu_b(t *testing.T) {
+	flag.Parse()
+
 	// if we're plotting, don't care about this regression test
 	if *testPlot {
 		return

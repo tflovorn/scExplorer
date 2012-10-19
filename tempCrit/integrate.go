@@ -9,7 +9,8 @@ import (
 	"../tempAll"
 )
 
-func OmegaIntegralY(env *tempAll.Environment, omegaCoeffs []float64, integrand func(float64) float64) (float64, error) {
+// Calculate the integral of y from 0 to ymax of: F(y) / (4*pi^2*a*sqrt(b)).
+func OmegaIntegralY(env *tempAll.Environment, omegaCoeffs []float64, F func(float64) float64) (float64, error) {
 	// ignore produced value for ay and mu_b
 	a, b := omegaCoeffs[0], omegaCoeffs[2]
 	if a == 0.0 || b == 0.0 {
@@ -28,7 +29,7 @@ func OmegaIntegralY(env *tempAll.Environment, omegaCoeffs []float64, integrand f
 		ymax = env.Beta * b * math.Pow(math.Pi, 2.0)
 	}
 	t := 1e-7
-	integral, abserr, err := integrate.Qags(integrand, 0.0, ymax, t, t)
+	integral, abserr, err := integrate.Qags(F, 0.0, ymax, t, t)
 	if err != nil {
 		fmt.Printf("err conditions: ymax = %f; upper_a = %f; upper_b = %f\n", ymax, upper_a, upper_b)
 		return 0.0, err
