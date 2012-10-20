@@ -56,12 +56,12 @@ func HolonSpecificHeat(env *tempAll.Environment) (float64, error) {
 		return bo, nil
 	}
 	// calculate second derivatives
-	e1 := 1e-4
+	e1 := 1e-3
 	OmegaBetaBeta, err := solve.Simple2ndDiff(F, env.Beta, e1)
 	if err != nil {
 		return 0.0, err
 	}
-	e2 := 1e-4
+	e2 := 1e-3
 	OmegaBetaMu, err := solve.SimpleMixed2ndDiff(G, env.Beta, env.Mu_h, e2, e2)
 	if err != nil {
 		return 0.0, err
@@ -94,8 +94,8 @@ func dMu_hdT(env *tempAll.Environment) (float64, error) {
 		env.D1, env.Mu_h, env.Beta, env.Mu_b = oD1, oMu_h, oBeta, oMu_b
 		return Mu_h, nil
 	}
-	h := 1e-2
-	epsAbs := 1e-4
+	h := 1e-4
+	epsAbs := 1e-5
 	deriv, err := solve.OneDimDerivative(F, env.Beta, h, epsAbs)
 	fmt.Println("MuT ct", ct)
 	return -math.Pow(env.Beta, 2.0) * deriv, err
@@ -122,8 +122,8 @@ func dXdMu_h(env *tempAll.Environment) (float64, error) {
 		env.D1, env.Mu_h, env.X, env.Mu_b = oD1, oMu_h, oX, oMu_b
 		return X, nil
 	}
-	h := 1e-3
-	epsAbs := 1e-4
+	h := 1e-4
+	epsAbs := 1e-5
 	deriv, err := solve.OneDimDerivative(F, env.Mu_h, h, epsAbs)
 	fmt.Println("XMu ct", ct)
 	return deriv, err
@@ -150,8 +150,8 @@ func dXdBeta(env *tempAll.Environment) (float64, error) {
 		env.D1, env.Beta, env.X, env.Mu_b = oD1, oBeta, oX, oMu_b
 		return X, nil
 	}
-	h := 1e-3
-	epsAbs := 1e-4
+	h := 1e-4
+	epsAbs := 1e-5
 	deriv, err := solve.OneDimDerivative(F, env.Beta, h, epsAbs)
 	fmt.Println("XBeta ct", ct)
 	return deriv, err

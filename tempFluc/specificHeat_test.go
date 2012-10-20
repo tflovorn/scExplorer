@@ -2,6 +2,7 @@ package tempFluc
 
 import (
 	"flag"
+	"fmt"
 	"testing"
 )
 
@@ -13,7 +14,7 @@ func TestHolonSpecificHeat(t *testing.T) {
 		return
 	}
 
-	expected := 0.2897846954052469
+	expected := -0.8620157436346703
 	env, err := flucDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -22,10 +23,11 @@ func TestHolonSpecificHeat(t *testing.T) {
 	env.Mu_h = defaultEnvSolution[1]
 	env.Beta = defaultEnvSolution[2]
 	Cv, err := HolonSpecificHeat(env)
+	fmt.Println(Cv)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if Cv != expected {
-		t.Fatalf("unexpected energy value %v", Cv)
+		t.Fatalf("unexpected SH value %v", Cv)
 	}
 }
