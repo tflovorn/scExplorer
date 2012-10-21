@@ -1,6 +1,7 @@
 package tempFluc
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"testing"
 )
 import (
+	"../parallel"
 	"../plots"
 	"../tempAll"
 	"../tempCrit"
@@ -47,14 +49,14 @@ func TestSolveFlucSystem_LargeMu_b(t *testing.T) {
 		return
 	}
 
-	expected := []float64{0.031118887678035306, -0.7703426423828764, 1.659210022782662}
+	expected := []float64{0.030477040639422425, -0.7236663239242993, 1.7649273942043424}
 	vars := []string{"D1", "Mu_h", "Beta"}
 	eps := 1e-8
 	env, err := flucDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	env.Mu_b = -0.7
+	env.Mu_b = -0.6
 	env.Tz = 0.05
 	err = tempAll.VerifySolution(env, FlucTempSolve, FlucTempFullSystem, vars, eps, eps, expected)
 	if err != nil {
@@ -80,10 +82,14 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	if err != nil {
 		return nil, err
 	}
+	var envs []*tempAll.Environment
 	if long {
-		return defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{12, 1, 1, 3}, []float64{-0.1, 0.1, 0.1, 0.025}, []float64{-0.50, 0.1, 0.1, 0.075}), nil
+		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{24, 2, 2, 3}, []float64{-0.02, 0.1, 0.1, 0.025}, []float64{-0.50, 0.1, 0.1, 0.075})
+	} else {
+		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{-0.1, 0.05, 0.1, 0.075}, []float64{-0.60, 0.1, 0.1, 0.075})
 	}
-	return defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 2}, []float64{-0.1, 0.05, 0.1, 0.025}, []float64{-0.60, 0.1, 0.1, 0.075}), nil
+	return envs, nil
+
 }
 
 func TestPlotX2VsMu_b(t *testing.T) {
@@ -115,6 +121,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	Xs := getXs(plotEnvs)
 	// X2 vs Mu_b plots
 	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp", "X"}, []string{"t_z", "t_h^{\\prime}", "x"}, tempCrit.GetX2}
 	fileLabel := "deleteme.system_x2_mu_b_data"
@@ -145,57 +152,38 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	}
 	// calculate specific heat contributions
 	SHenvs := make([]interface{}, len(plotEnvs))
-	/*
-		F := func(i int, cerr chan error) {
-			pe := plotEnvs[i]
-			if pe == nil {
-				cerr <- errors.New("pe is nil")
-			}
-			if errs[i] != nil {
-				cerr <- errs[i]
-			}
-			env := pe.(tempAll.Environment)
-			X2, err := tempCrit.X2(&env)
-			if err != nil {
-				cerr <- err
-			}
-			SHenvs[i] = SpecificHeatEnv{env, X2, 0.0}
-			if X2 == 0.0 {
-				cerr <- nil
-			}
-			sh_12, err := HolonSpecificHeat(&env)
-			if err != nil {
-				cerr <- err
-			}
-			fmt.Printf("sh_12 = %f\n", sh_12)
-			SHenvs[i] = SpecificHeatEnv{env, X2, sh_12}
-			cerr <- nil
-		}
-		SHerrs := parallel.Run(F, len(plotEnvs))
-	*/
-	for i, pe := range plotEnvs {
+	F := func(i int, cerr chan<- error) {
+		pe := plotEnvs[i]
 		if pe == nil {
-			continue
+			cerr <- errors.New("pe is nil")
 		}
 		if errs[i] != nil {
-			continue
+			cerr <- errs[i]
 		}
 		env := pe.(tempAll.Environment)
 		X2, err := tempCrit.X2(&env)
 		if err != nil {
-			continue
+			cerr <- err
 		}
 		SHenvs[i] = SpecificHeatEnv{env, X2, 0.0}
 		if X2 == 0.0 {
-			continue
+			cerr <- nil
 		}
 		sh_12, err := HolonSpecificHeat(&env)
 		if err != nil {
-			continue
+			cerr <- err
 		}
 		fmt.Printf("sh_12 = %f\n", sh_12)
 		SHenvs[i] = SpecificHeatEnv{env, X2, sh_12}
+		cerr <- nil
 	}
+	SHerrs := parallel.Run(F, len(plotEnvs))
+	for _, err := range SHerrs {
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	SHenvs = fixXs(SHenvs, Xs)
 	// specific heat plot
 	fileLabel = "deleteme.system_SH-12_mu_b_data"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel

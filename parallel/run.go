@@ -1,7 +1,6 @@
 package parallel
 
 import (
-	"fmt"
 	"runtime"
 	"time"
 )
@@ -12,7 +11,6 @@ func Run(F func(int, chan<- error), N int) []error {
 	runtime.GOMAXPROCS(ncpu)
 	numActive, i := 0, 0
 	resp := make([]chan error, ncpu)
-	fmt.Println("ncpu", ncpu)
 	respOwner := make([]int, ncpu)
 	for i := 0; i < ncpu; i++ {
 		resp[i] = make(chan error)
@@ -61,7 +59,7 @@ func waitOn(resp []chan error) (error, int) {
 			}
 		}
 		// sleep to avoid busy waiting
-		sleepFor := 50 * time.Millisecond
+		sleepFor := 250 * time.Millisecond
 		time.Sleep(sleepFor)
 	}
 	return nil, 0.0

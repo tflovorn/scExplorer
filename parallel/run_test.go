@@ -5,7 +5,7 @@ import (
 )
 
 func TestRunCounting(t *testing.T) {
-	N := 25
+	N := 8
 	state := make([]int, N)
 	F := func(i int, resp chan<- error) {
 		state[i] = i

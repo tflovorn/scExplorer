@@ -6,6 +6,7 @@ cd solve && go test && cd ..
 cd integrate && go test && cd ..
 cd fit && go test && cd ..
 cd serialize && go test && cd ..
+cd parallel && go test && cd ..
 cd plots && go test && cd ..
 cd tempAll && go test && cd ..
 cd tempZero && go test && cd ..
