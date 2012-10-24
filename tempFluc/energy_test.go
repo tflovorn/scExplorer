@@ -1,19 +1,13 @@
 package tempFluc
 
 import (
-	"flag"
 	"testing"
 )
 
-var checkEnergy = flag.Bool("checkEnergy", false, "Check if default env has correct energy")
+func TestEnergies(t *testing.T) {
+	expectedHolon := 0.011309275210763277
+	expectedPair := 0.008298245919880036
 
-func TestHolonEnergy(t *testing.T) {
-	flag.Parse()
-	if !*checkEnergy {
-		return
-	}
-
-	expected := -0.054519481332429724
 	env, err := flucDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -21,11 +15,19 @@ func TestHolonEnergy(t *testing.T) {
 	env.D1 = defaultEnvSolution[0]
 	env.Mu_h = defaultEnvSolution[1]
 	env.Beta = defaultEnvSolution[2]
-	energy, err := HolonEnergy(env)
+	holon, err := HolonEnergy(env)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if energy != expected {
-		t.Fatalf("unexpected energy value %v", energy)
+	if holon != expectedHolon {
+		t.Fatalf("unexpected holon energy value %v", holon)
 	}
+	pair, err := PairEnergy(env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pair != expectedPair {
+		t.Fatalf("unexpected pair energy value %v", pair)
+	}
+
 }

@@ -23,7 +23,7 @@ func TestFixXs(t *testing.T) {
 	for i, env := range envs {
 		e := env.(tempAll.Environment)
 		e.X += 0.01
-		shEnvs[i] = SpecificHeatEnv{e, 0.0, 0.0}
+		shEnvs[i] = SpecificHeatEnv{e, 0.0, 0.0, 0.0}
 	}
 	shEnvs = fixXs(shEnvs, Xs)
 	for _, env := range shEnvs {

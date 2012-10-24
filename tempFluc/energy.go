@@ -1,93 +1,39 @@
 package tempFluc
 
 import (
-	"errors"
-	"fmt"
 	"math"
 )
 import (
 	"../bzone"
-	"../solve"
 	"../tempAll"
 	"../tempCrit"
 	vec "../vector"
 )
 
-// Calculate U_{12}/N = <H_{12}>/N
-// 	= (d/dBeta)_(Mu_h,V)(Beta*Omega_{12})/N + Mu_h * X
-// where H_{12} etc. are contributions due to individual and paired holons.
-// The derivative is given up to absolute error 1e-4.
+// Calculate U_{1}/N = 1/N \sum_k \epsilon_h(k) f_h(\xi_h(k))
 func HolonEnergy(env *tempAll.Environment) (float64, error) {
-	pip := 0
-	if env.Mu_b == 0.0 {
-		return 0.0, errors.New("Holon pair energy is singular at Mu_b = 0")
-	}
-	// F(Beta) = Beta*Omega_{12}(Beta).
-	// Derivative will hold Mu_h fixed and allow X and Mu_b to vary.
-	F := func(Beta float64) (float64, error) {
-		// save the environment state before changing it
-		// (don't want one call of F to affect the next)
-		oD1, oBeta, oX, oMu_b := env.D1, env.Beta, env.X, env.Mu_b
-		env.Beta = Beta
-		// fix free variables
-		eps := 1e-9
-		_, err := SolveD1Mu_bX(env, eps, eps)
-		if err != nil {
-			return 0.0, err
-		}
-		// get the result
-		unpaired := freeEnergyHolonUnpaired(env)
-		paired, err := freeEnergyHolonPaired(env)
-		if err != nil {
-			return 0.0, err
-		}
-		// restore the environment
-		env.D1, env.Beta, env.X, env.Mu_b = oD1, oBeta, oX, oMu_b
-		fmt.Println("pip", pip)
-		pip += 1
-		return unpaired + paired, nil
-	}
-	h := 1e-8
-	epsAbs := 1e-9
-	deriv, err := solve.OneDimDerivative(F, env.Beta, h, epsAbs)
-	if err != nil {
-		return 0.0, err
-	}
-
-	U := deriv + env.Mu_h*env.X
-	return U, nil
-}
-
-// Beta*Omega/N
-func BetaOmega(env *tempAll.Environment) (float64, error) {
-	p1 := freeEnergyHolonUnpaired(env)
-	p2, err := freeEnergyHolonPaired(env)
-	if err != nil {
-		return 0.0, err
-	}
-	return p1 + p2, nil
-}
-
-// Beta*Omega_{1}/N
-func freeEnergyHolonUnpaired(env *tempAll.Environment) float64 {
 	inner := func(k vec.Vector) float64 {
-		arg := 1.0 + math.Exp(-env.Beta*env.Xi_h(k))
-		return -math.Log(arg)
+		return env.Epsilon_h(k) * env.Fermi(env.Xi_h(k))
 	}
-	L := env.PointsPerSide
-	dim := 3
-	return bzone.Avg(L, dim, inner)
+	dim := 2
+	avg := bzone.Avg(env.PointsPerSide, dim, inner)
+	return avg, nil
 }
 
-// Beta*Omega_{2}/N
-func freeEnergyHolonPaired(env *tempAll.Environment) (float64, error) {
-	cs, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
+// Calculate U_{2}/N = 1/N \sum_k (\omega_+(k) + \mu_b) n_b(\omega_+(k))
+func PairEnergy(env *tempAll.Environment) (float64, error) {
+	oc, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
 	if err != nil {
 		return 0.0, err
 	}
 	integrand := func(y float64) float64 {
-		arg := 1.0 - math.Exp(-y+env.Beta*env.Mu_b)
-		return math.Sqrt(y) * math.Log(arg)
+		num := math.Pow(y, 1.5)
+		denom := math.Exp(y-env.Beta*env.Mu_b) - 1.0
+		return num / denom
 	}
-	return tempCrit.OmegaIntegralY(env, cs, integrand)
+	integral, err := tempCrit.OmegaIntegralY(env, oc, integrand)
+	if err != nil {
+		return 0.0, err
+	}
+	return integral / math.Pow(env.Beta, 2.5), nil
 }

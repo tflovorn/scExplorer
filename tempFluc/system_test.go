@@ -84,9 +84,9 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	}
 	var envs []*tempAll.Environment
 	if long {
-		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{24, 2, 2, 3}, []float64{-0.02, 0.1, 0.1, 0.025}, []float64{-0.50, 0.1, 0.1, 0.075})
+		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{24, 2, 2, 3}, []float64{-0.08, 0.05, 0.05, 0.025}, []float64{-0.50, 0.1, 0.1, 0.075})
 	} else {
-		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{-0.1, 0.05, 0.1, 0.075}, []float64{-0.60, 0.1, 0.1, 0.075})
+		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{-0.1, 0.05, 0.1, 0.075}, []float64{-0.50, 0.1, 0.1, 0.075})
 	}
 	return envs, nil
 
@@ -94,7 +94,7 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 
 func TestPlotX2VsMu_b(t *testing.T) {
 	flag.Parse()
-	if !*testPlot {
+	if !(*testPlot || *longPlot) {
 		return
 	}
 	var plotEnvs []interface{}
@@ -165,16 +165,21 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		if err != nil {
 			cerr <- err
 		}
-		SHenvs[i] = SpecificHeatEnv{env, X2, 0.0}
+		SHenvs[i] = SpecificHeatEnv{env, X2, 0.0, 0.0}
 		if X2 == 0.0 {
 			cerr <- nil
 		}
-		sh_12, err := HolonSpecificHeat(&env)
+		sh_1, err := HolonSpecificHeat(&env)
 		if err != nil {
 			cerr <- err
 		}
-		fmt.Printf("sh_12 = %f\n", sh_12)
-		SHenvs[i] = SpecificHeatEnv{env, X2, sh_12}
+		fmt.Printf("sh_1 = %f\n", sh_1)
+		sh_2, err := PairSpecificHeat(&env)
+		if err != nil {
+			cerr <- err
+		}
+		fmt.Printf("sh_2 = %f\n", sh_2)
+		SHenvs[i] = SpecificHeatEnv{env, X2, sh_1, sh_2}
 		cerr <- nil
 	}
 	SHerrs := parallel.Run(F, len(plotEnvs))
@@ -184,12 +189,71 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		}
 	}
 	SHenvs = fixXs(SHenvs, Xs)
-	// specific heat plot
+	// specific heat plots
+	fileLabel = "deleteme.system_SH-1_mu_b_data"
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$C_V^{1}$"
+	vars.Y = "SH_1"
+	vars.YFunc = nil
+	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making specific heat plot: %v", err)
+	}
+	fileLabel = "deleteme.system_SH-2_mu_b_data"
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$C_V^{2}$"
+	vars.Y = "SH_2"
+	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making specific heat plot: %v", err)
+	}
+	SH12 := func(d interface{}) float64 {
+		env := d.(SpecificHeatEnv)
+		return env.SH_1 + env.SH_2
+	}
 	fileLabel = "deleteme.system_SH-12_mu_b_data"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$C_V^{12}$"
-	vars.Y = "SH_12"
-	vars.YFunc = nil
+	vars.Y = ""
+	vars.YFunc = SH12
+	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making specific heat plot: %v", err)
+	}
+	// C_V / T = C_V * Beta
+	Gamma := func(d interface{}) float64 {
+		env := d.(SpecificHeatEnv)
+		return SH12(d) * env.Beta
+	}
+	fileLabel = "deleteme.system_gamma-12_mu_b_data"
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$\\gamma^{12}$"
+	vars.YFunc = Gamma
+	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making specific heat plot: %v", err)
+	}
+	Gamma1 := func(d interface{}) float64 {
+		env := d.(SpecificHeatEnv)
+		return env.SH_1 * env.Beta
+	}
+	fileLabel = "deleteme.system_gamma-1_mu_b_data"
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$\\gamma^{1}$"
+	vars.YFunc = Gamma1
+	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making specific heat plot: %v", err)
+	}
+
+	Gamma2 := func(d interface{}) float64 {
+		env := d.(SpecificHeatEnv)
+		return env.SH_2 * env.Beta
+	}
+	fileLabel = "deleteme.system_gamma-2_mu_b_data"
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$\\gamma^{2}$"
+	vars.YFunc = Gamma2
 	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making specific heat plot: %v", err)
