@@ -122,25 +122,28 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		}
 	}
 	Xs := getXs(plotEnvs)
-	// X2 vs Mu_b plots
-	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp", "X"}, []string{"t_z", "t_h^{\\prime}", "x"}, tempCrit.GetX2}
-	fileLabel := "deleteme.system_x2_mu_b_data"
+	// T vs Mu_b plots
+	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp", "X"}, []string{"t_z", "t_h^{\\prime}", "x"}, nil, tempAll.GetTemp}
+	fileLabel := "deleteme.system_T_mu_b_data"
 	grapherPath := wd + "/../plots/grapher.py"
-	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$\\mu_b$", plots.YLABEL_KEY: "$x_2$"}
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$\\mu_b$", plots.YLABEL_KEY: "$T$"}
 	err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
-		t.Fatalf("error making Mu_b plot: %v", err)
+		t.Fatalf("error making T(Mu_b) plot: %v", err)
 	}
-	// T vs Mu_b plots
-	fileLabel = "deleteme.system_T_mu_b_data"
+	// X2 vs T plots
+	fileLabel = "deleteme.system_x2_mu_b_data"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
-	graphParams[plots.YLABEL_KEY] = "$T$"
-	vars.YFunc = tempAll.GetTemp
+	graphParams[plots.XLABEL_KEY] = "$T$"
+	graphParams[plots.YLABEL_KEY] = "$x_2$"
+	vars.X = ""
+	vars.XFunc = tempAll.GetTemp
+	vars.YFunc = tempCrit.GetX2
 	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
-		t.Fatalf("error making T plot: %v", err)
+		t.Fatalf("error making X2(T) plot: %v", err)
 	}
-	// Mu_h vs Mu_b plots
+	// Mu_h vs T plots
 	fileLabel = "deleteme.system_mu_h_mu_b_data"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
@@ -193,6 +196,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	fileLabel = "deleteme.system_SH-1_mu_b_data"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$C_V^{1}$"
+	vars.XFunc = GetSHTemp
 	vars.Y = "SH_1"
 	vars.YFunc = nil
 	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
@@ -279,7 +283,7 @@ func TestPlotX2Collapse(t *testing.T) {
 	plotEnvs, errs := tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
 
 	// X2 vs Mu_b plots
-	vars := plots.GraphVars{"Mu_b", "", []string{"Tz"}, []string{"t_z"}, tempCrit.GetX2}
+	vars := plots.GraphVars{"Mu_b", "", []string{"Tz"}, []string{"t_z"}, nil, tempCrit.GetX2}
 	fileLabel := "deleteme.system_x2_mu_b_data"
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"

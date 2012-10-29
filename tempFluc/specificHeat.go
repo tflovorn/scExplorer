@@ -14,6 +14,12 @@ type SpecificHeatEnv struct {
 	X2, SH_1, SH_2 float64
 }
 
+// Get T for a SpecificHeatEnv
+func GetSHTemp(d interface{}) float64 {
+	env := d.(SpecificHeatEnv)
+	return 1.0 / env.Beta
+}
+
 type envFunc func(*tempAll.Environment) (float64, error)
 
 // Specific heat at constant volume due to particles with energy U

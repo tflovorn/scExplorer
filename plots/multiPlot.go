@@ -16,8 +16,9 @@ type GraphVars struct {
 	Params []string
 	// Latex labels for additional parameters
 	ParamLabels []string
-	// if Y variable name is not given, use this to find value of Y
-	YFunc func(data interface{}) float64
+	// if X/Y variable name is not given, use this to find value of X/Y
+	XFunc func(interface{}) float64
+	YFunc func(interface{}) float64
 }
 
 // Create a plot for each combination of vars.Params contained in data.
@@ -41,7 +42,7 @@ func MultiPlot(data []interface{}, errs []error, vars GraphVars, graphParams map
 		}
 		graphParams[FILE_KEY] = basePath + extraPath
 
-		series, primaryVals := ExtractSeries(data, errs, []string{vars.X, vars.Y, primaryNames[i]}, secondaries[i], vars.YFunc)
+		series, primaryVals := ExtractSeries(data, errs, []string{vars.X, vars.Y, primaryNames[i]}, secondaries[i], vars.XFunc, vars.YFunc)
 		sp := MakeSeriesParams(primaryLabels[i], "%.3f", primaryVals, DEFAULT_STYLES)
 		err := PlotMPL(series, graphParams, sp, grapherPath)
 		if err != nil {
