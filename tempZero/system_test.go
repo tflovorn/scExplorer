@@ -59,8 +59,8 @@ func TestPlotF0VsX(t *testing.T) {
 	}
 	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, nil}
 	xyLabels := []string{"$x$", "$F_0$", "$\\mu_h$"}
-	fileLabelF0 := "deleteme.system_F0_x_dwave_data"
-	fileLabelMu := "deleteme.system_Mu_h_x_dwave_data"
+	fileLabelF0 := "plot_data.F0_x_dwave"
+	fileLabelMu := "plot_data.Mu_h_x_dwave"
 	err = solveAndPlot(envs, 1e-6, 1e-6, vars, xyLabels, fileLabelF0, fileLabelMu)
 	if err != nil {
 		t.Fatal(err)
@@ -73,8 +73,8 @@ func TestPlotF0VsX(t *testing.T) {
 	if *longPlot {
 		envsS = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 3, 3}, []float64{0.05, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	}
-	fileLabelF0 = "deleteme.system_F0_x_swave_data"
-	fileLabelMu = "deleteme.system_F0_x_swave_data"
+	fileLabelF0 = "plot_data.F0_x_swave"
+	fileLabelMu = "plot_data.F0_x_swave"
 	err = solveAndPlot(envsS, 1e-6, 1e-6, vars, xyLabels, fileLabelF0, fileLabelMu)
 	if err != nil {
 		t.Fatal(err)

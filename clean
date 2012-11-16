@@ -6,8 +6,12 @@
 rm plots/deleteme*
 rm tempAll/deleteme*
 rm tempZero/deleteme*
+rm tempZero/plot_data*
 rm tempPair/deleteme*
+rm tempPair/plot_data*
 rm tempCrit/deleteme*
+rm tempCrit/plot_data*
 rm tempFluc/deleteme*
+rm tempFluc/plot_data*
 rm scExplorer
 } >/dev/null 2>&1

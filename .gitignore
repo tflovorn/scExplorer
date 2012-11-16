@@ -4,5 +4,6 @@ pkg
 src
 bin
 deleteme.*
+plot_data.*
 scExplorer
 __data*

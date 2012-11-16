@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd tempZero
+go test -testPlot -longPlot -test.timeout 10h
+cd ../tempPair
+go test -testPlot -longPlot -test.timeout 10h
+cd ../tempCrit
+go test -testPlot -longPlot -test.timeout 20h
+go test -testPlot -longPlot -tinyX -test.timeout 20h
+cd ../tempFluc
+go test -longPlot -test.timeout 100h
+cd ..

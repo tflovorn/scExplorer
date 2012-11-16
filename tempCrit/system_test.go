@@ -63,8 +63,6 @@ func TestPlotTcVsX(t *testing.T) {
 		}
 	}
 	vars := plots.GraphVars{"X", "", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, tempAll.GetTemp}
-	fileLabel := "deleteme.system_tc_x_data"
-
 	eps := 1e-6
 	// solve the full system
 	plotEnvs, errs := tempAll.MultiSolve(envs, eps, eps, CritTempSolve)
@@ -72,13 +70,23 @@ func TestPlotTcVsX(t *testing.T) {
 	// Tc vs x plots
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
+	var fileLabel string
+	if !*tinyX {
+		fileLabel = "plot_data.tc_x"
+	} else {
+		fileLabel = "plot_data.tinyX_tc_x"
+	}
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_c$"}
 	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Tc plot: %v", err)
 	}
 	// Mu_h vs x plots
-	fileLabel = "deleteme.system_mu_x_data"
+	if !*tinyX {
+		fileLabel = "plot_data.mu_x_data"
+	} else {
+		fileLabel = "plot_data.tinyX_mu_x_data"
+	}
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
 	vars.Y = "Mu_h"

@@ -8,6 +8,12 @@ For Fedora the corresponding packages are:
 
 gsl gsl-devel python-matplotlib
 
+# Usage
+
+Data plots are currently built with test scripts. To run all of these scripts,
+run allPlot in the root directory. This will create plots in the subdirectories
+(tempZero, tempPair, tempCrit, tempFluc).
+
 # References
 
 [S. K. Sarker, PRB 77, 052505 (2008)](http://prb.aps.org/abstract/PRB/v77/i5/e052505)  

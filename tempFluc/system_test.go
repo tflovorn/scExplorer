@@ -124,7 +124,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	Xs := getXs(plotEnvs)
 	// T vs Mu_b plots
 	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp", "X"}, []string{"t_z", "t_h^{\\prime}", "x"}, nil, tempAll.GetTemp}
-	fileLabel := "deleteme.system_T_mu_b_data"
+	fileLabel := "plot_data.T_mu_b"
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$\\mu_b$", plots.YLABEL_KEY: "$T$"}
 	err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
@@ -132,7 +132,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		t.Fatalf("error making T(Mu_b) plot: %v", err)
 	}
 	// X2 vs T plots
-	fileLabel = "deleteme.system_x2_mu_b_data"
+	fileLabel = "plot_data.x2_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.XLABEL_KEY] = "$T$"
 	graphParams[plots.YLABEL_KEY] = "$x_2$"
@@ -144,7 +144,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		t.Fatalf("error making X2(T) plot: %v", err)
 	}
 	// Mu_h vs T plots
-	fileLabel = "deleteme.system_mu_h_mu_b_data"
+	fileLabel = "plot_data.mu_h_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
 	vars.Y = "Mu_h"
@@ -193,7 +193,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	}
 	SHenvs = fixXs(SHenvs, Xs)
 	// specific heat plots
-	fileLabel = "deleteme.system_SH-1_mu_b_data"
+	fileLabel = "plot_data.SH-1_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$C_V^{1}$"
 	vars.XFunc = GetSHTemp
@@ -203,7 +203,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error making specific heat plot: %v", err)
 	}
-	fileLabel = "deleteme.system_SH-2_mu_b_data"
+	fileLabel = "plot_data.SH-2_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$C_V^{2}$"
 	vars.Y = "SH_2"
@@ -215,7 +215,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		env := d.(SpecificHeatEnv)
 		return env.SH_1 + env.SH_2
 	}
-	fileLabel = "deleteme.system_SH-12_mu_b_data"
+	fileLabel = "plot_data.SH-12_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$C_V^{12}$"
 	vars.Y = ""
@@ -229,7 +229,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		env := d.(SpecificHeatEnv)
 		return SH12(d) * env.Beta
 	}
-	fileLabel = "deleteme.system_gamma-12_mu_b_data"
+	fileLabel = "plot_data.gamma-12_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\gamma^{12}$"
 	vars.YFunc = Gamma
@@ -241,7 +241,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		env := d.(SpecificHeatEnv)
 		return env.SH_1 * env.Beta
 	}
-	fileLabel = "deleteme.system_gamma-1_mu_b_data"
+	fileLabel = "plot_data.gamma-1_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\gamma^{1}$"
 	vars.YFunc = Gamma1
@@ -254,7 +254,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		env := d.(SpecificHeatEnv)
 		return env.SH_2 * env.Beta
 	}
-	fileLabel = "deleteme.system_gamma-2_mu_b_data"
+	fileLabel = "plot_data.gamma-2_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\gamma^{2}$"
 	vars.YFunc = Gamma2
@@ -284,7 +284,7 @@ func TestPlotX2Collapse(t *testing.T) {
 
 	// X2 vs Mu_b plots
 	vars := plots.GraphVars{"Mu_b", "", []string{"Tz"}, []string{"t_z"}, nil, tempCrit.GetX2}
-	fileLabel := "deleteme.system_x2_mu_b_data"
+	fileLabel := "plot.x2_mu_b"
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$\\mu_b$", plots.YLABEL_KEY: "$x_2$"}
@@ -293,7 +293,7 @@ func TestPlotX2Collapse(t *testing.T) {
 		t.Fatalf("error making Mu_b plot: %v", err)
 	}
 	// T vs Mu_b plots
-	fileLabel = "deleteme.system_T_mu_b_data"
+	fileLabel = "plot_data.T_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$T$"
 	vars.YFunc = tempAll.GetTemp
@@ -302,7 +302,7 @@ func TestPlotX2Collapse(t *testing.T) {
 		t.Fatalf("error making T plot: %v", err)
 	}
 	// Mu_h vs Mu_b plots
-	fileLabel = "deleteme.system_mu_h_mu_b_data"
+	fileLabel = "plot_data.mu_h_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
 	vars.Y = "Mu_h"
