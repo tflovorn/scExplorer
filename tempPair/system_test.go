@@ -64,7 +64,7 @@ func TestPlotTpVsX(t *testing.T) {
 	eps := 1e-9
 	plotEnvs, errs := tempAll.MultiSolve(envs, eps, eps, PairTempSolve)
 
-	vars := plots.GraphVars{"X", "", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, tempAll.GetTemp}
+	vars := plots.GraphVars{"X", "", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, tempAll.GetTemp}
 	fileLabel := "deleteme.system_tp_x_data"
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
