@@ -20,7 +20,7 @@ var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var loadCache = flag.Bool("loadCache", false, "load cached data instead of re-generating")
 var collapsePlot = flag.Bool("collapsePlot", false, "Run collapsing x2 version of plot tests")
 
-var defaultEnvSolution = []float64{0.01641113805141947, -0.5778732666052968, 2.750651176253013}
+var defaultEnvSolution = []float64{0.0164111381183055, -0.5778732662210768, 2.750651172711139}
 
 func TestSolveFlucSystem(t *testing.T) {
 	flag.Parse()
@@ -49,7 +49,7 @@ func TestSolveFlucSystem_LargeMu_b(t *testing.T) {
 		return
 	}
 
-	expected := []float64{0.030477040639422425, -0.7236663239242993, 1.7649273942043424}
+	expected := []float64{0.03047703936397049, -0.7236663299469903, 1.7649274240769777}
 	vars := []string{"D1", "Mu_h", "Beta"}
 	eps := 1e-8
 	env, err := flucDefaultEnv()

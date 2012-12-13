@@ -13,5 +13,6 @@ cd tempZero && go test && cd ..
 cd tempPair && go test && cd ..
 cd tempCrit && go test && cd ..
 cd tempFluc && go test && cd ..
+cd tempLow && go test && cd ..
 
 ./clean

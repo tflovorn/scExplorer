@@ -5,8 +5,8 @@ import (
 )
 
 func TestEnergies(t *testing.T) {
-	expectedHolon := 0.011309275210763277
-	expectedPair := 0.008298245919880036
+	expectedHolon := 0.011309275258310362
+	expectedPair := 0.00829824598441264
 
 	env, err := flucDefaultEnv()
 	if err != nil {
@@ -20,14 +20,14 @@ func TestEnergies(t *testing.T) {
 		t.Fatal(err)
 	}
 	if holon != expectedHolon {
-		t.Fatalf("unexpected holon energy value %v", holon)
+		t.Fatalf("unexpected holon energy value %v (expected %v)", holon, expectedHolon)
 	}
 	pair, err := PairEnergy(env)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if pair != expectedPair {
-		t.Fatalf("unexpected pair energy value %v", pair)
+		t.Fatalf("unexpected pair energy value %v (expected %v)", pair, expectedPair)
 	}
 
 }
