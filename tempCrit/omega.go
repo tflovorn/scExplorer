@@ -20,7 +20,16 @@ type OmegaFunc func(*tempAll.Environment, vec.Vector) (float64, error)
 // The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
 // we expect ax == ay.
 func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
-	points := omegaCoeffsPoints(3, 1e-4)
+	var numRadial int
+	var startDistance float64
+	if env.F0 == 0.0 {
+		numRadial = 3
+		startDistance = 1e-4
+	} else {
+		numRadial = 6
+		startDistance = 1e-4
+	}
+	points := omegaCoeffsPoints(numRadial, startDistance)
 	fit, err := omegaFitHelper(env, fn, points)
 	if err != nil {
 		return nil, err
@@ -78,7 +87,13 @@ func omegaCoeffsPoints(numRadial int, sk float64) []vec.Vector {
 // Calculate omega_+(k) by finding zeros of 1 - lambda_+
 func OmegaPlus(env *tempAll.Environment, k vec.Vector) (float64, error) {
 	lp := lambdaPlusFn(env, k)
-	root, err := solve.OneDimDiffRoot(lp, 0.01, 1e-9, 1e-9)
+	var initOmega, epsAbs, epsRel float64
+	if env.F0 == 0.0 {
+		initOmega, epsAbs, epsRel = 0.01, 1e-9, 1e-9
+	} else {
+		initOmega, epsAbs, epsRel = 0.01, 1e-9, 1e-9
+	}
+	root, err := solve.OneDimDiffRoot(lp, initOmega, epsAbs, epsRel)
 	return root, err
 }
 

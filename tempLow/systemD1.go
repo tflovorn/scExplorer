@@ -20,7 +20,7 @@ func AbsErrorD1(env *tempAll.Environment, variables []string) solve.Diffable {
 		rhs := -bzone.Avg(L, 2, tempAll.WrapFunc(env, innerD1)) / 2.0
 		return lhs - rhs, nil
 	}
-	h := 1e-6
+	h := 1e-5
 	epsabs := 1e-4
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
@@ -28,5 +28,5 @@ func AbsErrorD1(env *tempAll.Environment, variables []string) solve.Diffable {
 func innerD1(env *tempAll.Environment, k vec.Vector) float64 {
 	sxy := math.Sin(k[0]) * math.Sin(k[1])
 	E := env.BogoEnergy(k)
-	return sxy * (1.0 + env.Xi_h(k)/E*(2.0*env.Fermi(E)-1.0))
+	return sxy * (1.0 - env.Xi_h(k)*math.Tanh(env.Beta*E/2.0)/E)
 }

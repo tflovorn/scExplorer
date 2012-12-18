@@ -15,10 +15,10 @@ func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 		env.Set(v, variables)
 		L := env.PointsPerSide
 		lhs := 1.0 / (env.T0 + env.Tz)
-		rhs := bzone.Avg(L, 2, tempAll.WrapFunc(env, innerMu_h)) / 2.0
+		rhs := bzone.Avg(L, 2, tempAll.WrapFunc(env, innerMu_h))
 		return lhs - rhs, nil
 	}
-	h := 1e-6
+	h := 1e-5
 	epsabs := 1e-4
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }

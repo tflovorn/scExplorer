@@ -15,6 +15,19 @@ extern int powell_go_fdf(const gsl_vector*, void *, gsl_vector*, gsl_matrix*);
 
 typedef const gsl_vector* const_gsl_vector;
 
+static int debugReport = 0;
+
+static void setDebugReport(int value) {
+	debugReport = value;
+}
+
+static void print_vector(gsl_vector * v) {
+	size_t i;
+	for (i = 0; i < v->size; i++) {
+		printf("%e ", gsl_vector_get(v, i));
+	}
+}
+
 // Follows the fdf solver example at:
 // http://www.gnu.org/software/gsl/manual/html_node/Example-programs-for-Multidimensional-Root-finding.html
 
@@ -32,6 +45,14 @@ static int powellSolve(void * uservar, gsl_vector * start, double epsabs, double
 
 	do {
 		iter++;
+		// status (if not solving 1-lambda=0)
+		if (debugReport && s->x->size > 1) {
+			printf("x: ");
+			print_vector(s->x);
+			printf("\nf: ");
+			print_vector(s->f);
+			printf("\n");
+		}
 		status = gsl_multiroot_fdfsolver_iterate(s);
 		if (status) {
 			break;
@@ -53,6 +74,15 @@ import (
 	"unsafe"
 )
 import vec "../vector"
+
+// if true, print solution progress
+func DebugReport(on bool) {
+	if on {
+		C.setDebugReport(1)
+	} else {
+		C.setDebugReport(0)
+	}
+}
 
 // Multidimensional root-finder. Implemented by providing an interface to GSL
 // implementation of Powell's Hybrid method (gsl_multiroot_fdfsolver_hybridsj).

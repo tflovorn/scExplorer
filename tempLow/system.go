@@ -1,5 +1,6 @@
 package tempLow
 
+//import "fmt"
 import (
 	"../solve"
 	"../tempAll"
@@ -29,16 +30,6 @@ func D1MuBetaSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 }
 
 /*
-func D1MuF0System(env *tempAll.Environment) (solve.DiffSystem, []float64) {
-	variables := []string{"D1", "Mu_h", "F0"}
-	diffD1 := AbsErrorD1(env, variables)
-	diffMu_h := AbsErrorMu_h(env, variables)
-	diffF0 := AbsErrorF0(env, variables)
-	system := solve.Combine([]solve.Diffable{diffD1, diffMu_h, diffF0})
-	start := []float64{env.D1, env.Mu_h, env.F0}
-	return system, start
-}
-
 func D1MuXSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	variables := []string{"D1", "Mu_h", "X"}
 	diffD1 := AbsErrorD1(env, variables)
@@ -52,20 +43,28 @@ func D1MuXSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 
 // Solve the (D1, Mu_h, Beta) system with x and F0 fixed.
 func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
-	// T should be < Tc (so Beta > Beta_c)
-	_, err := tempCrit.CritTempSolve(env, epsAbs, epsRel)
+	//solve.DebugReport(false)
+	// our guess for beta should be above beta_c
+	F0 := env.F0
+	env.F0 = 0.0 // F0 is 0 at T_c
+	critSystem, critStart := tempCrit.CritTempFullSystem(env)
+	_, err := solve.MultiDim(critSystem, critStart, epsAbs, epsRel)
 	if err != nil {
 		return nil, err
 	}
 	env.Beta += 0.1
-	// solve low temp system for reasonable values of Mu and D1 first
-	system, start := D1MuSystem(env)
-	_, err = solve.MultiDim(system, start, epsAbs, epsRel)
-	if err != nil {
-		return nil, err
-	}
+	env.F0 = F0
+	//fmt.Printf("%v; Tc = %f\n", env, 1.0 / env.Beta)
+	// solve low temp system for reasonable values of D1 and Mu_h first
+	//solve.DebugReport(true)
+	/*
+		_, err = D1MuSolve(env, epsAbs, epsRel)
+		if err != nil {
+			return nil, err
+		}
+	*/
 	// solve the full low temp system
-	system, start = D1MuBetaSystem(env)
+	system, start := D1MuBetaSystem(env)
 	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
 	if err != nil {
 		return nil, err

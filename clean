@@ -13,5 +13,6 @@ rm tempCrit/deleteme*
 rm tempCrit/plot_data*
 rm tempFluc/deleteme*
 rm tempFluc/plot_data*
+rm tempLow/plot_data*
 rm scExplorer
 } >/dev/null 2>&1
