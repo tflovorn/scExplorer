@@ -1,3 +1,4 @@
+/*
 package tempLow
 
 import "math"
@@ -29,8 +30,8 @@ func innerF0(env *tempAll.Environment, k vec.Vector) float64 {
 	E := env.BogoEnergy(k)
 	return sxy * sxy * math.Tanh(env.Beta*E/2.0) / E
 }
+*/
 
-/*
 package tempLow
 
 import (
@@ -52,27 +53,27 @@ func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 		}
 		env.Set(v, variables)
 		/*
-		// Before we evaluate error in F0, Mu_h and D1 should have
-		// appropriate values.
-		eps := 1e-9
-		_, err := D1MuSolve(env, eps, eps)
-		if err != nil {
-			return 0.0, err
-		}
-*/ /*
+			// Before we evaluate error in F0, Mu_h and D1 should have
+			// appropriate values.
+			eps := 1e-9
+			_, err := D1MuSolve(env, eps, eps)
+			if err != nil {
+				return 0.0, err
+			}
+		*/
 		// F0 equation error = x - x1 - x2
 		x1 := X1(env)
 		x2, err := tempCrit.X2(env)
 		if err != nil {
 			fmt.Printf("error from X2(): %v\n", err)
 			return 0.0, err
+			//x2 = 0.0
 		}
 		lhs := env.X
 		rhs := x1 + x2
 		return lhs - rhs, nil
 	}
-	h := 1e-5
-	epsabs := 1e-4
+	h := 1e-6
+	epsabs := 1e-5
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
-*/

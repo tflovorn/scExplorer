@@ -2,6 +2,7 @@ package tempCrit
 
 import (
 	"math"
+	//"fmt"
 )
 import (
 	"../tempAll"
@@ -31,12 +32,36 @@ func nu(env *tempAll.Environment) (float64, error) {
 	if -env.Mu_b > -2.0*env.Mu_h {
 		return 0.0, nil
 	}
-	cs, err := OmegaFit(env, OmegaPlus)
-	if err != nil {
-		return 0.0, err
-	}
 	integrand := func(y float64) float64 {
 		return 2.0 * math.Sqrt(y) / (math.Exp(y-env.Beta*env.Mu_b) - 1.0)
 	}
-	return OmegaIntegralY(env, cs, integrand)
+	// find omega_+ coefficients
+	plusCoeffs, err := OmegaFit(env, OmegaPlus)
+	if err != nil {
+		//return 0.0, err
+		return 0.0, nil
+	}
+	plus, err := OmegaIntegralY(env, plusCoeffs, integrand)
+	if err != nil {
+		return 0.0, err
+	}
+	return plus, nil
+	/*
+		// above T_c, only plus poles exist
+		if env.F0 == 0.0 {
+			return plus, nil
+		}
+		// below T_c, maybe have minus poles
+		minusCoeffs, err := OmegaFit(env, OmegaMinus)
+		if err != nil {
+			fmt.Println("failed to find omega_- coeffs")
+			return plus, nil
+		}
+		fmt.Printf("got omega_- coeffs %v\n", minusCoeffs)
+		minus, err := OmegaIntegralY(env, minusCoeffs, integrand)
+		if err != nil {
+			return 0.0, err
+		}
+		return plus + minus, nil
+	*/
 }

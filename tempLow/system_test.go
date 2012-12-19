@@ -19,7 +19,7 @@ var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var loadCache = flag.Bool("loadCache", false, "load cached data instead of re-generating")
 
-var defaultEnvSolution = []float64{0.029616109177784084, -0.4661676231459041, 6.2709252666154995}
+var defaultEnvSolution = []float64{0.02155729636501704, -0.5065216126264922, 0.08378494601111632}
 
 func TestSolveLowSystem(t *testing.T) {
 	flag.Parse()
@@ -28,13 +28,13 @@ func TestSolveLowSystem(t *testing.T) {
 	if *testPlot {
 		return
 	}
-	vars := []string{"D1", "Mu_h", "Beta"}
+	vars := []string{"D1", "Mu_h", "F0"}
 	eps := 1e-9
 	env, err := lowDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = tempAll.VerifySolution(env, D1MuBetaSolve, D1MuBetaSystem, vars, eps, eps, defaultEnvSolution)
+	err = tempAll.VerifySolution(env, D1MuF0Solve, D1MuF0System, vars, eps, eps, defaultEnvSolution)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func TestPlotX2VsT(t *testing.T) {
 		}
 		// solve the full system
 		eps := 1e-9
-		plotEnvs, errs = tempAll.MultiSolve(envs, eps, eps, D1MuBetaSolve)
+		plotEnvs, errs = tempAll.MultiSolve(envs, eps, eps, D1MuF0Solve)
 		// cache results for future use
 		err = tempAll.SaveEnvCache(cachePath, plotEnvs, errs)
 		if err != nil {
