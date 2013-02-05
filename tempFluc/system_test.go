@@ -153,6 +153,39 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error making Mu_h plot: %v", err)
 	}
+	// omega(q) parameters (a, b) vs T
+	get_fit := func(data interface{}, i int) float64 {
+		env := data.(tempAll.Environment)
+		fit, err := tempCrit.OmegaFit(&env, tempCrit.OmegaPlus)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+		}
+		return fit[i]
+	}
+	get_a := func(data interface{}) float64 {
+		return get_fit(data, 0)
+	}
+	get_b := func(data interface{}) float64 {
+		return get_fit(data, 2)
+	}
+	fileLabel = "plot_data.a_T"
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$a$"
+	vars.Y = ""
+	vars.YFunc = get_a
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making a plot: %v", err)
+	}
+	fileLabel = "plot_data.b_T"
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$b$"
+	vars.Y = ""
+	vars.YFunc = get_b
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making b plot: %v", err)
+	}
 	// calculate specific heat contributions
 	SHenvs := make([]interface{}, len(plotEnvs))
 	F := func(i int, cerr chan<- error) {
