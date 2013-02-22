@@ -41,10 +41,11 @@ import (
 import (
 	"../solve"
 	"../tempAll"
-	"../tempCrit"
+	//"../tempCrit"
 	vec "../vector"
 )
 
+// a and b give omega(q) = a(q_x^2+q_y^2) + b q_z^2 at T_c
 func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 	F := func(v vec.Vector) (float64, error) {
 		if v.ContainsNaN() {
@@ -63,7 +64,7 @@ func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 		*/
 		// F0 equation error = x - x1 - x2
 		x1 := X1(env)
-		x2, err := tempCrit.X2(env)
+		x2, err := X2(env)
 		if err != nil {
 			fmt.Printf("error from X2(): %v\n", err)
 			return 0.0, err

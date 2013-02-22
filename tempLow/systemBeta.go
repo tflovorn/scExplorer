@@ -7,7 +7,6 @@ import (
 import (
 	"../solve"
 	"../tempAll"
-	"../tempCrit"
 	vec "../vector"
 )
 
@@ -29,7 +28,7 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 		*/
 		// Beta equation error = x - x1 - x2
 		x1 := X1(env)
-		x2, err := tempCrit.X2(env)
+		x2, err := X2(env)
 		if err != nil {
 			fmt.Printf("error from X2(): %v\n", err)
 			return 0.0, err
@@ -38,7 +37,7 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 		rhs := x1 + x2
 		return lhs - rhs, nil
 	}
-	h := 1e-5
-	epsabs := 1e-4
+	h := 1e-6
+	epsabs := 1e-5
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }

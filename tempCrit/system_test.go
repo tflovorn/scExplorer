@@ -8,6 +8,7 @@ import (
 )
 import (
 	"../plots"
+	"../solve"
 	"../tempAll"
 )
 
@@ -20,6 +21,7 @@ var defaultEnvSolution = []float64{0.006316132112386478, -0.5799328990719926, 3.
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
 func TestSolveCritTempSystem(t *testing.T) {
+	solve.DebugReport(true)
 	vars := []string{"D1", "Mu_h", "Beta"}
 	eps := 1e-6
 	env, err := ctDefaultEnv()

@@ -26,14 +26,15 @@ func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
 		numRadial = 3
 		startDistance = 1e-4
 	} else {
-		numRadial = 6
-		startDistance = 1e-4
+		numRadial = 3
+		startDistance = 2e-4
 	}
 	points := omegaCoeffsPoints(numRadial, startDistance)
 	fit, err := omegaFitHelper(env, fn, points)
 	if err != nil {
 		return nil, err
 	}
+	//fmt.Printf("%v\n", fit)
 	return fit, nil
 }
 

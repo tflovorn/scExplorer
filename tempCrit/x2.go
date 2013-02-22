@@ -15,6 +15,7 @@ func X2(env *tempAll.Environment) (float64, error) {
 		return 0.0, err
 	}
 	x2 := nu / math.Pow(env.Beta, 3.0/2.0)
+	//println(x2)
 	return x2, nil
 }
 

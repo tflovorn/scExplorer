@@ -31,6 +31,7 @@ type Environment struct {
 	Beta float64 // inverse temperature
 	F0   float64 // superconducting order parameter (0 if T >= Tc)
 	Mu_b float64 // holon pair (bosonic) chemical potential (0 if T <= Tc)
+	A, B float64 // pair spectrum parameters
 
 	// Cached values:
 	epsilonMinCache  float64
