@@ -24,7 +24,7 @@ func TestSolveLowSystem(t *testing.T) {
 	flag.Parse()
 
 	// if we're plotting, don't care about this regression test
-	if *testPlot {
+	if *testPlot || *longPlot {
 		return
 	}
 	vars := []string{"D1", "Mu_h", "F0"}
@@ -58,9 +58,9 @@ func lowDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	}
 	var envs []*tempAll.Environment
 	if long {
-		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{12, 2, 2, 3}, []float64{0.01, 0.05, 0.05, 0.025}, []float64{0.10, 0.1, 0.1, 0.075})
+		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{12, 2, 2, 3}, []float64{0.01, 0.05, 0.05, 0.025}, []float64{0.078, 0.1, 0.1, 0.075})
 	} else {
-		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{12, 1, 1, 1}, []float64{0.01, 0.1, 0.1, 0.075}, []float64{0.07, 0.1, 0.1, 0.075})
+		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{0.01, 0.1, 0.1, 0.075}, []float64{0.1, 0.1, 0.1, 0.075})
 	}
 	return envs, nil
 
@@ -133,27 +133,36 @@ func TestPlotX2VsT(t *testing.T) {
 		pe := plotEnvs[i]
 		if pe == nil {
 			cerr <- errors.New("pe is nil")
+			return
 		}
 		if errs[i] != nil {
 			cerr <- errs[i]
+			return
 		}
-		env := pe.(tempAll.Environment)
+		env, ok := pe.(tempAll.Environment)
+		if !ok {
+			cerr <- errors.New("pe is not Environment")
+		}
 		X2, err := X2(&env)
 		if err != nil {
 			cerr <- err
+			return
 		}
 		SHenvs[i] = SpecificHeatEnv{env, X2, 0.0, 0.0}
 		if X2 == 0.0 {
 			cerr <- nil
+			return
 		}
 		sh_1, err := HolonSpecificHeat(&env)
 		if err != nil {
 			cerr <- err
+			return
 		}
 		fmt.Printf("sh_1 = %f\n", sh_1)
 		sh_2, err := PairSpecificHeat(&env)
 		if err != nil {
 			cerr <- err
+			return
 		}
 		fmt.Printf("sh_2 = %f\n", sh_2)
 		SHenvs[i] = SpecificHeatEnv{env, X2, sh_1, sh_2}
