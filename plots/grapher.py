@@ -8,7 +8,7 @@ from numpy import arange
 _GRAPH_DEFAULTS = {"xlabel":"$x$", "ylabel":"$y$", "num_ticks":5, 
     "axis_label_fontsize":"large", "tick_formatstr":"%.2f",
     "legend_fontsize":"large", "legend_loc":0, "legend_title":None, 
-    "graph_filepath":None}
+    "ymin":None, "graph_filepath":None}
 
 _SERIES_DEFAULTS = {"label":None, "style":"k."}
 
@@ -56,14 +56,17 @@ def make_graph(graph_data):
         fig = plt.figure()
     axes = fig.add_subplot(1, 1, 1)
     bounds = [None, None]
+	# plot the data
     for series in graph_data["series"]:
-        fig, axes, bounds = _graph_series(graph_data, series, fig, axes, 
-                                          bounds)
+        fig,axes,bounds = _graph_series(graph_data,series,fig,axes,bounds)
+	# set properties
     fontprop = FontProperties(size=graph_data["legend_fontsize"])
     axes.legend(loc=graph_data["legend_loc"], title=graph_data["legend_title"],
                 prop=fontprop)
     axes.set_xlabel(graph_data["xlabel"], size="large")
     axes.set_ylabel(graph_data["ylabel"], size="large")
+    if graph_data["ymin"] != None and graph_data["ymin"] != "":
+        axes.set_ylim(bottom=float(graph_data["ymin"]), auto=None)
     _save_figure(graph_data, fig)
     return fig, axes
     

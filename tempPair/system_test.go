@@ -55,7 +55,7 @@ func TestPlotTpVsX(t *testing.T) {
 	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	if *longPlot {
 		if !*tinyX {
-			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.01, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
+			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{120, 1, 5}, []float64{0.0005, 0.1, -0.15}, []float64{0.15, 0.1, 0.15})
 		} else {
 			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.001, 0.05, 0.05}, []float64{0.01, 0.1, 0.1})
 		}
@@ -63,24 +63,36 @@ func TestPlotTpVsX(t *testing.T) {
 
 	eps := 1e-9
 	plotEnvs, errs := tempAll.MultiSolve(envs, eps, eps, PairTempSolve)
-
+	// T_p vs x plot
 	vars := plots.GraphVars{"X", "", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, tempAll.GetTemp}
 	fileLabel := "plot_data.tp_x"
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_p$"}
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_p$", plots.YMIN_KEY: "0"}
 	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making plot: %v", err)
 	}
+	// Mu_h vs x plot
 	fileLabel = "plot_data.mu_x"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
+	graphParams[plots.YMIN_KEY] = ""
 	vars.Y = "Mu_h"
 	vars.YFunc = nil
 	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Mu_h plot: %v", err)
+	}
+	// D1 vs x plot
+	fileLabel = "plot_data.D1_x"
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$D_1$"
+	vars.Y = "D1"
+	vars.YFunc = nil
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making D1 plot: %v", err)
 	}
 
 }

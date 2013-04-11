@@ -6,7 +6,7 @@ import (
 	"sort"
 )
 
-var DEFAULT_STYLES = []string{"k.", "r.", "b.", "g."}
+var DEFAULT_STYLES = []string{"k-", "r-", "b-", "g-", "c-", "m-", "y-", "k--", "r--", "b--", "g--", "c--", "m--", "y--"}
 
 // Names of parameters relevant to MultiPlot
 type GraphVars struct {

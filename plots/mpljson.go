@@ -13,6 +13,7 @@ const SERIES_KEY = "series"
 const DATA_KEY = "data"
 const XLABEL_KEY = "xlabel"
 const YLABEL_KEY = "ylabel"
+const YMIN_KEY = "ymin"
 
 // A map compatible with the JSON object type
 type jsonObject map[string]interface{}
