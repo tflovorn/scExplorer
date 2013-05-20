@@ -40,3 +40,49 @@ func OmegaIntegralY(env *tempAll.Environment, omegaCoeffs []float64, F func(floa
 	val := integral / (4.0 * math.Pow(math.Pi, 2.0) * a * math.Sqrt(b))
 	return val, err
 }
+
+func OmegaIntegralCos(env *tempAll.Environment, omegaCoeffs []float64, F func(float64, float64) float64) (float64, error) {
+	// ignore produced value for ay and mu_b
+	a, b := omegaCoeffs[0], omegaCoeffs[2]
+	if a == 0.0 || b == 0.0 {
+		return 0.0, nil
+	}
+	// define the inner integral
+	t := 1e-7
+	integral_inner := func(kz float64) float64 {
+		bterm := 2.0 * b * (1.0 - math.Cos(kz))
+		ymax := env.Beta * (-2.0*env.Mu_h + env.Mu_b - bterm)
+		if ymax <= 0.0 {
+			return 0.0
+		}
+		if ymax/env.Beta > a*math.Pow(math.Pi, 2.0) {
+			panic(fmt.Errorf("ymax = %f is too large", ymax))
+		}
+		innerF := func(y float64) float64 {
+			return F(y, kz)
+		}
+		integral, abserr, err := integrate.Qags(innerF, 1e-10, ymax, t, t)
+		if err != nil {
+			fmt.Printf("inner integral error\n")
+			panic(err)
+		}
+		if math.Abs(abserr) > t*100 {
+			err = fmt.Errorf("inner integral too innaccurate (abserr = %e)", abserr)
+			panic(err)
+		}
+		return integral
+	}
+	// calculate the full integral
+	integral, abserr, err := integrate.Qags(integral_inner, -math.Pi, math.Pi, t, t)
+	if err != nil {
+		fmt.Printf("outer integral error\n")
+		return 0.0, err
+	}
+	if math.Abs(abserr) > t*1000 {
+		err = fmt.Errorf("outer integral too innaccurate (abserr = %e)", abserr)
+		return 0.0, err
+	}
+	val := integral / (8.0 * math.Pow(math.Pi, 2.0) * env.Beta * a)
+	return val, nil
+
+}

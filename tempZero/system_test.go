@@ -55,7 +55,7 @@ func TestPlotF0VsX(t *testing.T) {
 	}
 	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	if *longPlot {
-		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{120, 1, 5}, []float64{0.0005, 0.1, -0.15}, []float64{0.15, 0.1, 0.15})
+		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{120, 2, 1}, []float64{0.0005, 0.05, 0.10}, []float64{0.15, 0.15, 0.10})
 	}
 	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, nil}
 	xyLabels := []string{"$x$", "$F_0$", "$\\mu_h$", "$D_1$"}

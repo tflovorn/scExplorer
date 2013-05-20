@@ -55,7 +55,7 @@ func TestPlotTpVsX(t *testing.T) {
 	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	if *longPlot {
 		if !*tinyX {
-			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{120, 1, 5}, []float64{0.0005, 0.1, -0.15}, []float64{0.15, 0.1, 0.15})
+			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{30, 1, 1}, []float64{0.0005, 0.1, 0.1}, []float64{0.15, 0.1, 0.1})
 		} else {
 			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.001, 0.05, 0.05}, []float64{0.01, 0.1, 0.1})
 		}

@@ -167,7 +167,7 @@ func (env *Environment) Epsilon_h(k vec.Vector) float64 {
 // Single-holon energy without fixed minimum.
 func (env *Environment) epsilonBar(k vec.Vector) float64 {
 	sx, sy := math.Sin(k[0]), math.Sin(k[1])
-	return 2.0*env.Th()*((sx+sy)*(sx+sy)-1) + 4.0*(2.0*env.D1*env.T0-env.Thp)*sx*sy
+	return 2.0*env.Th()*((sx+sy)*(sx+sy)-1.0) + 4.0*(2.0*env.D1*env.T0-env.Thp)*sx*sy
 }
 
 // Get minimum value of env.Epsilon. If env.D1 hasn't changed since the last
@@ -186,6 +186,7 @@ func (env *Environment) setEpsilonMinCache() {
 		return env.epsilonBar(k)
 	}
 	env.epsilonMinCache = bzone.Min(env.PointsPerSide, 2, worker)
+	//println(env.epsilonMinCache)
 }
 
 // Single-holon energy minus chemical potential. Minimum is -env.Mu_h.

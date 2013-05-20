@@ -1,8 +1,8 @@
 package tempCrit
 
 import (
+	"fmt"
 	"math"
-	//"fmt"
 )
 import (
 	"../tempAll"
@@ -10,13 +10,35 @@ import (
 
 // Concentration of paired holons
 func X2(env *tempAll.Environment) (float64, error) {
-	nu, err := nu(env)
+	/*
+		// kz^2 version
+		nu, err := nu(env)
+		if err != nil {
+			return 0.0, err
+		}
+		x2 := nu / math.Pow(env.Beta, 3.0/2.0)
+		//println(x2)
+		return x2, nil
+	*/
+	// cos(kz) version
+	if -env.Mu_b > -2.0*env.Mu_h {
+		return 0.0, nil
+	}
+	// find omega_+ coefficients
+	plusCoeffs, err := OmegaFit(env, OmegaPlus)
+	if err != nil {
+		return 0.0, nil
+	}
+	fmt.Printf("plusCoeffs: %v\n", plusCoeffs)
+	integrand := func(y, kz float64) float64 {
+		bterm := plusCoeffs[2] * 2.0 * (1.0 - math.Cos(kz))
+		return 2.0 / (math.Exp(y+env.Beta*(bterm-env.Mu_b)) - 1.0)
+	}
+	plus, err := OmegaIntegralCos(env, plusCoeffs, integrand)
 	if err != nil {
 		return 0.0, err
 	}
-	x2 := nu / math.Pow(env.Beta, 3.0/2.0)
-	//println(x2)
-	return x2, nil
+	return plus, nil
 }
 
 // Equivalent to X2(); for use as YFunc in a plots.GraphVars

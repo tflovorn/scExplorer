@@ -2,6 +2,7 @@ package tempCrit
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -30,6 +31,7 @@ func TestSolveCritTempSystem(t *testing.T) {
 	}
 	err = tempAll.VerifySolution(env, CritTempSolve, CritTempFullSystem, vars, eps, eps, defaultEnvSolution)
 	if err != nil {
+		fmt.Printf("T_c = %f\n", 1.0/env.Beta)
 		t.Fatal(err)
 	}
 }
@@ -59,7 +61,7 @@ func TestPlotTcVsX(t *testing.T) {
 	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{4, 1, 1}, []float64{0.025, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
 	if *longPlot {
 		if !*tinyX {
-			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.01, 0.05, 0.05}, []float64{0.10, 0.1, 0.1})
+			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.0001, 0.05, 0.05}, []float64{0.15, 0.1, 0.10})
 		} else {
 			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.001, 0.05, 0.05}, []float64{0.01, 0.1, 0.1})
 		}
@@ -97,4 +99,19 @@ func TestPlotTcVsX(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error making Mu_h plot: %v", err)
 	}
+	// D_1 vs x plots
+	if !*tinyX {
+		fileLabel = "plot_data.D1_x_data"
+	} else {
+		fileLabel = "plot_data.tinyX_D1_x_data"
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.YLABEL_KEY] = "$D_1$"
+	vars.Y = "D1"
+	vars.YFunc = nil
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making D1 plot: %v", err)
+	}
+
 }

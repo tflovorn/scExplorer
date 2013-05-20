@@ -58,7 +58,7 @@ func lowDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	}
 	var envs []*tempAll.Environment
 	if long {
-		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{12, 2, 2, 3}, []float64{0.01, 0.05, 0.05, 0.025}, []float64{0.078, 0.1, 0.1, 0.075})
+		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{48, 2, 2, 3}, []float64{0.001, 0.05, 0.05, 0.025}, []float64{0.15, 0.1, 0.1, 0.075})
 	} else {
 		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{0.01, 0.1, 0.1, 0.075}, []float64{0.1, 0.1, 0.1, 0.075})
 	}

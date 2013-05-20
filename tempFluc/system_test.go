@@ -19,6 +19,7 @@ var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var loadCache = flag.Bool("loadCache", false, "load cached data instead of re-generating")
 var collapsePlot = flag.Bool("collapsePlot", false, "Run collapsing x2 version of plot tests")
+var skipPlots = flag.Bool("skipPlots", false, "skip creation of plots before SH calculation")
 
 var defaultEnvSolution = []float64{0.0164111381183055, -0.5778732662210768, 2.750651172711139}
 
@@ -84,9 +85,9 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	}
 	var envs []*tempAll.Environment
 	if long {
-		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{24, 2, 2, 3}, []float64{-0.08, 0.05, 0.05, 0.025}, []float64{-0.50, 0.1, 0.1, 0.075})
+		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{20, 1, 1, 3}, []float64{-0.05, 0.1, 0.1, 0.025}, []float64{-0.5, 0.1, 0.1, 0.075})
 	} else {
-		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{-0.1, 0.05, 0.1, 0.075}, []float64{-0.50, 0.1, 0.1, 0.075})
+		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{-0.05, 0.1, 0.1, 0.05}, []float64{-0.50, 0.1, 0.1, 0.05})
 	}
 	return envs, nil
 
@@ -127,9 +128,11 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	fileLabel := "plot_data.T_mu_b"
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$\\mu_b$", plots.YLABEL_KEY: "$T$"}
-	err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
-	if err != nil {
-		t.Fatalf("error making T(Mu_b) plot: %v", err)
+	if !*skipPlots {
+		err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+		if err != nil {
+			t.Fatalf("error making T(Mu_b) plot: %v", err)
+		}
 	}
 	// X2 vs T plots
 	fileLabel = "plot_data.x2_mu_b"
@@ -139,9 +142,11 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	vars.X = ""
 	vars.XFunc = tempAll.GetTemp
 	vars.YFunc = tempCrit.GetX2
-	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
-	if err != nil {
-		t.Fatalf("error making X2(T) plot: %v", err)
+	if !*skipPlots {
+		err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+		if err != nil {
+			t.Fatalf("error making X2(T) plot: %v", err)
+		}
 	}
 	// Mu_h vs T plots
 	fileLabel = "plot_data.mu_h_mu_b"
@@ -149,9 +154,11 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
 	vars.Y = "Mu_h"
 	vars.YFunc = nil
-	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
-	if err != nil {
-		t.Fatalf("error making Mu_h plot: %v", err)
+	if !*skipPlots {
+		err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+		if err != nil {
+			t.Fatalf("error making Mu_h plot: %v", err)
+		}
 	}
 	// omega(q) parameters (a, b) vs T
 	get_fit := func(data interface{}, i int) float64 {
@@ -173,18 +180,22 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	graphParams[plots.YLABEL_KEY] = "$a$"
 	vars.Y = ""
 	vars.YFunc = get_a
-	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
-	if err != nil {
-		t.Fatalf("error making a plot: %v", err)
+	if !*skipPlots {
+		err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+		if err != nil {
+			t.Fatalf("error making a plot: %v", err)
+		}
 	}
 	fileLabel = "plot_data.b_T"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$b$"
 	vars.Y = ""
 	vars.YFunc = get_b
-	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
-	if err != nil {
-		t.Fatalf("error making b plot: %v", err)
+	if !*skipPlots {
+		err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+		if err != nil {
+			t.Fatalf("error making b plot: %v", err)
+		}
 	}
 	// calculate specific heat contributions
 	SHenvs := make([]interface{}, len(plotEnvs))
@@ -232,7 +243,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	vars.XFunc = GetSHTemp
 	vars.Y = "SH_1"
 	vars.YFunc = nil
-	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
+	err := plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making specific heat plot: %v", err)
 	}

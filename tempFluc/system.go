@@ -41,6 +41,16 @@ func D1Mu_bXSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	return system, start
 }
 
+// System to solve (D1, Mu_b) with X, Mu_h and Beta fixed
+func D1Mu_bSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
+	variables := []string{"D1", "Mu_b"}
+	diffD1 := tempPair.AbsErrorD1(env, variables)
+	diffMu_b := AbsErrorMu_b(env, variables)
+	system := solve.Combine([]solve.Diffable{diffD1, diffMu_b})
+	start := []float64{env.D1, env.Mu_b}
+	return system, start
+}
+
 // Solve the (D1, Mu_h, Beta) system with x and Mu_b fixed.
 func FlucTempSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
 	// our guess for beta should be a bit above Beta_p
