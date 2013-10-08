@@ -27,13 +27,14 @@ func TestSolveLowSystem(t *testing.T) {
 	if *testPlot || *longPlot {
 		return
 	}
-	vars := []string{"D1", "Mu_h", "F0"}
-	eps := 1e-8
+	vars := []string{"D1", "Mu_h", "Beta"}
+	eps := 1e-6
 	env, err := lowDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = tempAll.VerifySolution(env, D1MuF0Solve, D1MuF0System, vars, eps, eps, defaultEnvSolution)
+	err = tempAll.VerifySolution(env, D1MuBetaSolve, D1MuBetaSystem, vars, eps, eps, defaultEnvSolution)
+	fmt.Printf("%v\n", env)
 	if err != nil {
 		t.Fatal(err)
 	}

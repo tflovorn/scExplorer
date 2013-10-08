@@ -20,6 +20,14 @@ func D1MuSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	return system, start
 }
 
+func MuSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
+	variables := []string{"Mu_h"}
+	diffMu_h := AbsErrorMu_h(env, variables)
+	system := solve.Combine([]solve.Diffable{diffMu_h})
+	start := []float64{env.Mu_h}
+	return system, start
+}
+
 func D1MuBetaSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	variables := []string{"D1", "Mu_h", "Beta"}
 	diffD1 := AbsErrorD1(env, variables)
@@ -61,25 +69,26 @@ func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 		if err != nil {
 			return nil, err
 		}
-		omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
-		if err != nil {
-			return nil, err
-		}
-		env.A, env.B = omegaFit[0], omegaFit[2]
-		env.Beta += 1.0
+		/*
+			omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
+			if err != nil {
+				return nil, err
+			}
+			env.A, env.B = omegaFit[0], omegaFit[2]
+		*/
+		fmt.Printf("%v; Tc = %f\n", env, 1.0/env.Beta)
+		env.Beta += 0.01
 		// we are at T < T_c; uncache env
 		env.D1, env.Mu_h, env.F0 = D1, Mu_h, F0
 	}
-	//fmt.Printf("%v; Tc = %f\n", env, 1.0 / env.Beta)
-	/*
-		// solve low temp system for reasonable values of D1 and Mu_h first
-		_, err = D1MuSolve(env, epsAbs, epsRel)
-		if err != nil {
-			return nil, err
-		}
-	*/
-	// solve the full low temp system
 	solve.DebugReport(true)
+	// solve low temp system for reasonable values of D1 and Mu_h first
+	_, err := D1MuSolve(env, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("-----D1MuSolve finished-----\n")
+	// solve the full low temp system
 	system, start := D1MuBetaSystem(env)
 	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
 	if err != nil {
@@ -100,30 +109,30 @@ func D1MuF0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 			return nil, err
 		}
 		if Beta < env.Beta {
-			return nil, fmt.Errorf("Beta = %f less than Beta_p in env %v", env, Beta)
+			return nil, fmt.Errorf("Beta = %f less than Beta_p in env %v", Beta, env)
 		}
 		_, err = tempCrit.CritTempSolve(env, epsAbs, epsRel)
 		if err != nil {
 			return nil, err
 		}
 		if Beta < env.Beta {
-			return nil, fmt.Errorf("Beta = %f less than Beta_c in env %v", env, Beta)
+			return nil, fmt.Errorf("Beta = %f less than Beta_c in env %v", Beta, env)
 		}
 		fmt.Printf("%v; Tc = %f\n", env, 1.0/env.Beta)
-		omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
-		if err != nil {
-			return nil, err
-		}
-		env.A, env.B = omegaFit[0], omegaFit[2]
-		// we are at T < T_c; uncache env
-		env.D1, env.Mu_h, env.F0, env.Beta = D1, Mu_h, F0, Beta
 		/*
-			// solve low temp system for reasonable values of D1 and Mu_h first
-			_, err = D1MuSolve(env, epsAbs, epsRel)
+			omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
 			if err != nil {
 				return nil, err
 			}
+			env.A, env.B = omegaFit[0], omegaFit[2]
 		*/
+		// we are at T < T_c; uncache env
+		env.D1, env.Mu_h, env.F0, env.Beta = D1, Mu_h, F0, Beta
+		// solve low temp system for reasonable values of D1 and Mu_h first
+		_, err = D1MuSolve(env, epsAbs, epsRel)
+		if err != nil {
+			return nil, err
+		}
 	}
 	solve.DebugReport(true)
 	// solve the full low temp system
@@ -138,6 +147,16 @@ func D1MuF0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 // Solve the (D1, Mu_h) system with Beta, x, and F0 fixed.
 func D1MuSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
 	system, start := D1MuSystem(env)
+	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	return solution, nil
+}
+
+// Solve the (Mu_h) system with D1, Beta, x, and F0 fixed.
+func MuSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	system, start := MuSystem(env)
 	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
 	if err != nil {
 		return nil, err

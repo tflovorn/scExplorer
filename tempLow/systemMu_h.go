@@ -1,10 +1,12 @@
 package tempLow
 
-import "math"
+//import "math"
+import "fmt"
 import (
-	"../bzone"
+	//	"../bzone"
 	"../solve"
 	"../tempAll"
+	"../tempCrit"
 	vec "../vector"
 )
 
@@ -13,20 +15,15 @@ import (
 func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 	F := func(v vec.Vector) (float64, error) {
 		env.Set(v, variables)
-		L := env.PointsPerSide
-		lhs := 2.0 / (env.T0 + env.Tz)
-		rhs := bzone.Avg(L, 2, tempAll.WrapFunc(env, innerMu_h))
-		return lhs - rhs, nil
+		plusCoeffs, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
+		if err != nil {
+			return 0.0, err
+		}
+		fmt.Printf("mu_h plusCoeffs: %v\n", plusCoeffs)
+		mu_pair := plusCoeffs[3]
+		return mu_pair, nil
 	}
-	h := 1e-5
-	epsabs := 1e-4
+	h := 2e-5
+	epsabs := 1e-2
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
-}
-
-func innerMu_h(env *tempAll.Environment, k vec.Vector) float64 {
-	sxy := math.Sin(k[0]) - math.Sin(k[1])
-	E := env.BogoEnergy(k)
-	xi := env.Xi_h(k)
-	delta := env.Delta_h(k)
-	return sxy * sxy * math.Tanh(env.Beta*E/2.0) * (2.0*xi*xi + delta*delta) / (E * E * E)
 }

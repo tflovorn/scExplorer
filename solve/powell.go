@@ -89,6 +89,11 @@ func DebugReport(on bool) {
 // Callback passing through cgo follows the model at:
 // http://stackoverflow.com/questions/6125683/call-go-functions-from-c/6147097#6147097
 func MultiDim(fn DiffSystem, start vec.Vector, epsAbs, epsRel float64) (vec.Vector, error) {
+	originalAbsErr, solveErr := fn.F(start)
+	if originalAbsErr.AbsMax() < epsAbs {
+		// solution already ok, can shortcut
+		return start, nil
+	}
 	cfn := unsafe.Pointer(&fn)
 	dim := C.size_t(fn.Dimension)
 	csolution, cstart := C.gsl_vector_alloc(dim), C.gsl_vector_alloc(dim)

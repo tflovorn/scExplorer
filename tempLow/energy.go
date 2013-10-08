@@ -1,11 +1,12 @@
 package tempLow
 
 import (
-	"math"
+//"math"
 )
 import (
 	"../bzone"
 	"../tempAll"
+	"../tempFluc"
 	vec "../vector"
 )
 
@@ -21,14 +22,17 @@ func HolonEnergy(env *tempAll.Environment) (float64, error) {
 
 // Calculate U_{2}/N = 1/N \sum_k (\omega_+(k) + \mu_b) n_b(\omega_+(k))
 func PairEnergy(env *tempAll.Environment) (float64, error) {
-	integrand := func(y float64) float64 {
-		num := math.Pow(y, 1.5)
-		denom := math.Exp(y) - 1.0
-		return num / denom
-	}
-	integral, err := OmegaIntegralY(env, integrand)
-	if err != nil {
-		return 0.0, err
-	}
-	return integral / math.Pow(env.Beta, 2.5), nil
+	return tempFluc.PairEnergy(env)
+	/*
+		integrand := func(y float64) float64 {
+			num := math.Pow(y, 1.5)
+			denom := math.Exp(y) - 1.0
+			return num / denom
+		}
+		integral, err := OmegaIntegralY(env, integrand)
+		if err != nil {
+			return 0.0, err
+		}
+		return integral / math.Pow(env.Beta, 2.5), nil
+	*/
 }

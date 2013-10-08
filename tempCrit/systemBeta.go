@@ -37,7 +37,7 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 		rhs := x1 + x2
 		return lhs - rhs, nil
 	}
-	h := 1e-5
-	epsabs := 1e-4
+	h := 1e-4
+	epsabs := 1e-3
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }

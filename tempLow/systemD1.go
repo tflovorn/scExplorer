@@ -20,8 +20,8 @@ func AbsErrorD1(env *tempAll.Environment, variables []string) solve.Diffable {
 		rhs := -bzone.Avg(L, 2, tempAll.WrapFunc(env, innerD1)) / 2.0
 		return lhs - rhs, nil
 	}
-	h := 1e-5
-	epsabs := 1e-4
+	h := 1e-2
+	epsabs := 1e-2
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
 

@@ -63,15 +63,16 @@ func omegaFitHelper(env *tempAll.Environment, fn OmegaFunc, points []vec.Vector)
 
 // Return a list of all k points surveyed by OmegaCoeffs().
 func omegaCoeffsPoints(numRadial int, sk float64) []vec.Vector {
-	ssk := sk / math.Sqrt(2)
+	//ssk := sk / math.Sqrt(2)
 	// basis vectors
 	xb := []float64{sk, 0.0, 0.0}
 	yb := []float64{0.0, sk, 0.0}
 	zb := []float64{0.0, 0.0, sk}
-	xyb := []float64{ssk, ssk, 0.0}
-	xzb := []float64{ssk, 0.0, ssk}
-	yzb := []float64{0.0, ssk, ssk}
-	basis := []vec.Vector{xb, yb, zb, xyb, xzb, yzb}
+	//xyb := []float64{ssk, ssk, 0.0}
+	//xzb := []float64{ssk, 0.0, ssk}
+	//yzb := []float64{0.0, ssk, ssk}
+	//basis := []vec.Vector{xb, yb, zb, xyb, xzb, yzb}
+	basis := []vec.Vector{xb, yb, zb}
 	// create points from basis
 	points := []vec.Vector{}
 	for _, v := range basis {

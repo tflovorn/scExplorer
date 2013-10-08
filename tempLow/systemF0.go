@@ -53,15 +53,13 @@ func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 			return 0.0, errors.New("NaN in input")
 		}
 		env.Set(v, variables)
-		/*
-			// Before we evaluate error in F0, Mu_h and D1 should have
-			// appropriate values.
-			eps := 1e-9
-			_, err := D1MuSolve(env, eps, eps)
-			if err != nil {
-				return 0.0, err
-			}
-		*/
+		// Before we evaluate error in F0, Mu_h and D1 should have
+		// appropriate values.
+		eps := 1e-9
+		_, err := D1MuSolve(env, eps, eps)
+		if err != nil {
+			return 0.0, err
+		}
 		// F0 equation error = x - x1 - x2
 		x1 := X1(env)
 		x2, err := X2(env)

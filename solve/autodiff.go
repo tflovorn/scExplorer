@@ -48,9 +48,9 @@ func Derivative(fn vec.FnDim0, v vec.Vector, i int, h, epsabs float64) (float64,
 	v_i_initial := v[i]
 	iters, maxIters := 0, 100
 	// results are bad for h too small or too large; we iterate in both directions
-	hMin := h / 1e6
-	hMax := h * 1e6
-	hRising := true
+	hMin := h / 1e2
+	hMax := h * 1e2
+	hRising := false
 	hInitial := h
 	hOk := func(h float64) bool {
 		if !hRising && h > hMin {
@@ -61,14 +61,14 @@ func Derivative(fn vec.FnDim0, v vec.Vector, i int, h, epsabs float64) (float64,
 		return false
 	}
 	hAdvance := func(h float64) float64 {
-		if hRising {
-			if h*2.0 > hMax {
-				hRising = false
-				return hInitial / 2.0
+		if !hRising {
+			if h/8.0 < hMin {
+				hRising = true
+				return hInitial * 8.0
 			}
-			return h * 2.0
+			return h / 8.0
 		}
-		return h / 2.0
+		return h * 8.0
 	}
 	fwi := unsafe.Pointer(&fnWithIndex{fn, v, i})
 	x := C.double(v[i])
@@ -85,7 +85,10 @@ func Derivative(fn vec.FnDim0, v vec.Vector, i int, h, epsabs float64) (float64,
 			return float64(result), nil
 		}
 		iters++
+		old_h := h
 		h = hAdvance(h)
+		fmt.Printf("calling hAdvance: previous h = %e, now h = %e\n", old_h, h)
+
 	}
 	// if we get here, !hOk(h) || iters == maxIters
 	v[i] = v_i_initial
