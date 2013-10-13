@@ -27,8 +27,8 @@ func Magnetization(env *tempAll.Environment) (float64, error) {
 		I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)
 		omega_c := 4.0 * env.Be_field * a
 		mu_tilde := env.Mu_b - omega_c/2.0
-		exp := math.Exp(-r * env.Beta * omega_c)
-		bracket := 1.0/(env.Beta*r*(1.0-exp)) - omega_c*exp/(math.Pow(1.0-exp, 2.0))
+		exp := -math.Expm1(-r * env.Beta * omega_c)
+		bracket := 1.0/(env.Beta*r*exp) - omega_c*math.Exp(-r*env.Beta*omega_c)/(exp*exp)
 		return I0 * math.Exp(r*env.Beta*(mu_tilde-2.0*b)) * bracket
 	}
 	sum, absErr := seriesaccel.Levin_u(MSumTerm, 1, 20)

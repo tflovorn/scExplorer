@@ -50,7 +50,7 @@ func X2(env *tempAll.Environment) (float64, error) {
 		I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)
 		omega_c := 4.0 * env.Be_field * a
 		mu_tilde := env.Mu_b - omega_c/2.0
-		return I0 * math.Exp(env.Beta*r*(mu_tilde-2.0*b)) / (1.0 - math.Exp(-env.Beta*omega_c*r))
+		return I0 * math.Exp(env.Beta*r*(mu_tilde-2.0*b)) / (-math.Expm1(-env.Beta * omega_c * r))
 	}
 	sum, absErr := seriesaccel.Levin_u(x2BSumTerm, 1, 20)
 	fmt.Printf("x2 B sum %e, absErr %e\n", sum, absErr)
