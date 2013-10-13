@@ -13,7 +13,7 @@ static void levin(void * fn, int iStart, int Nterms, double * result, double * a
 	double * t = malloc(Nterms * sizeof(double));
 	int i;
 
-	for (i = 0; (i - iStart) < Nterms; i++) {
+	for (i = iStart; (i - iStart) < Nterms; i++) {
 		double val = 0.0;
 		levin_go_f(i, fn, &val);
 		t[i] = val;
@@ -28,7 +28,9 @@ static void levin(void * fn, int iStart, int Nterms, double * result, double * a
 */
 import "C"
 
-import "unsafe"
+import (
+	"unsafe"
+)
 
 type TermFn func(int) float64
 
