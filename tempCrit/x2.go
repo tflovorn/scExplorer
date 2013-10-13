@@ -5,6 +5,8 @@ import (
 	"math"
 )
 import (
+	"../bessel"
+	"../seriesaccel"
 	"../tempAll"
 )
 
@@ -29,16 +31,30 @@ func X2(env *tempAll.Environment) (float64, error) {
 	if err != nil {
 		return 0.0, nil
 	}
-	fmt.Printf("plusCoeffs: %v\n", plusCoeffs)
-	integrand := func(y, kz float64) float64 {
-		bterm := plusCoeffs[2] * 2.0 * (1.0 - math.Cos(kz))
-		return 2.0 / (math.Exp(y+env.Beta*(bterm-env.Mu_b)) - 1.0)
+	fmt.Printf("plusCoeffs in X2: %v\n", plusCoeffs)
+	if math.Abs(env.Be_field) < 1e-9 {
+		integrand := func(y, kz float64) float64 {
+			bterm := plusCoeffs[2] * 2.0 * (1.0 - math.Cos(kz))
+			return 2.0 / (math.Exp(y+env.Beta*(bterm-env.Mu_b)) - 1.0)
+		}
+		plus, err := OmegaIntegralCos(env, plusCoeffs, integrand)
+		if err != nil {
+			return 0.0, err
+		}
+		return plus, nil
 	}
-	plus, err := OmegaIntegralCos(env, plusCoeffs, integrand)
-	if err != nil {
-		return 0.0, err
+	// if we get here, math.Abs(env.Be_field) >= 1e-9
+	x2BSumTerm := func(ri int) float64 {
+		r := float64(ri)
+		a, b := plusCoeffs[0], plusCoeffs[2]
+		I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)
+		omega_c := 4.0 * env.Be_field * a
+		mu_tilde := env.Mu_b - omega_c/2.0
+		return I0 * math.Exp(env.Beta*r*(mu_tilde-2.0*b)) / (1.0 - math.Exp(-env.Beta*omega_c*r))
 	}
-	return plus, nil
+	sum, absErr := seriesaccel.Levin_u(x2BSumTerm, 1, 20)
+	fmt.Printf("x2 B sum %e, absErr %e\n", sum, absErr)
+	return 2.0 * env.Be_field * sum / math.Pi, nil
 }
 
 // Equivalent to X2(); for use as YFunc in a plots.GraphVars
