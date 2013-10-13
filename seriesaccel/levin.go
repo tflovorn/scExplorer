@@ -16,7 +16,7 @@ static void levin(void * fn, int iStart, int Nterms, double * result, double * a
 	for (i = iStart; (i - iStart) < Nterms; i++) {
 		double val = 0.0;
 		levin_go_f(i, fn, &val);
-		t[i] = val;
+		t[i-iStart] = val;
 	}
 
 	gsl_sum_levin_u_accel(t, Nterms, w, result, absErr);
