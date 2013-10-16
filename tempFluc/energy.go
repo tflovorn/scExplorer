@@ -2,12 +2,15 @@ package tempFluc
 
 import (
 	"math"
+	"fmt"
 )
 import (
 	"../bzone"
 	"../tempAll"
 	"../tempCrit"
 	vec "../vector"
+	"../bessel"
+	"../seriesaccel"
 )
 
 // Calculate U_{1}/N = 1/N \sum_k \epsilon_h(k) f_h(\xi_h(k))
@@ -44,15 +47,34 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 	if err != nil {
 		return 0.0, err
 	}
-	integrand := func(y, kz float64) float64 {
-		bterm := 2.0 * oc[2] * (1.0 - math.Cos(kz))
-		num := y/env.Beta + bterm
-		denom := math.Exp(y+env.Beta*(bterm-env.Mu_b)) - 1.0
-		return num / denom
+	if math.Abs(env.Be_field) > 1e-9 {
+		integrand := func(y, kz float64) float64 {
+			bterm := 2.0 * oc[2] * (1.0 - math.Cos(kz))
+			num := y/env.Beta + bterm
+			denom := math.Exp(y+env.Beta*(bterm-env.Mu_b)) - 1.0
+			return num / denom
+		}
+		integral, err := tempCrit.OmegaIntegralCos(env, oc, integrand)
+		if err != nil {
+			return 0.0, err
+		}
+		return integral, nil
 	}
-	integral, err := tempCrit.OmegaIntegralCos(env, oc, integrand)
-	if err != nil {
-		return 0.0, err
+	// if we get here, math.Abs(env.Be_field) >= 1e-9
+	E2BSumTerm := func(ri int) float64 {
+		r := float64(ri)
+		a, b := oc[0], oc[2]
+		I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)
+		I1 := bessel.ModifiedBesselFirstKindFirst(2.0 * b * env.Beta * r)
+		omega_c := 4.0 * env.Be_field * a
+		mu_tilde := env.Mu_b - omega_c/2.0
+		expL := math.Exp(r * env.Beta * (mu_tilde - 2.0*b))
+		expR := math.Exp(-env.Beta * omega_c * r)
+		expm1 := -math.Expm1(-env.Beta * omega_c * r)
+		return expL * ((I0 * (0.5 + 2.0*b) - 2.0*b*I1)*expm1 + (I0 * omega_c * expR * expm1 * expm1))
 	}
-	return integral, nil
+	sum, absErr := seriesaccel.Levin_u(E2BSumTerm, 1, 20)
+	fmt.Printf("E2 B sum %e, absErr %e\n", sum, absErr)
+	return 2.0 * env.Be_field * sum / math.Pi, nil
+
 }
