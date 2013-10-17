@@ -47,7 +47,7 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 	if err != nil {
 		return 0.0, err
 	}
-	if math.Abs(env.Be_field) > 1e-9 {
+	if math.Abs(env.Be_field) < 1e-9 {
 		integrand := func(y, kz float64) float64 {
 			bterm := 2.0 * oc[2] * (1.0 - math.Cos(kz))
 			num := y/env.Beta + bterm

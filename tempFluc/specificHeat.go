@@ -77,7 +77,7 @@ func dMu_hdT(env *tempAll.Environment) (float64, error) {
 	h := 1e-4
 	epsAbs := 1e-5
 	deriv, err := solve.OneDimDerivative(F, env.Beta, h, epsAbs)
-	fmt.Println("MuT ct", ct)
+	fmt.Println("dMu_dT ct", ct)
 	return -math.Pow(env.Beta, 2.0) * deriv, err
 }
 
@@ -92,7 +92,7 @@ func dFdMu_h(env *tempAll.Environment, F envFunc) (float64, error) {
 		// (don't want one call of F to affect the next)
 		oD1, oMu_h, oX, oMu_b := env.D1, env.Mu_h, env.X, env.Mu_b
 		env.Mu_h = Mu_h
-		// fix free variables2
+		// fix free variables
 		eps := 1e-9
 		_, err := SolveD1Mu_bX(env, eps, eps)
 		if err != nil {
