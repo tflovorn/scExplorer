@@ -29,6 +29,7 @@ static void levin(void * fn, int iStart, int Nterms, double * result, double * a
 import "C"
 
 import (
+	"fmt"
 	"unsafe"
 )
 
@@ -44,9 +45,12 @@ func Levin_u(fn TermFn, iStart, Nstart int) (float64, float64) {
 	terms := C.int(0)
 
 	C.levin(unsafe.Pointer(&fn), C.int(iStart), C.int(Nstart), &result, &absErr, &terms)
-
 	// if number of terms used == Nstart, evaluate again with larger Nstart
 	if int(terms) == Nstart {
+		if Nstart > 300 {
+			fmt.Printf("bailing early from Levin_u; result=%e, absErr=%e, terms=%d\n", float64(result), float64(absErr), Nstart)
+			return float64(result), float64(absErr)
+		}
 		return Levin_u(fn, iStart, Nstart*2)
 	}
 	return float64(result), float64(absErr)

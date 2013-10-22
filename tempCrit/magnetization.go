@@ -12,6 +12,9 @@ import (
 
 // Magnetization per unit area divided by e
 func Magnetization(env *tempAll.Environment) (float64, error) {
+	if math.Abs(env.Be_field) < 1e-9 {
+		return 0.0, nil
+	}
 	if -env.Mu_b > -2.0*env.Mu_h {
 		return 0.0, nil
 	}
@@ -38,4 +41,14 @@ func Magnetization(env *tempAll.Environment) (float64, error) {
 		return 0.0, err
 	}
 	return -a*x2 + sum/math.Pi, nil
+}
+
+// Equivalent to Magnetization(); for use as YFunc in a plots.GraphVars
+func GetMagnetization(data interface{}) float64 {
+	env := data.(tempAll.Environment)
+	M, err := Magnetization(&env)
+	if err != nil {
+		panic(err)
+	}
+	return M
 }

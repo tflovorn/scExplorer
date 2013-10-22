@@ -2,15 +2,15 @@ package tempFluc
 
 import (
 	"math"
-	"fmt"
+	//"fmt"
 )
 import (
+	"../bessel"
 	"../bzone"
+	"../seriesaccel"
 	"../tempAll"
 	"../tempCrit"
 	vec "../vector"
-	"../bessel"
-	"../seriesaccel"
 )
 
 // Calculate U_{1}/N = 1/N \sum_k \epsilon_h(k) f_h(\xi_h(k))
@@ -61,6 +61,7 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 		return integral, nil
 	}
 	// if we get here, math.Abs(env.Be_field) >= 1e-9
+	//fmt.Printf("about to calculate E2 B sum for env = %s\n", env.String())
 	E2BSumTerm := func(ri int) float64 {
 		r := float64(ri)
 		a, b := oc[0], oc[2]
@@ -71,10 +72,13 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 		expL := math.Exp(r * env.Beta * (mu_tilde - 2.0*b))
 		expR := math.Exp(-env.Beta * omega_c * r)
 		expm1 := -math.Expm1(-env.Beta * omega_c * r)
-		return expL * ((I0 * (0.5 + 2.0*b) - 2.0*b*I1)*expm1 + (I0 * omega_c * expR * expm1 * expm1))
+		return expL * ((I0*(0.5+2.0*b)-2.0*b*I1)*expm1 + (I0 * omega_c * expR * expm1 * expm1))
 	}
-	sum, absErr := seriesaccel.Levin_u(E2BSumTerm, 1, 20)
-	fmt.Printf("E2 B sum %e, absErr %e\n", sum, absErr)
+	sum, _ := seriesaccel.Levin_u(E2BSumTerm, 1, 20)
+	// reporting of absErr:
+	// (dropped this since absErr is always very small compared to sum)
+	//sum, absErr := seriesaccel.Levin_u(E2BSumTerm, 1, 20)
+	//fmt.Printf("env=%s; E2 B sum %e, absErr %e\n", env.String(), sum, absErr)
 	return 2.0 * env.Be_field * sum / math.Pi, nil
 
 }

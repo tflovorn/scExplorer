@@ -20,8 +20,12 @@ var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var loadCache = flag.Bool("loadCache", false, "load cached data instead of re-generating")
 var collapsePlot = flag.Bool("collapsePlot", false, "Run collapsing x2 version of plot tests")
 var skipPlots = flag.Bool("skipPlots", false, "skip creation of plots before SH calculation")
+var magnetization_calc = flag.Bool("magnetization", false, "calculate magnetization")
 
 var defaultEnvSolution = []float64{0.0164111381183055, -0.5778732662210768, 2.750651172711139}
+
+// For Be_field = 0.001
+//var defaultEnvSolution = []float64{0.01303265027310482, -0.5952314017497311, 2.927696556072416}
 
 func TestSolveFlucSystem(t *testing.T) {
 	flag.Parse()
@@ -40,6 +44,12 @@ func TestSolveFlucSystem(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println(env.String())
+	magnetization, err := tempCrit.Magnetization(env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("magnetization: %e\n", magnetization)
 }
 
 func TestSolveFlucSystem_LargeMu_b(t *testing.T) {
@@ -85,7 +95,11 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	}
 	var envs []*tempAll.Environment
 	if long {
-		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{20, 1, 1, 3}, []float64{-0.05, 0.1, 0.1, 0.025}, []float64{-0.5, 0.1, 0.1, 0.075})
+		if *magnetization_calc {
+			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{8, 1, 1, 3, 20}, []float64{0.0, 0.1, 0.1, 0.025, 0.0}, []float64{-0.5, 0.1, 0.1, 0.075, 1.0})
+		} else {
+			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{16, 1, 1, 3, 8}, []float64{-0.05, 0.1, 0.1, 0.025, 0.0}, []float64{-0.3, 0.1, 0.1, 0.075, 0.10})
+		}
 	} else {
 		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{-0.05, 0.1, 0.1, 0.05}, []float64{-0.50, 0.1, 0.1, 0.05})
 	}
@@ -124,7 +138,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	}
 	Xs := getXs(plotEnvs)
 	// T vs Mu_b plots
-	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp", "X"}, []string{"t_z", "t_h^{\\prime}", "x"}, nil, tempAll.GetTemp}
+	vars := plots.GraphVars{"Mu_b", "", []string{"Tz", "Thp", "X", "Be_field"}, []string{"t_z", "t_h^{\\prime}", "x", "eB"}, nil, tempAll.GetTemp}
 	fileLabel := "plot_data.T_mu_b"
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$\\mu_b$", plots.YLABEL_KEY: "$T$"}
@@ -135,7 +149,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		}
 	}
 	// X2 vs T plots
-	fileLabel = "plot_data.x2_mu_b"
+	fileLabel = "plot_data.x2_T"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.XLABEL_KEY] = "$T$"
 	graphParams[plots.YLABEL_KEY] = "$x_2$"
@@ -149,7 +163,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		}
 	}
 	// Mu_h vs T plots
-	fileLabel = "plot_data.mu_h_mu_b"
+	fileLabel = "plot_data.mu_h_T"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h$"
 	vars.Y = "Mu_h"
@@ -197,17 +211,42 @@ func TestPlotX2VsMu_b(t *testing.T) {
 			t.Fatalf("error making b plot: %v", err)
 		}
 	}
+	// if looking for magnetization plot, make that plot and don't get Cv
+	if *magnetization_calc && !*skipPlots {
+		fileLabel = "plot_data.M_eB"
+		graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+		graphParams[plots.XLABEL_KEY] = "$eB$"
+		graphParams[plots.YLABEL_KEY] = "$M$"
+		vars.X = "Be_field"
+		vars.XFunc = nil
+		vars.Y = ""
+		vars.YFunc = tempCrit.GetMagnetization
+		vars.Params = []string{"Tz", "Thp", "X", "Mu_b"}
+		vars.ParamLabels = []string{"t_z", "t_h^{\\prime}", "x", "\\mu_b"}
+		err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+		if err != nil {
+			t.Fatalf("error making M plot: %v", err)
+		}
+		return
+	}
 	// calculate specific heat contributions
 	SHenvs := make([]interface{}, len(plotEnvs))
 	F := func(i int, cerr chan<- error) {
+		SHenvs[i] = nil
 		pe := plotEnvs[i]
-		if pe == nil {
-			cerr <- errors.New("pe is nil")
-		}
 		if errs[i] != nil {
 			cerr <- errs[i]
+			return
 		}
-		env := pe.(tempAll.Environment)
+		if pe == nil {
+			cerr <- errors.New("pe is nil")
+			return
+		}
+		env, ok := pe.(tempAll.Environment)
+		if !ok {
+			cerr <- errors.New("conversion of plotEnvs[i] to Environment failed")
+			return
+		}
 		X2, err := tempCrit.X2(&env)
 		if err != nil {
 			cerr <- err
@@ -240,6 +279,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	fileLabel = "plot_data.SH-1_mu_b"
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 	graphParams[plots.YLABEL_KEY] = "$C_V^{1}$"
+	vars.X = ""
 	vars.XFunc = GetSHTemp
 	vars.Y = "SH_1"
 	vars.YFunc = nil

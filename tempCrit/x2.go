@@ -1,7 +1,7 @@
 package tempCrit
 
 import (
-	"fmt"
+	//"fmt"
 	"math"
 )
 import (
@@ -31,7 +31,7 @@ func X2(env *tempAll.Environment) (float64, error) {
 	if err != nil {
 		return 0.0, nil
 	}
-	fmt.Printf("plusCoeffs in X2: %v\n", plusCoeffs)
+	//fmt.Printf("plusCoeffs in X2: %v\n", plusCoeffs)
 	if math.Abs(env.Be_field) < 1e-9 {
 		integrand := func(y, kz float64) float64 {
 			bterm := plusCoeffs[2] * 2.0 * (1.0 - math.Cos(kz))
@@ -44,6 +44,7 @@ func X2(env *tempAll.Environment) (float64, error) {
 		return plus, nil
 	}
 	// if we get here, math.Abs(env.Be_field) >= 1e-9
+	//fmt.Printf("about to calculate x2 sum for env = %s\n", env.String())
 	x2BSumTerm := func(ri int) float64 {
 		r := float64(ri)
 		a, b := plusCoeffs[0], plusCoeffs[2]
@@ -52,8 +53,11 @@ func X2(env *tempAll.Environment) (float64, error) {
 		mu_tilde := env.Mu_b - omega_c/2.0
 		return I0 * math.Exp(env.Beta*r*(mu_tilde-2.0*b)) / (-math.Expm1(-env.Beta * omega_c * r))
 	}
-	sum, absErr := seriesaccel.Levin_u(x2BSumTerm, 1, 20)
-	fmt.Printf("x2 B sum %e, absErr %e\n", sum, absErr)
+	sum, _ := seriesaccel.Levin_u(x2BSumTerm, 1, 20)
+	// reporting of absErr:
+	// (dropped this since absErr is always very small relative to sum)
+	//sum, absErr := seriesaccel.Levin_u(x2BSumTerm, 1, 20)
+	//fmt.Printf("for env=%s; x2 B sum %e, absErr %e\n", env.String(), sum, absErr)
 	return 2.0 * env.Be_field * sum / math.Pi, nil
 }
 
