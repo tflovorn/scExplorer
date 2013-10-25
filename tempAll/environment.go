@@ -34,8 +34,13 @@ type Environment struct {
 	Mu_b float64 // holon pair (bosonic) chemical potential (0 if T <= Tc)
 	A, B float64 // pair spectrum parameters
 
-	// Behavior flags
-	IterateD1Mu_hMu_b bool // iterate solution for Mu_b in SolveD1Mu_hMu_b
+	// Behavior flags:
+
+	// Iterate solution for Mu_b in SolveD1Mu_hMu_b.
+	IterateD1Mu_hMu_b bool
+	// Use kz^2 in pair spectrum - incompatible with finite magnetic field.
+	// If false, use cosine spectrum in tempCrit/tempFluc; cosine spectrum not implemented in tempLow.
+	PairKzSquaredSpectrum bool
 
 	// Cached values:
 	epsilonMinCache  float64

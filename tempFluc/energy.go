@@ -25,8 +25,8 @@ func HolonEnergy(env *tempAll.Environment) (float64, error) {
 
 // Calculate U_{2}/N = 1/N \sum_k (\omega_+(k) + \mu_b) n_b(\omega_+(k))
 func PairEnergy(env *tempAll.Environment) (float64, error) {
-	/*
-		// kz^2 version
+	// kz^2 version - incompatible with finite magnetic field
+	if env.PairKzSquaredSpectrum && math.Abs(env.Be_field) < 1e-9 {
 		oc, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
 		if err != nil {
 			return 0.0, err
@@ -41,7 +41,7 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 			return 0.0, err
 		}
 		return integral / math.Pow(env.Beta, 2.5), nil
-	*/
+	}
 	// cos(kz) version
 	oc, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
 	if err != nil {

@@ -12,16 +12,15 @@ import (
 
 // Concentration of paired holons
 func X2(env *tempAll.Environment) (float64, error) {
-	/*
-		// kz^2 version
+	// kz^2 version - incompatible with finite magnetic field
+	if env.PairKzSquaredSpectrum && math.Abs(env.Be_field) < 1e-9 {
 		nu, err := nu(env)
 		if err != nil {
 			return 0.0, err
 		}
 		x2 := nu / math.Pow(env.Beta, 3.0/2.0)
-		//println(x2)
 		return x2, nil
-	*/
+	}
 	// cos(kz) version
 	if -env.Mu_b > -2.0*env.Mu_h {
 		return 0.0, nil
