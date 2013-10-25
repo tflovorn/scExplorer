@@ -1,6 +1,5 @@
 package tempCrit
 
-import "fmt"
 import (
 	"../solve"
 	"../tempAll"
@@ -64,7 +63,6 @@ func CritTempSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("pair temp system solved")
 	// solve the full crit temp system
 	system, start = CritTempFullSystem(env)
 	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)

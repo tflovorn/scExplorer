@@ -9,7 +9,6 @@ import (
 )
 import (
 	"../plots"
-	"../solve"
 	"../tempAll"
 )
 
@@ -17,12 +16,14 @@ var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")
 
-var defaultEnvSolution = []float64{0.006316132112386478, -0.5799328990719926, 3.727109277361983}
+// kz^2 values
+//var defaultEnvSolution = []float64{0.006316132112386478, -0.5799328990719926, 3.727109277361983}
+// cos(kz) values
+var defaultEnvSolution = []float64{0.005166791967836855, -0.5859596040494773, 3.9111016056424477}
 
 // Solve a critical-temperature system for the appropriate values of
 // (D1,Mu_h,Beta)
 func TestSolveCritTempSystem(t *testing.T) {
-	solve.DebugReport(true)
 	vars := []string{"D1", "Mu_h", "Beta"}
 	eps := 1e-6
 	env, err := ctDefaultEnv()

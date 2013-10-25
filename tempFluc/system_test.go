@@ -22,7 +22,10 @@ var collapsePlot = flag.Bool("collapsePlot", false, "Run collapsing x2 version o
 var skipPlots = flag.Bool("skipPlots", false, "skip creation of plots before SH calculation")
 var magnetization_calc = flag.Bool("magnetization", false, "calculate magnetization")
 
-var defaultEnvSolution = []float64{0.0164111381183055, -0.5778732662210768, 2.750651172711139}
+// kz^2 value
+//var defaultEnvSolution = []float64{0.0164111381183055, -0.5778732662210768, 2.750651172711139}
+// cos(kz) value
+var defaultEnvSolution = []float64{0.013529938198461218, -0.5926718578899809, 2.898448599519963}
 
 // For Be_field = 0.001
 //var defaultEnvSolution = []float64{0.01303265027310482, -0.5952314017497311, 2.927696556072416}
@@ -44,12 +47,6 @@ func TestSolveFlucSystem(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(env.String())
-	magnetization, err := tempCrit.Magnetization(env)
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Printf("magnetization: %e\n", magnetization)
 }
 
 func TestSolveFlucSystem_LargeMu_b(t *testing.T) {
@@ -60,7 +57,11 @@ func TestSolveFlucSystem_LargeMu_b(t *testing.T) {
 		return
 	}
 
-	expected := []float64{0.03047703936397049, -0.7236663299469903, 1.7649274240769777}
+	// kz^2 value
+	//expected := []float64{0.03047703936397049, -0.7236663299469903, 1.7649274240769777}
+	// cos(kz) value
+	expected := []float64{0.023531753277253136, -0.7559676667469845, 1.9480858710644846}
+
 	vars := []string{"D1", "Mu_h", "Beta"}
 	eps := 1e-8
 	env, err := flucDefaultEnv()
