@@ -34,6 +34,9 @@ type Environment struct {
 	Mu_b float64 // holon pair (bosonic) chemical potential (0 if T <= Tc)
 	A, B float64 // pair spectrum parameters
 
+	// Behavior flags
+	IterateD1Mu_hMu_b bool // iterate solution for Mu_b in SolveD1Mu_hMu_b
+
 	// Cached values:
 	epsilonMinCache  float64
 	lastEpsilonMinD1 float64

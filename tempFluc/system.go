@@ -1,6 +1,10 @@
 package tempFluc
 
 import (
+	"fmt"
+	"math"
+)
+import (
 	"../solve"
 	"../tempAll"
 	"../tempCrit"
@@ -87,17 +91,29 @@ func SolveD1Mu_h(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 
 // Solve the (D1, Mu_h, Mu_b) system with Beta and x fixed.
 func SolveD1Mu_hMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
-	solution, err := SolveD1Mu_h(env, epsAbs, epsRel)
-	if err != nil {
-		return nil, err
+	maxIters := 1000
+	oldMu_b := env.Mu_b
+	for i := 0; i < maxIters; i++ {
+		// iterate D1/Mu_h
+		solution, err := SolveD1Mu_h(env, epsAbs, epsRel)
+		if err != nil {
+			return nil, err
+		}
+		// iterate Mu_b
+		zv := vec.ZeroVector(3)
+		omega0, err := tempCrit.OmegaPlus(env, zv)
+		if err != nil {
+			return nil, err
+		}
+		env.Mu_b = -omega0
+		//fmt.Printf("iterating Mu_b: now %f, before %f\n", env.Mu_b, oldMu_b)
+		// check if done
+		if math.Abs(env.Mu_b-oldMu_b) < epsAbs || !env.IterateD1Mu_hMu_b {
+			return []float64{solution[0], solution[1], env.Mu_b}, nil
+		}
+		oldMu_b = env.Mu_b
 	}
-	zv := vec.ZeroVector(3)
-	omega0, err := tempCrit.OmegaPlus(env, zv)
-	if err != nil {
-		return nil, err
-	}
-	env.Mu_b = -omega0
-	return []float64{solution[0], solution[1], env.Mu_b}, nil
+	return []float64{0.0, 0.0, 0.0}, fmt.Errorf("failed to find D1/Mu_h/Mu_b solution for env=%s\n", env.String())
 }
 
 // Solve the (D1, x) system with Mu_h, Beta, and Mu_b fixed.

@@ -98,7 +98,7 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 		if *magnetization_calc {
 			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{8, 1, 1, 3, 20}, []float64{0.0, 0.1, 0.1, 0.025, 0.0}, []float64{-0.5, 0.1, 0.1, 0.075, 1.0})
 		} else {
-			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{16, 1, 1, 3, 8}, []float64{-0.05, 0.1, 0.1, 0.025, 0.0}, []float64{-0.3, 0.1, 0.1, 0.075, 0.10})
+			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{16, 1, 1, 3, 4}, []float64{-0.05, 0.1, 0.1, 0.025, 0.0}, []float64{-0.3, 0.1, 0.1, 0.075, 0.01})
 		}
 	} else {
 		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{-0.05, 0.1, 0.1, 0.05}, []float64{-0.50, 0.1, 0.1, 0.05})
