@@ -9,8 +9,8 @@ func TestEnergies(t *testing.T) {
 	//expectedHolon := 0.011309275258310362
 	//expectedPair := 0.00829824598441264
 	// cos(kz) values
-	expectedHolon := 0.009492473853092808
-	expectedPair := 0.010898198557571579
+	expectedHolon := 0.009492473956200979
+	expectedPair := 0.010898198589873287
 
 	env, err := flucDefaultEnv()
 	if err != nil {
