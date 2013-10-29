@@ -5,6 +5,7 @@ import (
 	"math"
 )
 import (
+	"../integrate"
 	"../solve"
 	"../tempAll"
 )
@@ -51,6 +52,14 @@ func HolonSpecificHeat(env *tempAll.Environment) (float64, error) {
 // Specific heat at constant volume due to pairs
 func PairSpecificHeat(env *tempAll.Environment) (float64, error) {
 	return specificHeat(env, PairEnergy)
+}
+
+// Entropy = \int_{0}^{T} \gamma(T^{\prime}) dT^{\prime}.
+// Calculate by interpolating between the given gamma values at the given
+// temperatures. Since gamma down to T=0 may not be available, lower bound
+// is also specified.
+func Entropy(temps, gammas []float64, lower, upper float64) (float64, error) {
+	return integrate.Spline(temps, gammas, lower, upper)
 }
 
 // Partial derivative of Mu_h with respect to T; x and V held constant.
