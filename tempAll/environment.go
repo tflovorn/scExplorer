@@ -36,11 +36,15 @@ type Environment struct {
 
 	// Behavior flags:
 
-	// Iterate solution for Mu_b in SolveD1Mu_hMu_b.
+	// Iterate solution for Mu_b in tempFluc.SolveD1Mu_hMu_b.
 	IterateD1Mu_hMu_b bool
 	// Use kz^2 in pair spectrum - incompatible with finite magnetic field.
 	// If false, use cosine spectrum in tempCrit/tempFluc; cosine spectrum not implemented in tempLow.
 	PairKzSquaredSpectrum bool
+	// Fix pair spectrum coefficients to their values at Tc (helps match F0 = 0 to Tc in T < Tc calculation).
+	FixedPairCoeffs bool
+	// If FixedPairCoeffs = true, stop varying pair spectrum coefficients after PairCoeffsReady is set to true.
+	PairCoeffsReady bool
 
 	// Cached values:
 	epsilonMinCache  float64

@@ -1,7 +1,7 @@
 package tempCrit
 
 import (
-	//"fmt"
+	"fmt"
 	"math"
 )
 import (
@@ -26,17 +26,23 @@ func X2(env *tempAll.Environment) (float64, error) {
 		return 0.0, nil
 	}
 	// find omega_+ coefficients
-	plusCoeffs, err := OmegaFit(env, OmegaPlus)
-	if err != nil {
-		return 0.0, nil
+	a, b := env.A, env.B
+	if !env.FixedPairCoeffs || !env.PairCoeffsReady {
+		plusCoeffs, err := OmegaFit(env, OmegaPlus)
+		//fmt.Printf("plusCoeffs in X2: %v\n", plusCoeffs)
+		if err != nil {
+			fmt.Println("suppressing error in x2 - cannot find pair spectrum")
+			return 0.0, nil
+		}
+		a, b = plusCoeffs[0], plusCoeffs[2]
 	}
-	//fmt.Printf("plusCoeffs in X2: %v\n", plusCoeffs)
+	// zero magnetic field with cos(kz) spectrum
 	if math.Abs(env.Be_field) < 1e-9 {
 		integrand := func(y, kz float64) float64 {
-			bterm := plusCoeffs[2] * 2.0 * (1.0 - math.Cos(kz))
+			bterm := 2.0 * b * (1.0 - math.Cos(kz))
 			return 2.0 / (math.Exp(y+env.Beta*(bterm-env.Mu_b)) - 1.0)
 		}
-		plus, err := OmegaIntegralCos(env, plusCoeffs, integrand)
+		plus, err := OmegaIntegralCos(env, a, b, integrand)
 		if err != nil {
 			return 0.0, err
 		}
@@ -46,7 +52,6 @@ func X2(env *tempAll.Environment) (float64, error) {
 	//fmt.Printf("about to calculate x2 sum for env = %s\n", env.String())
 	x2BSumTerm := func(ri int) float64 {
 		r := float64(ri)
-		a, b := plusCoeffs[0], plusCoeffs[2]
 		I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)
 		omega_c := 4.0 * env.Be_field * a
 		mu_tilde := env.Mu_b - omega_c/2.0
@@ -78,12 +83,16 @@ func nu(env *tempAll.Environment) (float64, error) {
 		return 2.0 * math.Sqrt(y) / (math.Exp(y-env.Beta*env.Mu_b) - 1.0)
 	}
 	// find omega_+ coefficients
-	plusCoeffs, err := OmegaFit(env, OmegaPlus)
-	if err != nil {
-		//return 0.0, err
-		return 0.0, nil
+	a, b := env.A, env.B
+	if !env.FixedPairCoeffs || !env.PairCoeffsReady {
+		plusCoeffs, err := OmegaFit(env, OmegaPlus)
+		if err != nil {
+			fmt.Println("suppressing error in x2 - cannot find pair spectrum")
+			return 0.0, nil
+		}
+		a, b = plusCoeffs[0], plusCoeffs[2]
 	}
-	plus, err := OmegaIntegralY(env, plusCoeffs, integrand)
+	plus, err := OmegaIntegralY(env, a, b, integrand)
 	if err != nil {
 		return 0.0, err
 	}

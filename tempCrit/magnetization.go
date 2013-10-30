@@ -19,12 +19,16 @@ func Magnetization(env *tempAll.Environment) (float64, error) {
 		return 0.0, nil
 	}
 	// find omega_+ coefficients
-	plusCoeffs, err := OmegaFit(env, OmegaPlus)
-	if err != nil {
-		return 0.0, nil
+	a, b := env.A, env.B
+	if !env.FixedPairCoeffs || !env.PairCoeffsReady {
+		plusCoeffs, err := OmegaFit(env, OmegaPlus)
+		//fmt.Printf("plusCoeffs in Magnetization: %v\n", plusCoeffs)
+		if err != nil {
+			fmt.Println("suppressing error in magnetization - cannot find pair spectrum")
+			return 0.0, nil
+		}
+		a, b = plusCoeffs[0], plusCoeffs[2]
 	}
-	fmt.Printf("plusCoeffs in Magnetization: %v\n", plusCoeffs)
-	a, b := plusCoeffs[0], plusCoeffs[2]
 	MSumTerm := func(ri int) float64 {
 		r := float64(ri)
 		I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)

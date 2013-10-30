@@ -10,9 +10,8 @@ import (
 )
 
 // Calculate the integral of y from 0 to ymax of: F(y) / (4*pi^2*a*sqrt(b)).
-func OmegaIntegralY(env *tempAll.Environment, omegaCoeffs []float64, F func(float64) float64) (float64, error) {
-	// ignore produced value for ay and mu_b
-	a, b := omegaCoeffs[0], omegaCoeffs[2]
+// a, b are parameters in pair spectrum: omega_+(k) = a*(kx^2 + ky^2) + b*(kz^2)
+func OmegaIntegralY(env *tempAll.Environment, a, b float64, F func(float64) float64) (float64, error) {
 	if a == 0.0 || b == 0.0 {
 		return 0.0, nil
 	}
@@ -41,9 +40,9 @@ func OmegaIntegralY(env *tempAll.Environment, omegaCoeffs []float64, F func(floa
 	return val, err
 }
 
-func OmegaIntegralCos(env *tempAll.Environment, omegaCoeffs []float64, F func(float64, float64) float64) (float64, error) {
-	// ignore produced value for ay and mu_b
-	a, b := omegaCoeffs[0], omegaCoeffs[2]
+// Calculate the integral of y from 0 to ymax of: F(y) / (8*pi^2*a).
+// a, b are parameters in pair spectrum: omega_+(k) = a*(kx^2 + ky^2) + 2b*(1 - cos(kz))
+func OmegaIntegralCos(env *tempAll.Environment, a, b float64, F func(float64, float64) float64) (float64, error) {
 	if a == 0.0 || b == 0.0 {
 		return 0.0, nil
 	}

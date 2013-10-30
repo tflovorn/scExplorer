@@ -12,13 +12,14 @@ import (
 	"../parallel"
 	"../plots"
 	"../tempAll"
+	"../tempCrit"
 )
 
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var loadCache = flag.Bool("loadCache", false, "load cached data instead of re-generating")
 
-var defaultEnvSolution = []float64{0.02155729636501704, -0.5065216126264922, 0.08378494601111632}
+var defaultEnvSolution = []float64{0.005168644067156091, -0.5859316261870242, 0.0008541131711382995}
 
 func TestSolveLowSystem(t *testing.T) {
 	flag.Parse()
@@ -112,7 +113,7 @@ func TestPlotX2VsT(t *testing.T) {
 	graphParams[plots.YLABEL_KEY] = "$x_2$"
 	vars.X = ""
 	vars.XFunc = tempAll.GetTemp
-	vars.YFunc = GetX2
+	vars.YFunc = tempCrit.GetX2
 	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making X2(T) plot: %v", err)
@@ -143,7 +144,7 @@ func TestPlotX2VsT(t *testing.T) {
 		if !ok {
 			cerr <- errors.New("pe is not Environment")
 		}
-		X2, err := X2(&env)
+		X2, err := tempCrit.X2(&env)
 		if err != nil {
 			cerr <- err
 			return

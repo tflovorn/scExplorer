@@ -66,7 +66,8 @@ func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 			return nil, err
 		}
 		env.A, env.B = omegaFit[0], omegaFit[2]
-		env.Beta += 1.0
+		env.PairCoeffsReady = true
+		env.Beta += 0.1
 		// we are at T < T_c; uncache env
 		env.D1, env.Mu_h, env.F0 = D1, Mu_h, F0
 	}
@@ -100,14 +101,14 @@ func D1MuF0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 			return nil, err
 		}
 		if Beta < env.Beta {
-			return nil, fmt.Errorf("Beta = %f less than Beta_p in env %v", env, Beta)
+			return nil, fmt.Errorf("Beta = %f less than Beta_p in env %s", Beta, env.String())
 		}
 		_, err = tempCrit.CritTempSolve(env, epsAbs, epsRel)
 		if err != nil {
 			return nil, err
 		}
 		if Beta < env.Beta {
-			return nil, fmt.Errorf("Beta = %f less than Beta_c in env %v", env, Beta)
+			return nil, fmt.Errorf("Beta = %f less than Beta_c in env %s", Beta, env.String())
 		}
 		fmt.Printf("%v; Tc = %f\n", env, 1.0/env.Beta)
 		omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
@@ -115,6 +116,7 @@ func D1MuF0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 			return nil, err
 		}
 		env.A, env.B = omegaFit[0], omegaFit[2]
+		env.PairCoeffsReady = true
 		// we are at T < T_c; uncache env
 		env.D1, env.Mu_h, env.F0, env.Beta = D1, Mu_h, F0, Beta
 		/*

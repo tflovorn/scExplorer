@@ -178,6 +178,13 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	// omega(q) parameters (a, b) vs T
 	get_fit := func(data interface{}, i int) float64 {
 		env := data.(tempAll.Environment)
+		if env.FixedPairCoeffs {
+			if i == 0 || i == 1 {
+				return env.A
+			} else {
+				return env.B
+			}
+		}
 		fit, err := tempCrit.OmegaFit(&env, tempCrit.OmegaPlus)
 		if err != nil {
 			fmt.Printf("%v\n", err)

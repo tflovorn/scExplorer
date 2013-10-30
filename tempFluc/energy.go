@@ -1,8 +1,8 @@
 package tempFluc
 
 import (
+	"fmt"
 	"math"
-	//"fmt"
 )
 import (
 	"../bessel"
@@ -25,36 +25,38 @@ func HolonEnergy(env *tempAll.Environment) (float64, error) {
 
 // Calculate U_{2}/N = 1/N \sum_k (\omega_+(k) + \mu_b) n_b(\omega_+(k))
 func PairEnergy(env *tempAll.Environment) (float64, error) {
+	// find omega_+ coefficients
+	a, b := env.A, env.B
+	if !env.FixedPairCoeffs || !env.PairCoeffsReady {
+		plusCoeffs, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
+		if err != nil {
+			fmt.Println("suppressing error in PairEnergy - cannot find pair spectrum")
+			return 0.0, nil
+		}
+		a, b = plusCoeffs[0], plusCoeffs[2]
+	}
 	// kz^2 version - incompatible with finite magnetic field
 	if env.PairKzSquaredSpectrum && math.Abs(env.Be_field) < 1e-9 {
-		oc, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
-		if err != nil {
-			return 0.0, err
-		}
 		integrand := func(y float64) float64 {
 			num := math.Pow(y, 1.5)
 			denom := math.Exp(y-env.Beta*env.Mu_b) - 1.0
 			return num / denom
 		}
-		integral, err := tempCrit.OmegaIntegralY(env, oc, integrand)
+		integral, err := tempCrit.OmegaIntegralY(env, a, b, integrand)
 		if err != nil {
 			return 0.0, err
 		}
 		return integral / math.Pow(env.Beta, 2.5), nil
 	}
 	// cos(kz) version
-	oc, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
-	if err != nil {
-		return 0.0, err
-	}
 	if math.Abs(env.Be_field) < 1e-9 {
 		integrand := func(y, kz float64) float64 {
-			bterm := 2.0 * oc[2] * (1.0 - math.Cos(kz))
+			bterm := 2.0 * b * (1.0 - math.Cos(kz))
 			num := y/env.Beta + bterm
 			denom := math.Exp(y+env.Beta*(bterm-env.Mu_b)) - 1.0
 			return num / denom
 		}
-		integral, err := tempCrit.OmegaIntegralCos(env, oc, integrand)
+		integral, err := tempCrit.OmegaIntegralCos(env, a, b, integrand)
 		if err != nil {
 			return 0.0, err
 		}
@@ -64,7 +66,6 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 	//fmt.Printf("about to calculate E2 B sum for env = %s\n", env.String())
 	E2BSumTerm := func(ri int) float64 {
 		r := float64(ri)
-		a, b := oc[0], oc[2]
 		I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)
 		I1 := bessel.ModifiedBesselFirstKindFirst(2.0 * b * env.Beta * r)
 		omega_c := 4.0 * env.Be_field * a

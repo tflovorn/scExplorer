@@ -41,11 +41,10 @@ import (
 import (
 	"../solve"
 	"../tempAll"
-	//"../tempCrit"
+	"../tempCrit"
 	vec "../vector"
 )
 
-// a and b give omega(q) = a(q_x^2+q_y^2) + b q_z^2 at T_c
 func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 	F := func(v vec.Vector) (float64, error) {
 		if v.ContainsNaN() {
@@ -53,7 +52,7 @@ func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 			return 0.0, errors.New("NaN in input")
 		}
 		env.Set(v, variables)
-		/*
+		if !env.FixedPairCoeffs || !env.PairCoeffsReady {
 			// Before we evaluate error in F0, Mu_h and D1 should have
 			// appropriate values.
 			eps := 1e-9
@@ -61,10 +60,10 @@ func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 			if err != nil {
 				return 0.0, err
 			}
-		*/
+		}
 		// F0 equation error = x - x1 - x2
 		x1 := X1(env)
-		x2, err := X2(env)
+		x2, err := tempCrit.X2(env)
 		if err != nil {
 			fmt.Printf("error from X2(): %v\n", err)
 			return 0.0, err
@@ -74,7 +73,7 @@ func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 		rhs := x1 + x2
 		return lhs - rhs, nil
 	}
-	h := 1e-6
-	epsabs := 1e-5
+	h := 1e-5
+	epsabs := 1e-4
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
