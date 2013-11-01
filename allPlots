@@ -9,4 +9,6 @@ go test -testPlot -longPlot -test.timeout 20h
 go test -testPlot -longPlot -tinyX -test.timeout 20h
 cd ../tempFluc
 go test -longPlot -test.timeout 100h
+cd ../tempLow
+go test -longPlot -test.timeout 100h
 cd ..
