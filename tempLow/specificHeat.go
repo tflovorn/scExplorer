@@ -7,7 +7,7 @@ import (
 import (
 	"../solve"
 	"../tempAll"
-	"../tempFluc"
+	"../tempCrit"
 )
 
 type SpecificHeatEnv struct {
@@ -46,12 +46,12 @@ func specificHeat(env *tempAll.Environment, U envFunc) (float64, error) {
 
 // Specific heat at constant volume due to holons
 func HolonSpecificHeat(env *tempAll.Environment) (float64, error) {
-	return specificHeat(env, tempFluc.HolonEnergy)
+	return specificHeat(env, tempCrit.HolonEnergy)
 }
 
 // Specific heat at constant volume due to pairs
 func PairSpecificHeat(env *tempAll.Environment) (float64, error) {
-	return specificHeat(env, tempFluc.PairEnergy)
+	return specificHeat(env, tempCrit.PairEnergy)
 }
 
 // Partial derivative of Mu_h with respect to T; x and V held constant.

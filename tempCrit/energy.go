@@ -1,4 +1,4 @@
-package tempFluc
+package tempCrit
 
 import (
 	"fmt"
@@ -9,7 +9,6 @@ import (
 	"../bzone"
 	"../seriesaccel"
 	"../tempAll"
-	"../tempCrit"
 	vec "../vector"
 )
 
@@ -28,7 +27,7 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 	// find omega_+ coefficients
 	a, b := env.A, env.B
 	if !env.FixedPairCoeffs || !env.PairCoeffsReady {
-		plusCoeffs, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
+		plusCoeffs, err := OmegaFit(env, OmegaPlus)
 		if err != nil {
 			fmt.Println("suppressing error in PairEnergy - cannot find pair spectrum")
 			return 0.0, nil
@@ -42,7 +41,7 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 			denom := math.Exp(y-env.Beta*env.Mu_b) - 1.0
 			return num / denom
 		}
-		integral, err := tempCrit.OmegaIntegralY(env, a, b, integrand)
+		integral, err := OmegaIntegralY(env, a, b, integrand)
 		if err != nil {
 			return 0.0, err
 		}
@@ -56,7 +55,7 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 			denom := math.Exp(y+env.Beta*(bterm-env.Mu_b)) - 1.0
 			return num / denom
 		}
-		integral, err := tempCrit.OmegaIntegralCos(env, a, b, integrand)
+		integral, err := OmegaIntegralCos(env, a, b, integrand)
 		if err != nil {
 			return 0.0, err
 		}

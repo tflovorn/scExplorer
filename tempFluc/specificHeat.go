@@ -8,6 +8,7 @@ import (
 	"../integrate"
 	"../solve"
 	"../tempAll"
+	"../tempCrit"
 )
 
 type SpecificHeatEnv struct {
@@ -46,12 +47,12 @@ func specificHeat(env *tempAll.Environment, U envFunc) (float64, error) {
 
 // Specific heat at constant volume due to holons
 func HolonSpecificHeat(env *tempAll.Environment) (float64, error) {
-	return specificHeat(env, HolonEnergy)
+	return specificHeat(env, tempCrit.HolonEnergy)
 }
 
 // Specific heat at constant volume due to pairs
 func PairSpecificHeat(env *tempAll.Environment) (float64, error) {
-	return specificHeat(env, PairEnergy)
+	return specificHeat(env, tempCrit.PairEnergy)
 }
 
 // Entropy = \int_{0}^{T} \gamma(T^{\prime}) dT^{\prime}.
