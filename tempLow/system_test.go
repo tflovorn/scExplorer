@@ -19,7 +19,7 @@ var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var loadCache = flag.Bool("loadCache", false, "load cached data instead of re-generating")
 
-var defaultEnvSolution = []float64{0.005168644067156091, -0.5859316261870242, 0.0008541131711382995}
+var defaultEnvSolution = []float64{0.0051686440641811136, -0.5859316255507093, 0.0008540937133211469}
 
 func TestSolveLowSystem(t *testing.T) {
 	flag.Parse()
@@ -59,7 +59,7 @@ func lowDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	}
 	var envs []*tempAll.Environment
 	if long {
-		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{48, 2, 2, 3}, []float64{0.001, 0.05, 0.05, 0.025}, []float64{0.15, 0.1, 0.1, 0.075})
+		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{16, 1, 1, 3}, []float64{0.01, 0.1, 0.1, 0.025}, []float64{0.05, 0.1, 0.1, 0.075})
 	} else {
 		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{0.01, 0.1, 0.1, 0.075}, []float64{0.1, 0.1, 0.1, 0.075})
 	}

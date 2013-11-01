@@ -1,7 +1,7 @@
 package tempLow
 
 import (
-	"fmt"
+	//"fmt"
 	"math"
 )
 import (
@@ -30,17 +30,17 @@ func specificHeat(env *tempAll.Environment, U envFunc) (float64, error) {
 	if err != nil {
 		return 0.0, err
 	}
-	fmt.Println(MuT)
+	//fmt.Println(MuT)
 	UMu, err := dFdMu_h(env, U)
 	if err != nil {
 		return 0.0, err
 	}
-	fmt.Println(UMu)
+	//fmt.Println(UMu)
 	UT, err := dFdT(env, U)
 	if err != nil {
 		return 0.0, err
 	}
-	fmt.Println(UT)
+	//fmt.Println(UT)
 	return UMu*MuT + UT, nil
 }
 
@@ -78,7 +78,7 @@ func dMu_hdT(env *tempAll.Environment) (float64, error) {
 	h := 1e-4
 	epsAbs := 1e-5
 	deriv, err := solve.OneDimDerivative(F, env.Beta, h, epsAbs)
-	fmt.Println("MuT ct", ct)
+	//fmt.Println("MuT ct", ct)
 	return -math.Pow(env.Beta, 2.0) * deriv, err
 }
 
@@ -110,7 +110,7 @@ func dFdMu_h(env *tempAll.Environment, F envFunc) (float64, error) {
 	h := 1e-4
 	epsAbs := 1e-5
 	deriv, err := solve.OneDimDerivative(G, env.Mu_h, h, epsAbs)
-	fmt.Println("dF_dMu ct", ct)
+	//fmt.Println("dF_dMu ct", ct)
 	return deriv, err
 }
 
@@ -141,6 +141,6 @@ func dFdT(env *tempAll.Environment, F envFunc) (float64, error) {
 	h := 1e-4
 	epsAbs := 1e-5
 	deriv, err := solve.OneDimDerivative(G, env.Beta, h, epsAbs)
-	fmt.Println("dF_dT ct", ct)
+	//fmt.Println("dF_dT ct", ct)
 	return -math.Pow(env.Beta, 2.0) * deriv, err
 }

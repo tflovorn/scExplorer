@@ -81,5 +81,4 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 	//sum, absErr := seriesaccel.Levin_u(E2BSumTerm, 1, 20)
 	//fmt.Printf("env=%s; E2 B sum %e, absErr %e\n", env.String(), sum, absErr)
 	return 2.0 * env.Be_field * sum / math.Pi, nil
-
 }

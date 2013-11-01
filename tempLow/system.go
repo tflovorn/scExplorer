@@ -52,7 +52,6 @@ func D1F0XSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 
 // Solve the (D1, Mu_h, Beta) system with x and F0 fixed.
 func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
-	//solve.DebugReport(false)
 	// our guess for beta should be above beta_c
 	if env.A == 0.0 && env.B == 0.0 {
 		D1, Mu_h, F0 := env.D1, env.Mu_h, env.F0
@@ -61,6 +60,7 @@ func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 		if err != nil {
 			return nil, err
 		}
+		fmt.Printf("%v; Tc = %f\n", env, 1.0/env.Beta)
 		omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
 		if err != nil {
 			return nil, err
@@ -72,15 +72,12 @@ func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 		env.D1, env.Mu_h, env.F0 = D1, Mu_h, F0
 	}
 	//fmt.Printf("%v; Tc = %f\n", env, 1.0 / env.Beta)
-	/*
-		// solve low temp system for reasonable values of D1 and Mu_h first
-		_, err = D1MuSolve(env, epsAbs, epsRel)
-		if err != nil {
-			return nil, err
-		}
-	*/
+	// solve low temp system for reasonable values of D1 and Mu_h first
+	_, err := D1MuSolve(env, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
 	// solve the full low temp system
-	solve.DebugReport(true)
 	system, start := D1MuBetaSystem(env)
 	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
 	if err != nil {
@@ -119,15 +116,12 @@ func D1MuF0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 		env.PairCoeffsReady = true
 		// we are at T < T_c; uncache env
 		env.D1, env.Mu_h, env.F0, env.Beta = D1, Mu_h, F0, Beta
-		/*
-			// solve low temp system for reasonable values of D1 and Mu_h first
-			_, err = D1MuSolve(env, epsAbs, epsRel)
-			if err != nil {
-				return nil, err
-			}
-		*/
 	}
-	solve.DebugReport(true)
+	// solve low temp system for reasonable values of D1 and Mu_h first
+	_, err := D1MuSolve(env, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
 	// solve the full low temp system
 	system, start := D1MuF0System(env)
 	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)

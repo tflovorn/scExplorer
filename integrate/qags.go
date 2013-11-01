@@ -28,15 +28,26 @@ type floatFunc func(float64) float64
 // Interface to gsl_integration_qags: "adaptive integration with [integrable]
 // singularities". Integrate f from a to b and return the value of the
 // integral and the absolute error.
-func Qags(fn func(float64) float64, a, b, epsabs, epsrel float64) (float64, float64, error) {
+func Qags(fn func(float64) float64, a, b, epsabs, epsrel float64) (result, absErr float64, err error) {
 	cfn := unsafe.Pointer(&fn)
-	result, abserr := C.double(0.0), C.double(0.0)
-	err := C.gslQags(cfn, C.double(a), C.double(b), C.double(epsabs), C.double(epsrel), &result, &abserr)
-	if err != C.GSL_SUCCESS {
-		err_str := C.GoString(C.gsl_strerror(err))
+	C_result, C_absErr := C.double(0.0), C.double(0.0)
+	// guard against panics during integration
+	defer func() {
+		if x := recover(); x != nil {
+			result = 0.0
+			absErr = 0.0
+			err = x.(error)
+		}
+	}()
+	// perform integration
+	C_err := C.gslQags(cfn, C.double(a), C.double(b), C.double(epsabs), C.double(epsrel), &C_result, &C_absErr)
+	if C_err != C.GSL_SUCCESS {
+		err_str := C.GoString(C.gsl_strerror(C_err))
 		return 0.0, 0.0, fmt.Errorf("error in Qags (GSL): %v\n", err_str)
 	}
-	return float64(result), float64(abserr), nil
+	result = float64(C_result)
+	absErr = float64(C_absErr)
+	return
 }
 
 //export integrate_go_val

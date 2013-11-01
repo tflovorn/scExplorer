@@ -55,7 +55,8 @@ func OmegaIntegralCos(env *tempAll.Environment, a, b float64, F func(float64, fl
 			return 0.0
 		}
 		if ymax/env.Beta > a*math.Pow(math.Pi, 2.0) {
-			panic(fmt.Errorf("ymax = %f is too large", ymax))
+			fmt.Println("ymax = %f is too large, replacing with (beta*a*pi^2)", ymax)
+			ymax = env.Beta * a * math.Pow(math.Pi, 2.0)
 		}
 		innerF := func(y float64) float64 {
 			return F(y, kz)
@@ -83,5 +84,4 @@ func OmegaIntegralCos(env *tempAll.Environment, a, b float64, F func(float64, fl
 	}
 	val := integral / (8.0 * math.Pow(math.Pi, 2.0) * env.Beta * a)
 	return val, nil
-
 }
