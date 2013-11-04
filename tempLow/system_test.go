@@ -18,7 +18,9 @@ import (
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var loadCache = flag.Bool("loadCache", false, "load cached data instead of re-generating")
+var magnetization_calc = flag.Bool("magnetization", false, "calculate magnetization")
 
+// pair spectrum fixed at Tc, cos(kz) form
 var defaultEnvSolution = []float64{0.0051686440641811136, -0.5859316255507093, 0.0008540937133211469}
 
 func TestSolveLowSystem(t *testing.T) {
@@ -59,7 +61,11 @@ func lowDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	}
 	var envs []*tempAll.Environment
 	if long {
-		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{16, 1, 1, 3}, []float64{0.01, 0.1, 0.1, 0.025}, []float64{0.05, 0.1, 0.1, 0.075})
+		if *magnetization_calc {
+			envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X", "Be_field"}, []int{4, 1, 1, 1, 30}, []float64{0.0, 0.1, 0.1, 0.05, 0.0}, []float64{0.05, 0.1, 0.1, 0.05, 0.6})
+		} else {
+			envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{16, 1, 1, 3}, []float64{0.01, 0.1, 0.1, 0.025}, []float64{0.05, 0.1, 0.1, 0.075})
+		}
 	} else {
 		envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{0.01, 0.1, 0.1, 0.075}, []float64{0.1, 0.1, 0.1, 0.075})
 	}
@@ -98,7 +104,7 @@ func TestPlotX2VsT(t *testing.T) {
 	}
 	Xs := getXs(plotEnvs)
 	// T vs F0 plots
-	vars := plots.GraphVars{"F0", "", []string{"Tz", "Thp", "X"}, []string{"t_z", "t_h^{\\prime}", "x"}, nil, tempAll.GetTemp}
+	vars := plots.GraphVars{"F0", "", []string{"Tz", "Thp", "X", "Be_field"}, []string{"t_z", "t_h^{\\prime}", "x", "eB"}, nil, tempAll.GetTemp}
 	fileLabel := "plot_data.T_F0"
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$F_0$", plots.YLABEL_KEY: "$T$"}
@@ -127,6 +133,24 @@ func TestPlotX2VsT(t *testing.T) {
 	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		t.Fatalf("error making Mu_h(T) plot: %v", err)
+	}
+	// if looking for magnetization plot, make that plot and don't get Cv
+	if *magnetization_calc {
+		fileLabel = "plot_data.M_eB"
+		graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+		graphParams[plots.XLABEL_KEY] = "$eB$"
+		graphParams[plots.YLABEL_KEY] = "$M$"
+		vars.X = "Be_field"
+		vars.XFunc = nil
+		vars.Y = ""
+		vars.YFunc = tempCrit.GetMagnetization
+		vars.Params = []string{"Tz", "Thp", "X", "F0"}
+		vars.ParamLabels = []string{"t_z", "t_h^{\\prime}", "x", "F_0"}
+		err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+		if err != nil {
+			t.Fatalf("error making M plot: %v", err)
+		}
+		return
 	}
 	// calculate specific heat contributions
 	SHenvs := make([]interface{}, len(plotEnvs))
