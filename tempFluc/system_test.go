@@ -11,6 +11,7 @@ import (
 import (
 	"../parallel"
 	"../plots"
+	"../solve"
 	"../tempAll"
 	"../tempCrit"
 )
@@ -32,13 +33,13 @@ var defaultEnvSolution = []float64{0.013529938201483845, -0.5926718572657084, 2.
 
 func TestSolveFlucSystem(t *testing.T) {
 	flag.Parse()
-
+	solve.DebugReport(true)
 	// if we're plotting, don't care about this regression test
 	if *testPlot {
 		return
 	}
 	vars := []string{"D1", "Mu_h", "Beta"}
-	eps := 1e-9
+	eps := 1e-8
 	env, err := flucDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -56,7 +57,6 @@ func TestSolveFlucSystem_LargeMu_b(t *testing.T) {
 	if *testPlot {
 		return
 	}
-
 	// kz^2 value
 	//expected := []float64{0.03047703936397049, -0.7236663299469903, 1.7649274240769777}
 	// cos(kz) value
@@ -97,7 +97,8 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	var envs []*tempAll.Environment
 	if long {
 		if *magnetization_calc {
-			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{8, 1, 1, 3, 20}, []float64{0.0, 0.1, 0.1, 0.025, 0.0}, []float64{-0.5, 0.1, 0.1, 0.075, 1.0})
+			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{21, 1, 1, 1, 4}, []float64{0.1, 0.1, 0.1, 0.05, 0.0}, []float64{-0.1, 0.1, 0.1, 0.05, 0.1})
+			fmt.Println(envs)
 		} else {
 			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{16, 1, 1, 3, 4}, []float64{-0.05, 0.1, 0.1, 0.025, 0.0}, []float64{-0.3, 0.1, 0.1, 0.075, 0.01})
 		}
@@ -129,7 +130,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 			t.Fatal(err)
 		}
 		// solve the full system
-		eps := 1e-9
+		eps := 1e-7
 		plotEnvs, errs = tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
 		// cache results for future use
 		err = tempAll.SaveEnvCache(cachePath, plotEnvs, errs)

@@ -47,8 +47,8 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 		}
 		return integral / math.Pow(env.Beta, 2.5), nil
 	}
-	// cos(kz) version
-	if math.Abs(env.Be_field) < 1e-9 {
+	// zero magnetic field with cos(kz) spectrum, double integral version
+	if math.Abs(env.Be_field) < 1e-9 && !env.InfYMax {
 		integrand := func(y, kz float64) float64 {
 			bterm := 2.0 * b * (1.0 - math.Cos(kz))
 			num := y/env.Beta + bterm
@@ -60,6 +60,18 @@ func PairEnergy(env *tempAll.Environment) (float64, error) {
 			return 0.0, err
 		}
 		return integral, nil
+	}
+	// zero magnetic field with cos(kz) spectrum, sum version
+	if math.Abs(env.Be_field) < 1e-9 && env.InfYMax {
+		x2SumTerm := func(ri int) float64 {
+			r := float64(ri)
+			I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)
+			I1 := bessel.ModifiedBesselFirstKindFirst(2.0 * b * env.Beta * r)
+			exp := math.Exp(r * env.Beta * (env.Mu_b - 2.0*b))
+			return exp * ((1.0/(env.Beta*r*r)+2.0*b/r)*I0 - 2.0*b/r*I1)
+		}
+		sum, _ := seriesaccel.Levin_u(x2SumTerm, 1, 20)
+		return sum / (env.Beta * a * 4.0 * math.Pi), nil
 	}
 	// if we get here, math.Abs(env.Be_field) >= 1e-9
 	//fmt.Printf("about to calculate E2 B sum for env = %s\n", env.String())

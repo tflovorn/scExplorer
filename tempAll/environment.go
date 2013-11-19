@@ -45,6 +45,8 @@ type Environment struct {
 	FixedPairCoeffs bool
 	// If FixedPairCoeffs = true, stop varying pair spectrum coefficients after PairCoeffsReady is set to true.
 	PairCoeffsReady bool
+	// Use ymax -> infinity approximation for x2 and E2
+	InfYMax bool
 
 	// Cached values:
 	epsilonMinCache  float64

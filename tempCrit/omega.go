@@ -34,7 +34,7 @@ func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Printf("%v\n", fit)
+	//fmt.Printf("omegaFit %v\n", fit)
 	return fit, nil
 }
 

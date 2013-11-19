@@ -22,7 +22,7 @@ func X2(env *tempAll.Environment) (float64, error) {
 		return x2, nil
 	}
 	// cos(kz) version
-	if -env.Mu_b > -2.0*env.Mu_h {
+	if -env.Mu_b+2.0*env.A*env.Be_field > -2.0*env.Mu_h {
 		return 0.0, nil
 	}
 	// find omega_+ coefficients
@@ -36,8 +36,8 @@ func X2(env *tempAll.Environment) (float64, error) {
 		}
 		a, b = plusCoeffs[0], plusCoeffs[2]
 	}
-	// zero magnetic field with cos(kz) spectrum
-	if math.Abs(env.Be_field) < 1e-9 {
+	// zero magnetic field with cos(kz) spectrum, double integral version
+	if math.Abs(env.Be_field) < 1e-9 && !env.InfYMax {
 		integrand := func(y, kz float64) float64 {
 			bterm := 2.0 * b * (1.0 - math.Cos(kz))
 			return 2.0 / (math.Exp(y+env.Beta*(bterm-env.Mu_b)) - 1.0)
@@ -48,13 +48,25 @@ func X2(env *tempAll.Environment) (float64, error) {
 		}
 		return plus, nil
 	}
+	// zero magnetic field with cos(kz) spectrum, sum version
+	if math.Abs(env.Be_field) < 1e-9 && env.InfYMax {
+		x2SumTerm := func(ri int) float64 {
+			r := float64(ri)
+			I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)
+			return I0 * math.Exp(r*env.Beta*(env.Mu_b-2.0*b)) / r
+		}
+		sum, _ := seriesaccel.Levin_u(x2SumTerm, 1, 20)
+		return sum / (env.Beta * a * 2.0 * math.Pi), nil
+	}
 	// if we get here, math.Abs(env.Be_field) >= 1e-9
 	//fmt.Printf("about to calculate x2 sum for env = %s\n", env.String())
 	x2BSumTerm := func(ri int) float64 {
 		r := float64(ri)
 		I0 := bessel.ModifiedBesselFirstKindZeroth(2.0 * b * env.Beta * r)
 		omega_c := 4.0 * env.Be_field * a
-		mu_tilde := env.Mu_b - omega_c/2.0
+		//mu_tilde := env.Mu_b - omega_c/2.0
+		// -omega_c/2.0 term is absorbed in Mu_b?
+		mu_tilde := env.Mu_b
 		return I0 * math.Exp(env.Beta*r*(mu_tilde-2.0*b)) / (-math.Expm1(-env.Beta * omega_c * r))
 	}
 	sum, _ := seriesaccel.Levin_u(x2BSumTerm, 1, 20)

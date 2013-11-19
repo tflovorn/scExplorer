@@ -40,6 +40,7 @@ func Qags(fn func(float64) float64, a, b, epsabs, epsrel float64) (result, absEr
 		}
 	}()
 	// perform integration
+	C.gsl_set_error_handler_off()
 	C_err := C.gslQags(cfn, C.double(a), C.double(b), C.double(epsabs), C.double(epsrel), &C_result, &C_absErr)
 	if C_err != C.GSL_SUCCESS {
 		err_str := C.GoString(C.gsl_strerror(C_err))

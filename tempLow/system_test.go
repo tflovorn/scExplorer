@@ -62,7 +62,7 @@ func lowDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	var envs []*tempAll.Environment
 	if long {
 		if *magnetization_calc {
-			envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X", "Be_field"}, []int{4, 1, 1, 1, 30}, []float64{0.0, 0.1, 0.1, 0.05, 0.0}, []float64{0.05, 0.1, 0.1, 0.05, 0.6})
+			envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X", "Be_field"}, []int{2, 1, 1, 1, 4}, []float64{0.0, 0.1, 0.1, 0.05, 0.01}, []float64{0.05, 0.1, 0.1, 0.05, 0.05})
 		} else {
 			envs = defaultEnv.MultiSplit([]string{"F0", "Tz", "Thp", "X"}, []int{16, 1, 1, 3}, []float64{0.01, 0.1, 0.1, 0.025}, []float64{0.05, 0.1, 0.1, 0.075})
 		}

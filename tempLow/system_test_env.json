@@ -10,5 +10,6 @@
   "Beta": 3.9112,
   "F0": 0.01,
   "Mu_b": 0.0,
-  "FixedPairCoeffs": true
+  "FixedPairCoeffs": true,
+  "InfYMax": false
 }

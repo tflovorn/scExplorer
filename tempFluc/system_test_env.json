@@ -9,6 +9,7 @@
   "Mu_h": -1.0,
   "Beta": 1.0,
   "F0": 0.0,
-  "Mu_b": -0.1,
-  "Be_field": 0.000
+  "Mu_b": 0.09,
+  "Be_field": 0.066667,
+  "InfYMax": false
 }

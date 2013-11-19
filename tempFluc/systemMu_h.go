@@ -31,6 +31,9 @@ func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {
 func innerMu_h(env *tempAll.Environment, k vec.Vector) float64 {
 	sxy := math.Sin(k[0]) - math.Sin(k[1])
 	numer := sxy * sxy * math.Tanh(env.Beta*env.Xi_h(k)/2.0)
-	denom := env.Mu_b + 2.0*env.Xi_h(k)
+	// TODO deal with pre-fixed-A case?
+	omega_c := 4.0 * env.Be_field * env.A
+	mu_tilde := env.Mu_b - omega_c/2.0
+	denom := mu_tilde + 2.0*env.Xi_h(k)
 	return numer / denom
 }

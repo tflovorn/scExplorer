@@ -63,15 +63,45 @@ func FlucTempSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 	if err != nil {
 		return nil, err
 	}
-	env.Beta += 0.1
+	//env.Beta += 0.1
 	// solve fluc temp system for reasonable values of Mu and D1 first
-	system, start := FlucTempD1MuSystem(env)
-	_, err = solve.MultiDim(system, start, epsAbs, epsRel)
-	if err != nil {
-		return nil, err
+	//system, start := FlucTempD1MuSystem(env)
+	//_, err = solve.MultiDim(system, start, epsAbs, epsRel)
+	//if err != nil {
+	//	return nil, err
+	//}
+	// Solve the full fluc temp system.
+	// Fix pair spectrum parameters at their B = 0 values.
+	if env.A == 0.0 && env.B == 0.0 && math.Abs(env.Be_field) > 1e-9 {
+		Mu_b, Be_field := env.Mu_b, env.Be_field
+		//if env.Mu_b > 0.0 {
+		//	env.Mu_b = 0.0
+		//}
+		env.Be_field, env.Mu_b = 0.0, 0.0
+		_, err := tempCrit.CritTempSolve(env, epsAbs, epsRel)
+		if err != nil {
+			return nil, err
+		}
+		omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
+		if err != nil {
+			return nil, err
+		}
+		env.A, env.B = omegaFit[0], omegaFit[2]
+		env.PairCoeffsReady = true
+		env.FixedPairCoeffs = true
+		env.Mu_b, env.Be_field = Mu_b, Be_field
+
+		omega_c := 4.0 * env.Be_field * env.A
+		mu_tilde := env.Mu_b - omega_c/2.0
+		if mu_tilde > 0.0 {
+			return nil, fmt.Errorf("\npositive mu_tilde in env=%s\n", env.String())
+		}
+	} else if math.Abs(env.Be_field) <= 1e-9 {
+		if env.Mu_b > 1e-9 {
+			return nil, fmt.Errorf("\npositive mu_b with Be_field = 0 in env=%s\n", env.String())
+		}
 	}
-	// solve the full fluc temp system
-	system, start = FlucTempFullSystem(env)
+	system, start := FlucTempFullSystem(env)
 	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
 	if err != nil {
 		return nil, err
