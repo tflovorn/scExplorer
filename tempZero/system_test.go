@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"testing"
 )
 import (
@@ -55,7 +56,7 @@ func TestPlotF0VsX(t *testing.T) {
 	}
 	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	if *longPlot {
-		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{120, 2, 1}, []float64{0.0005, 0.05, 0.10}, []float64{0.15, 0.15, 0.10})
+		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 1, 1}, []float64{0.0005, 0.10, 0.05}, []float64{0.15, 0.10, 0.05})
 	}
 	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, nil}
 	xyLabels := []string{"$x$", "$F_0$", "$\\mu_h$", "$D_1$"}
@@ -110,6 +111,17 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
 		return fmt.Errorf("error making plots: %v", err)
+	}
+	// plot Fermi surface
+	for _, env := range(envs) {
+		X := strconv.FormatFloat(env.X, 'f', 6, 64)
+		Tz := strconv.FormatFloat(env.Tz, 'f', 6, 64)
+		Thp := strconv.FormatFloat(env.Thp, 'f', 6, 64)
+		outPrefix := wd + "/" + "plot_data.FermiSurface_x_" + X + "_tz_" + Tz + "_thp_" + Thp
+		err = tempAll.FermiSurface(env, outPrefix, grapherPath)
+		if err != nil {
+			return fmt.Errorf("error making plots: %v", err)
+		}
 	}
 	return nil
 }

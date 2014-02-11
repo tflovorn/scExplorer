@@ -1,14 +1,16 @@
 import sys
 import json
+import math
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 from matplotlib.font_manager import FontProperties
-from numpy import arange
+from numpy import arange, meshgrid
 
 _GRAPH_DEFAULTS = {"xlabel":"$x$", "ylabel":"$y$", "num_ticks":5, 
     "axis_label_fontsize":"large", "tick_formatstr":"%.2f",
     "legend_fontsize":"large", "legend_loc":0, "legend_title":None, 
-    "ymin":None, "graph_filepath":None}
+    "ymin":None, "graph_filepath":None, "plot_type": "scatter",
+    "th":None,"thp":None,"t0":None,"D1":None,"Mu_h":None,"epsilon_min":None}
 
 _SERIES_DEFAULTS = {"label":None, "style":"k."}
 
@@ -21,12 +23,12 @@ def import_json(json_string):
     '''Return the plot representation of the given JSON string.'''
     graph_data = json.loads(json_string)
     if isinstance(graph_data, list):
-        graph_data = [_default_data(graph) for graph in graph_data]
+        graph_data = [add_default_data(graph) for graph in graph_data]
     else:
-        graph_data = _default_data(graph_data)
+        graph_data = add_default_data(graph_data)
     return graph_data
 
-def _default_data(graph_data):
+def add_default_data(graph_data):
     # graph-wide defaults
     for key, value in _GRAPH_DEFAULTS.items():
         if key not in graph_data:
@@ -47,8 +49,13 @@ def make_graph(graph_data):
     matplotlib figures.
 
     '''
+    # Process a list of graphs one element at a time.
     if isinstance(graph_data, list):
         return [make_graph(some_graph) for some_graph in graph_data]
+    # If we need to make a Fermi surface plot, go to the function for that.
+    if graph_data["plot_type"] == "Fermi_surface":
+        return plot_Fermi_surface(graph_data)
+    # If we get here, this is not a Fermi surface plot - make scatter plot instead.
     try:
         dims = graph_data["dimensions"]
         fig = plt.figure(figsize=(dims[0], dims[1]))
@@ -69,7 +76,6 @@ def make_graph(graph_data):
         axes.set_ylim(bottom=float(graph_data["ymin"]), auto=None)
     _save_figure(graph_data, fig)
     return fig, axes
-    
 
 def _graph_series(graph_data, series, fig, axes, bounds):
     # -- todo : set ticks --
@@ -88,6 +94,38 @@ def _save_figure(graph_data, fig):
         return
     fig.savefig(graph_data["graph_filepath"] + ".png")
     fig.savefig(graph_data["graph_filepath"] + ".eps")
+
+# Plot a single Fermi surface.
+# To make this plot, graph_data["Fermi_surface_data"] must be a dictionary
+# with the keys "th", "thp", "t0", "D1", "Mu_h", and "epsilon_min".
+def plot_Fermi_surface(graph_data):
+    delta = 0.05
+    x = arange(-math.pi, math.pi, delta)
+    y = arange(-math.pi, math.pi, delta)
+    X, Y = meshgrid(x, y)
+    FS = lambda x, y: _step(_xi_h(graph_data, x, y))
+    Z = []
+    for i in range(len(y)):
+        Z.append([])
+        for j in range(len(x)):
+            Z[i].append(FS(x[j], y[i]))
+    fig = plt.figure()
+    axes = fig.add_subplot(1, 1, 1)
+    CS = axes.contour(X, Y, Z)
+    _save_figure(graph_data, fig)
+
+# if epsilon_min is included, step(xi) = 1 for all k-points - why?
+def _xi_h(fsd, kx, ky):
+    sx, sy = math.sin(kx), math.sin(ky)
+    #eps = 2.0*float(fsd["th"])*((sx+sy)*(sx+sy)-1.0) + 4.0*(2.0*float(fsd["D1"])*float(fsd["t0"])-float(fsd["thp"]))*sx*sy  - float(fsd["epsilon_min"])
+    eps = 2.0*float(fsd["th"])*((sx+sy)*(sx+sy)-1.0) + 4.0*(2.0*float(fsd["D1"])*float(fsd["t0"])-float(fsd["thp"]))*sx*sy
+    return eps - float(fsd["Mu_h"])
+
+def _step(x):
+    if x < 0.0:
+        return 0.0
+    else:
+        return 1.0
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
