@@ -16,6 +16,8 @@ import (
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var testPlotS = flag.Bool("testPlotS", false, "Run tests involving plots for s-wave system")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
+var printerPlots = flag.Bool("printerPlots", false, "Use line types as plot styles instead of colors")
+var plotFS = flag.Bool("plotFS", false, "Plot Fermi surface")
 
 // Solve a zero-temperature system for the appropriate values of (D1, Mu_h, F0)
 func TestSolveZeroTempSystem(t *testing.T) {
@@ -56,7 +58,7 @@ func TestPlotF0VsX(t *testing.T) {
 	}
 	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	if *longPlot {
-		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 1, 1}, []float64{0.0005, 0.10, 0.05}, []float64{0.15, 0.10, 0.05})
+		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{100, 3, 1}, []float64{0.08, 0.05, 0.1}, []float64{0.12, 0.15, 0.1})
 	}
 	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, nil}
 	xyLabels := []string{"$x$", "$F_0$", "$\\mu_h$", "$D_1$"}
@@ -91,7 +93,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelF0, plots.XLABEL_KEY: xyLabels[0], plots.YLABEL_KEY: xyLabels[1], plots.YMIN_KEY: "0.0"}
-	err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	err := plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, *printerPlots)
 	if err != nil {
 		return fmt.Errorf("error making plots: %v", err)
 	}
@@ -100,7 +102,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 	graphParams[plots.YLABEL_KEY] = xyLabels[2]
 	graphParams[plots.YMIN_KEY] = ""
 	vars.Y = "Mu_h"
-	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	err = plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, *printerPlots)
 	if err != nil {
 		return fmt.Errorf("error making plots: %v", err)
 	}
@@ -108,19 +110,21 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelD1
 	graphParams[plots.YLABEL_KEY] = xyLabels[3]
 	vars.Y = "D1"
-	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	err = plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, *printerPlots)
 	if err != nil {
 		return fmt.Errorf("error making plots: %v", err)
 	}
-	// plot Fermi surface
-	for _, env := range(envs) {
-		X := strconv.FormatFloat(env.X, 'f', 6, 64)
-		Tz := strconv.FormatFloat(env.Tz, 'f', 6, 64)
-		Thp := strconv.FormatFloat(env.Thp, 'f', 6, 64)
-		outPrefix := wd + "/" + "plot_data.FermiSurface_x_" + X + "_tz_" + Tz + "_thp_" + Thp
-		err = tempAll.FermiSurface(env, outPrefix, grapherPath)
-		if err != nil {
-			return fmt.Errorf("error making plots: %v", err)
+	if *plotFS {
+		// plot Fermi surface
+		for _, env := range(envs) {
+			X := strconv.FormatFloat(env.X, 'f', 6, 64)
+			Tz := strconv.FormatFloat(env.Tz, 'f', 6, 64)
+			Thp := strconv.FormatFloat(env.Thp, 'f', 6, 64)
+			outPrefix := wd + "/" + "plot_data.FermiSurface_x_" + X + "_tz_" + Tz + "_thp_" + Thp
+			err = tempAll.FermiSurface(env, outPrefix, grapherPath)
+			if err != nil {
+				return fmt.Errorf("error making plots: %v", err)
+			}
 		}
 	}
 	return nil

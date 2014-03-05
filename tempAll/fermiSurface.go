@@ -18,6 +18,6 @@ func FermiSurface(env *Environment, outPrefix, grapherPath string) error {
 	params["t0"] = strconv.FormatFloat(env.T0, 'f', 6, 64)
 	params["D1"] = strconv.FormatFloat(env.D1, 'f', 6, 64)
 	params["Mu_h"] = strconv.FormatFloat(env.Mu_h, 'f', 6, 64)
-	params["epsilon_min"] = strconv.FormatFloat(env.epsilonMinCache, 'f', 6, 64)
+	params["epsilon_min"] = strconv.FormatFloat(env.getEpsilonMin(), 'f', 6, 64)
 	return plots.PlotMPL(data, params, seriesParams, grapherPath)
 }

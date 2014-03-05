@@ -6,7 +6,9 @@ import (
 	"sort"
 )
 
-var DEFAULT_STYLES = []string{"k-", "r-", "b-", "g-", "c-", "m-", "y-", "k--", "r--", "b--", "g--", "c--", "m--", "y--"}
+var COLOR_STYLES = []string{"k-", "r-", "b-", "g-", "c-", "m-", "y-", "k--", "r--", "b--", "g--", "c--", "m--", "y--"}
+var PRINT_STYLES = []string{"k-", "k--", "k-.", "k:"}
+var DEFAULT_STYLES = COLOR_STYLES
 
 // Names of parameters relevant to MultiPlot
 type GraphVars struct {
@@ -25,6 +27,19 @@ type GraphVars struct {
 // graphParams[FILE_KEY] must specify a file path for output. grapherPath
 // must specify the location of the Python graphing script.
 func MultiPlot(data []interface{}, errs []error, vars GraphVars, graphParams map[string]string, grapherPath string) error {
+	return multiPlotHelper(data, errs, vars, graphParams, grapherPath, DEFAULT_STYLES)
+}
+
+// Same as MultiPlot except that printStyle = true specifies to use line
+// styles appropriate for printing in black & white.
+func MultiPlotStyle(data []interface{}, errs []error, vars GraphVars, graphParams map[string]string, grapherPath string, printStyle bool) error {
+	if printStyle {
+		return multiPlotHelper(data, errs, vars, graphParams, grapherPath, PRINT_STYLES)
+	}
+	return multiPlotHelper(data, errs, vars, graphParams, grapherPath, COLOR_STYLES)
+}
+
+func multiPlotHelper(data []interface{}, errs []error, vars GraphVars, graphParams map[string]string, grapherPath string, seriesStyles []string) error {
 	data = stripNils(data)
 	// we need to know the values of vars.Params to set up constraint
 	allParamValues, err := extractParamValues(data, errs, vars)
@@ -43,7 +58,7 @@ func MultiPlot(data []interface{}, errs []error, vars GraphVars, graphParams map
 		graphParams[FILE_KEY] = basePath + extraPath
 
 		series, primaryVals := ExtractSeries(data, errs, []string{vars.X, vars.Y, primaryNames[i]}, secondaries[i], vars.XFunc, vars.YFunc)
-		sp := MakeSeriesParams(primaryLabels[i], "%.3f", primaryVals, DEFAULT_STYLES)
+		sp := MakeSeriesParams(primaryLabels[i], "%.3f", primaryVals, seriesStyles)
 		err := PlotMPL(series, graphParams, sp, grapherPath)
 		if err != nil {
 			return err

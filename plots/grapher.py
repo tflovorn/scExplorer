@@ -7,7 +7,7 @@ from matplotlib.font_manager import FontProperties
 from numpy import arange, meshgrid
 
 _GRAPH_DEFAULTS = {"xlabel":"$x$", "ylabel":"$y$", "num_ticks":5, 
-    "axis_label_fontsize":"large", "tick_formatstr":"%.2f",
+    "axis_label_fontsize":"x-large", "tick_formatstr":"%.2f",
     "legend_fontsize":"large", "legend_loc":0, "legend_title":None, 
     "ymin":None, "graph_filepath":None, "plot_type": "scatter",
     "th":None,"thp":None,"t0":None,"D1":None,"Mu_h":None,"epsilon_min":None}
@@ -67,11 +67,11 @@ def make_graph(graph_data):
     for series in graph_data["series"]:
         fig,axes,bounds = _graph_series(graph_data,series,fig,axes,bounds)
 	# set properties
-    fontprop = FontProperties(size=graph_data["legend_fontsize"])
+    fontprop_legend = FontProperties(size=graph_data["legend_fontsize"])
     axes.legend(loc=graph_data["legend_loc"], title=graph_data["legend_title"],
-                prop=fontprop)
-    axes.set_xlabel(graph_data["xlabel"], size="large")
-    axes.set_ylabel(graph_data["ylabel"], size="large")
+                prop=fontprop_legend)
+    axes.set_xlabel(graph_data["xlabel"], size=graph_data["axis_label_fontsize"])
+    axes.set_ylabel(graph_data["ylabel"], size=graph_data["axis_label_fontsize"])
     if graph_data["ymin"] != None and graph_data["ymin"] != "":
         axes.set_ylim(bottom=float(graph_data["ymin"]), auto=None)
     _save_figure(graph_data, fig)
@@ -117,9 +117,11 @@ def plot_Fermi_surface(graph_data):
 # if epsilon_min is included, step(xi) = 1 for all k-points - why?
 def _xi_h(fsd, kx, ky):
     sx, sy = math.sin(kx), math.sin(ky)
-    #eps = 2.0*float(fsd["th"])*((sx+sy)*(sx+sy)-1.0) + 4.0*(2.0*float(fsd["D1"])*float(fsd["t0"])-float(fsd["thp"]))*sx*sy  - float(fsd["epsilon_min"])
-    eps = 2.0*float(fsd["th"])*((sx+sy)*(sx+sy)-1.0) + 4.0*(2.0*float(fsd["D1"])*float(fsd["t0"])-float(fsd["thp"]))*sx*sy
-    return eps - float(fsd["Mu_h"])
+    envVars = map(float, [fsd["th"], fsd["D1"], fsd["t0"], fsd["thp"], fsd["epsilon_min"], fsd["Mu_h"]])
+    th, D1, t0, thp, epsilon_min, Mu_h = envVars
+    #eps = 2.0*th*((sx+sy)*(sx+sy) - 1.0) + 4.0*(2.0*D1*t0 - thp)*sx*sy - epsilon_min
+    eps = 2.0*th*((sx+sy)*(sx+sy) - 1.0) + 4.0*(2.0*D1*t0 - thp)*sx*sy
+    return eps - Mu_h
 
 def _step(x):
     if x < 0.0:
