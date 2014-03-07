@@ -114,13 +114,11 @@ def plot_Fermi_surface(graph_data):
     CS = axes.contour(X, Y, Z)
     _save_figure(graph_data, fig)
 
-# if epsilon_min is included, step(xi) = 1 for all k-points - why?
 def _xi_h(fsd, kx, ky):
     sx, sy = math.sin(kx), math.sin(ky)
     envVars = map(float, [fsd["th"], fsd["D1"], fsd["t0"], fsd["thp"], fsd["epsilon_min"], fsd["Mu_h"]])
     th, D1, t0, thp, epsilon_min, Mu_h = envVars
-    #eps = 2.0*th*((sx+sy)*(sx+sy) - 1.0) + 4.0*(2.0*D1*t0 - thp)*sx*sy - epsilon_min
-    eps = 2.0*th*((sx+sy)*(sx+sy) - 1.0) + 4.0*(2.0*D1*t0 - thp)*sx*sy
+    eps = 2.0*th*((sx+sy)*(sx+sy) - 1.0) + 4.0*(2.0*D1*t0 - thp)*sx*sy - epsilon_min
     return eps - Mu_h
 
 def _step(x):
