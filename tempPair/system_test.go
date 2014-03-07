@@ -2,10 +2,10 @@ package tempPair
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
-	"fmt"
 	"testing"
 )
 import (
@@ -57,7 +57,7 @@ func TestPlotTpVsX(t *testing.T) {
 	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
 	if *longPlot {
 		if !*tinyX {
-			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{20, 1, 1}, []float64{0.0005, 0.1, 0.1}, []float64{0.15, 0.1, 0.1})
+			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 1, 1}, []float64{0.0005, 0.1, 0.1}, []float64{0.15, 0.1, 0.1})
 		} else {
 			envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 2, 2}, []float64{0.001, 0.05, 0.05}, []float64{0.01, 0.1, 0.1})
 		}
@@ -97,7 +97,7 @@ func TestPlotTpVsX(t *testing.T) {
 		t.Fatalf("error making D1 plot: %v", err)
 	}
 	// plot Fermi surface
-	for _, envInterface := range(plotEnvs) {
+	for _, envInterface := range plotEnvs {
 		env := envInterface.(tempAll.Environment)
 		X := strconv.FormatFloat(env.X, 'f', 6, 64)
 		Tz := strconv.FormatFloat(env.Tz, 'f', 6, 64)
