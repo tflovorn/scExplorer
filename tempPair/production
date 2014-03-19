@@ -1,0 +1,20 @@
+#!/bin/bash
+
+go test -production -test.timeout 10h
+
+mkdir Thp
+mkdir Thp/color
+mkdir Thp/print
+mkdir Tz
+mkdir Tz/color
+mkdir Tz/print
+
+cp plot_data_THP.*xTz*.png Thp/color/
+cp plot_data_THP_LOWX.*xTz*.png Thp/color/
+cp plot_data_THP*BW*Tz*.png Thp/print/
+cp plot_data_THP_LOWX*BW*Tz*.png Thp/print/
+
+cp plot_data_TZ.*xThp*.png Tz/color/
+cp plot_data_TZ_LOWX.*xThp*.png Tz/color/
+cp plot_data_TZ*BW*Thp*.png Tz/print/
+cp plot_data_TZ_LOWX*BW*Thp*.png Tz/print/
