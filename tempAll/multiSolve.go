@@ -51,6 +51,7 @@ func MultiSolve(envs []*Environment, epsAbs, epsRel float64, sv Solver) ([]inter
 				errs[j] = nil
 			}
 		}
+		fmt.Printf("***MultiSolve processed %d/%d environments.\n", i+runners, N)
 	}
 	return solvedEnvs, errs
 }
