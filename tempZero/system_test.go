@@ -50,7 +50,7 @@ func ztDefaultEnv() (*tempAll.Environment, error) {
 // Plot evolution of F0 vs X.
 func TestPlotF0VsX(t *testing.T) {
 	flag.Parse()
-	if !*testPlot {
+	if !*testPlot && !*longPlot && !*plotFS {
 		return
 	}
 	defaultEnv, err := ztDefaultEnv()
@@ -62,10 +62,11 @@ func TestPlotF0VsX(t *testing.T) {
 		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 1, 3}, []float64{0.02, 0.1, 0.05}, []float64{0.12, 0.1, 0.15})
 	}
 	if *plotFS {
-		if defaultEnv.PointsPerSide < 1024 {
-			defaultEnv.PointsPerSide = 1024
+		Nmin := 1024
+		if defaultEnv.PointsPerSide < Nmin {
+			defaultEnv.PointsPerSide = Nmin
 		}
-		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 1, 1}, []float64{0.05, 0.1, 0.1}, []float64{0.12, 0.1, 0.1})
+		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{30, 1, 1}, []float64{0.02, 0.1, 0.1}, []float64{0.12, 0.1, 0.1})
 	}
 	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, nil}
 	xyLabels := []string{"$x$", "$F_0$", "$\\mu_h$", "$D_1$"}

@@ -96,16 +96,4 @@ func TestPlotTpVsX(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error making D1 plot: %v", err)
 	}
-	// plot Fermi surface
-	for _, envInterface := range plotEnvs {
-		env := envInterface.(tempAll.Environment)
-		X := strconv.FormatFloat(env.X, 'f', 6, 64)
-		Tz := strconv.FormatFloat(env.Tz, 'f', 6, 64)
-		Thp := strconv.FormatFloat(env.Thp, 'f', 6, 64)
-		outPrefix := wd + "/" + "plot_data.FermiSurface_x_" + X + "_tz_" + Tz + "_thp_" + Thp
-		err = tempAll.FermiSurface(&env, outPrefix, grapherPath)
-		if err != nil {
-			fmt.Printf("error making plots: %v", err)
-		}
-	}
 }
