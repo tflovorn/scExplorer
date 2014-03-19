@@ -1,0 +1,31 @@
+#!/bin/bash
+
+go test -production -test.timeout 10h
+
+mkdir Thp
+mkdir Thp/color
+mkdir Thp/print
+mkdir Thp/FS
+mkdir Thp/FS/-0.1
+mkdir Thp/FS/0.0
+mkdir Thp/FS/0.1
+mkdir Tz
+mkdir Tz/color
+mkdir Tz/print
+mkdir Tz/FS
+mkdir Tz/FS/-0.1
+mkdir Tz/FS/0.0
+mkdir Tz/FS/0.1
+
+cp plot_data_THP.*Tz*.png Thp/color/
+cp plot_data_THP_BW*Tz*.png Thp/print/
+cp plot_data.Fermi*tz_0.1*thp_-0.1*.png Thp/FS/-0.1
+cp plot_data.Fermi*tz_0.1*thp_0.0*.png Thp/FS/0.0
+cp plot_data.Fermi*tz_0.1*thp_0.1*.png Thp/FS/0.1
+
+cp plot_data_TZ.*Thp*.png Tz/color/
+cp plot_data_TZ_BW*Thp*.png Tz/print/
+cp plot_data.Fermi*tz_-0.1*thp_0.1*.png Tz/FS/-0.1
+cp plot_data.Fermi*tz_0.0*thp_0.1*.png Tz/FS/0.0
+cp plot_data.Fermi*tz_0.1*thp_0.1*.png Tz/FS/0.1
+

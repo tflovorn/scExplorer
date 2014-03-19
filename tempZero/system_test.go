@@ -13,6 +13,7 @@ import (
 	"../tempAll"
 )
 
+var production = flag.Bool("production", false, "Production mode: make plots that shouldn't change.")
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots.")
 var testPlotS = flag.Bool("testPlotS", false, "Run tests involving plots for s-wave system.")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests.")
@@ -47,9 +48,92 @@ func ztDefaultEnv() (*tempAll.Environment, error) {
 	return env, nil
 }
 
+// Production-ready plots:
+//   D1, Mu_h, and F0 vs x; Fermi surface vs x.
+//   Vary tz and thp independently in each (fix one at 0.1 and the other is in {-0.1, 0.0, 0.1}).
+func TestProductionPlots(t *testing.T) {
+	flag.Parse()
+	if !*production {
+		return
+	}
+	defaultEnv, err := ztDefaultEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	*plotFS = false
+	*preciseFS = false
+	// vary thp
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{30, 1, 3}, []float64{0.02, 0.1, -0.1}, []float64{0.12, 0.1, 0.1})
+	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, nil}
+	xyLabels := []string{"$x$", "$F_0$", "$\\mu_h$", "$D_1$"}
+	fileLabelF0 := "plot_data_THP.F0_x_dwave"
+	fileLabelMu := "plot_data_THP.Mu_h_x_dwave"
+	fileLabelD1 := "plot_data_THP.D1_x_dwave"
+	eps := 1e-6
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// vary thp (B&W plots)
+	*printerPlots = true
+	fileLabelF0 = "plot_data_THP_BW.F0_x_dwave"
+	fileLabelMu = "plot_data_THP_BW.Mu_h_x_dwave"
+	fileLabelD1 = "plot_data_THP_BW.D1_x_dwave"
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// vary tz
+	*printerPlots = false
+	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{30, 3, 1}, []float64{0.02, -0.1, 0.1}, []float64{0.12, 0.1, 0.1})
+	fileLabelF0 = "plot_data_TZ.F0_x_dwave"
+	fileLabelMu = "plot_data_TZ.Mu_h_x_dwave"
+	fileLabelD1 = "plot_data_TZ.D1_x_dwave"
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// vary tz (B&W plots)
+	*printerPlots = true
+	fileLabelF0 = "plot_data_TZ_BW.F0_x_dwave"
+	fileLabelMu = "plot_data_TZ_BW.Mu_h_x_dwave"
+	fileLabelD1 = "plot_data_TZ_BW.D1_x_dwave"
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// vary thp (Fermi surface)
+	*printerPlots = false
+	*preciseFS = true
+	Nmin := 256
+	if defaultEnv.PointsPerSide < Nmin {
+		defaultEnv.PointsPerSide = Nmin
+	}
+	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 1, 3}, []float64{0.04, 0.1, -0.1}, []float64{0.12, 0.1, 0.1})
+	fileLabelF0 = "plot_data_THP_FS.F0_x_dwave"
+	fileLabelMu = "plot_data_THP_FS.Mu_h_x_dwave"
+	fileLabelD1 = "plot_data_THP_FS.D1_x_dwave"
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// vary tz (Fermi surface)
+	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 3, 1}, []float64{0.04, -0.1, 0.1}, []float64{0.12, 0.1, 0.1})
+	fileLabelF0 = "plot_data_TZ_FS.F0_x_dwave"
+	fileLabelMu = "plot_data_TZ_FS.Mu_h_x_dwave"
+	fileLabelD1 = "plot_data_TZ_FS.D1_x_dwave"
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Plot evolution of F0 vs X.
 func TestPlotF0VsX(t *testing.T) {
 	flag.Parse()
+	if *production {
+		return
+	}
 	if !*testPlot && !*longPlot && !*plotFS && !*preciseFS {
 		return
 	}
