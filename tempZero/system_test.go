@@ -10,15 +10,15 @@ import (
 )
 import (
 	"../plots"
-	"../solve"
 	"../tempAll"
 )
 
-var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
-var testPlotS = flag.Bool("testPlotS", false, "Run tests involving plots for s-wave system")
-var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
-var printerPlots = flag.Bool("printerPlots", false, "Use line types as plot styles instead of colors")
-var plotFS = flag.Bool("plotFS", false, "Plot Fermi surface")
+var testPlot = flag.Bool("testPlot", false, "Run tests involving plots.")
+var testPlotS = flag.Bool("testPlotS", false, "Run tests involving plots for s-wave system.")
+var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests.")
+var printerPlots = flag.Bool("printerPlots", false, "Use line types as plot styles instead of colors.")
+var plotFS = flag.Bool("plotFS", false, "Plot Fermi surface.")
+var preciseFS = flag.Bool("preciseFS", false, "Makes a more detailed Fermi surface plot.")
 
 // Solve a zero-temperature system for the appropriate values of (D1, Mu_h, F0)
 func TestSolveZeroTempSystem(t *testing.T) {
@@ -50,23 +50,22 @@ func ztDefaultEnv() (*tempAll.Environment, error) {
 // Plot evolution of F0 vs X.
 func TestPlotF0VsX(t *testing.T) {
 	flag.Parse()
-	if !*testPlot && !*longPlot && !*plotFS {
+	if !*testPlot && !*longPlot && !*plotFS && !*preciseFS {
 		return
 	}
 	defaultEnv, err := ztDefaultEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{2, 2, 2}, []float64{0.01, -0.1, -0.05}, []float64{0.15, 0.1, 0.05})
-	if *longPlot {
-		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 1, 3}, []float64{0.02, 0.1, 0.05}, []float64{0.12, 0.1, 0.15})
-	}
-	if *plotFS {
-		Nmin := 1024
+	if *plotFS || *preciseFS {
+		Nmin := 256
 		if defaultEnv.PointsPerSide < Nmin {
 			defaultEnv.PointsPerSide = Nmin
 		}
-		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{30, 1, 1}, []float64{0.02, 0.1, 0.1}, []float64{0.12, 0.1, 0.1})
+	}
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{4, 1, 1}, []float64{0.05, 0.1, 0.1}, []float64{0.15, 0.1, 0.1})
+	if *longPlot {
+		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 1, 3}, []float64{0.02, 0.1, 0.05}, []float64{0.12, 0.1, 0.15})
 	}
 	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, nil}
 	xyLabels := []string{"$x$", "$F_0$", "$\\mu_h$", "$D_1$"}
@@ -100,8 +99,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 	// solve
 	var plotEnvs []interface{}
 	var errs []error
-	solve.DebugReport(true)
-	if *plotFS {
+	if *plotFS || *preciseFS {
 		plotEnvs, errs = tempAll.MultiSolve(envs, epsabs, epsrel, SolveNoninteracting)
 	} else {
 		plotEnvs, errs = tempAll.MultiSolve(envs, epsabs, epsrel, ZeroTempSolve)
@@ -110,7 +108,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelF0, plots.XLABEL_KEY: xyLabels[0], plots.YLABEL_KEY: xyLabels[1], plots.YMIN_KEY: "0.0"}
-	if !*plotFS {
+	if !*plotFS && !*preciseFS {
 		// plot F0
 		err := plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, *printerPlots)
 		if err != nil {
@@ -134,14 +132,14 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 	if err != nil {
 		return fmt.Errorf("error making plots: %v", err)
 	}
-	if *plotFS {
+	if *plotFS || *preciseFS {
 		// plot Fermi surface
 		for _, env := range envs {
 			X := strconv.FormatFloat(env.X, 'f', 6, 64)
 			Tz := strconv.FormatFloat(env.Tz, 'f', 6, 64)
 			Thp := strconv.FormatFloat(env.Thp, 'f', 6, 64)
 			outPrefix := wd + "/" + "plot_data.FermiSurface_x_" + X + "_tz_" + Tz + "_thp_" + Thp
-			err = tempAll.FermiSurface(env, outPrefix, grapherPath)
+			err = tempAll.FermiSurface(env, outPrefix, grapherPath, *preciseFS)
 			if err != nil {
 				return fmt.Errorf("error making plots: %v", err)
 			}

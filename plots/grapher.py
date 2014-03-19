@@ -10,6 +10,7 @@ _GRAPH_DEFAULTS = {"xlabel":"$x$", "ylabel":"$y$", "num_ticks":5,
     "axis_label_fontsize":"x-large", "tick_formatstr":"%.2f",
     "legend_fontsize":"large", "legend_loc":0, "legend_title":None, 
     "ymin":None, "graph_filepath":None, "plot_type": "scatter",
+    "delta":"0.05",
     "th":None,"thp":None,"t0":None,"D1":None,"Mu_h":None,"epsilon_min":None}
 
 _SERIES_DEFAULTS = {"label":None, "style":"k."}
@@ -99,7 +100,7 @@ def _save_figure(graph_data, fig):
 # To make this plot, graph_data["Fermi_surface_data"] must be a dictionary
 # with the keys "th", "thp", "t0", "D1", "Mu_h", and "epsilon_min".
 def plot_Fermi_surface(graph_data):
-    delta = 0.05
+    delta = float(graph_data["delta"])
     x = arange(-math.pi, math.pi, delta)
     y = arange(-math.pi, math.pi, delta)
     X, Y = meshgrid(x, y)
@@ -111,6 +112,8 @@ def plot_Fermi_surface(graph_data):
             Z[i].append(FS(x[j], y[i]))
     fig = plt.figure()
     axes = fig.add_subplot(1, 1, 1)
+    axes.set_xlabel(graph_data["xlabel"], size=graph_data["axis_label_fontsize"])
+    axes.set_ylabel(graph_data["ylabel"], size=graph_data["axis_label_fontsize"])
     CS = axes.contour(X, Y, Z)
     _save_figure(graph_data, fig)
 
