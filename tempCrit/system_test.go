@@ -88,7 +88,7 @@ func TestProductionPlots(t *testing.T) {
 	// number of X values to use
 	Nx := 30
 	// vary thp
-	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{Nx, 1, 3}, []float64{0.01, 0.1, 0.05}, []float64{0.15, 0.1, 0.15})
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{Nx, 1, 3}, []float64{0.001, 0.1, 0.05}, []float64{0.15, 0.1, 0.15})
 	fileLabelTp := "plot_data_THP.tp_x"
 	fileLabelMu := "plot_data_THP.mu_x"
 	fileLabelD1 := "plot_data_THP.D1_x"
@@ -101,7 +101,7 @@ func TestProductionPlots(t *testing.T) {
 	fileLabelD1 = "plot_data_THP_LOWX.D1_x"
 	err = solveAndPlot(envs, eps, eps, fileLabelTp, fileLabelMu, fileLabelD1)
 	// vary tz
-	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{Nx, 3, 1}, []float64{0.01, 0.05, 0.1}, []float64{0.15, 0.15, 0.1})
+	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{Nx, 3, 1}, []float64{0.001, 0.05, 0.1}, []float64{0.15, 0.15, 0.1})
 	fileLabelTp = "plot_data_TZ.tp_x"
 	fileLabelMu = "plot_data_TZ.mu_x"
 	fileLabelD1 = "plot_data_TZ.D1_x"
@@ -197,7 +197,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, fileLabel
 	vars := plots.GraphVars{"X", "", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, tempAll.GetTemp}
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelTc, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_c/t_0$"}
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelTc, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T_c/t_0$", plots.YMIN_KEY: "0.0"}
 	err := plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, false)
 	if err != nil {
 		return err
@@ -210,6 +210,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, fileLabel
 	// Mu_h vs x plots
 	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelMu
 	graphParams[plots.YLABEL_KEY] = "$\\mu_h/t_0$"
+	graphParams[plots.YMIN_KEY] = ""
 	vars.Y = "Mu_h"
 	vars.YFunc = nil
 	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
@@ -241,7 +242,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, fileLabel
 func plotTcTp(tcEnvs, tpEnvs []*tempAll.Environment, fileLabelTcTp string) error {
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelTcTp, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T/t_0$"}
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelTcTp, plots.XLABEL_KEY: "$x$", plots.YLABEL_KEY: "$T/t_0$", plots.YMIN_KEY: "0.0"}
 	seriesParams := make([]map[string]string, 2)
 	seriesParams[0] = map[string]string{"label": "$T_c/t_0$", "style": "b-"}
 	seriesParams[1] = map[string]string{"label": "$T_p/t_0$", "style": "r--"}
