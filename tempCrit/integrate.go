@@ -9,13 +9,24 @@ import (
 	"../tempAll"
 )
 
-// Calculate the integral of y from 0 to ymax of: F(y) / (4*pi^2*a*sqrt(b)).
-// a, b are parameters in pair spectrum: omega_+(k) = a*(kx^2 + ky^2) + b*(kz^2)
+// Integrate F * n_BE(omega_+) over relevant energy range.
 func OmegaIntegralY(env *tempAll.Environment, a, b float64, F func(float64) float64) (float64, error) {
+	return omegaIntegralYHelper(env, a, b, 0.0, F)
+}
+
+// Integrate F * n_BE(omega_-) over relevant energy range.
+func OmegaMinusIntegralY(env *tempAll.Environment, a, b, mu_relative float64, F func(float64) float64) (float64, error) {
+	return omegaIntegralYHelper(env, a, b, mu_relative, F)
+}
+
+// Calculate the integral of y from 0 to ymax of: F(y) / (4*pi^2*a*sqrt(b)).
+// a, b are parameters in pair spectrum: omega_+(k) = a*(kx^2 + ky^2) + b*(kz^2).
+// mu_relative = 0 for omega_+ poles; = omegaCoeffs[3] for omega_- poles.
+func omegaIntegralYHelper(env *tempAll.Environment, a, b, mu_relative float64, F func(float64) float64) (float64, error) {
 	if a == 0.0 || b == 0.0 {
 		return 0.0, nil
 	}
-	ymax := env.Beta * (-2.0*env.Mu_h + env.Mu_b)
+	ymax := env.Beta * (-2.0*env.Mu_h + env.Mu_b + mu_relative)
 	if ymax <= 0.0 {
 		return 0.0, nil
 	}

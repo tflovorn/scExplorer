@@ -34,12 +34,11 @@ func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Printf("%v\n", fit)
 	return fit, nil
 }
 
 func omegaFitHelper(env *tempAll.Environment, fn OmegaFunc, points []vec.Vector) (vec.Vector, error) {
-	// evaluate omega_+(k) at each point
+	// evaluate omega_+/-(k) at each point
 	omegas := []float64{}
 	Xs := []vec.Vector{}
 	for _, q := range points {
@@ -56,7 +55,7 @@ func omegaFitHelper(env *tempAll.Environment, fn OmegaFunc, points []vec.Vector)
 		omegas = append(omegas, omega)
 	}
 	if len(omegas) < 3 {
-		return nil, fmt.Errorf("not enough omega_+ values can be found")
+		return nil, fmt.Errorf("not enough omega_+/- values can be found")
 	}
 	return fit.Linear(omegas, Xs), nil
 }
@@ -88,12 +87,7 @@ func omegaCoeffsPoints(numRadial int, sk float64) []vec.Vector {
 // Calculate omega_+(k) by finding zeros of 1 - lambda_+
 func OmegaPlus(env *tempAll.Environment, k vec.Vector) (float64, error) {
 	lp := lambdaPlusFn(env, k)
-	var initOmega, epsAbs, epsRel float64
-	if env.F0 == 0.0 {
-		initOmega, epsAbs, epsRel = 0.01, 1e-9, 1e-9
-	} else {
-		initOmega, epsAbs, epsRel = 0.01, 1e-9, 1e-9
-	}
+	initOmega, epsAbs, epsRel := 0.01, 1e-9, 1e-9
 	root, err := solve.OneDimDiffRoot(lp, initOmega, epsAbs, epsRel)
 	return root, err
 }

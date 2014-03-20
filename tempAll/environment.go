@@ -41,6 +41,10 @@ type Environment struct {
 	// Use kz^2 in pair spectrum - incompatible with finite magnetic field.
 	// If false, use cosine spectrum in tempCrit/tempFluc; cosine spectrum not implemented in tempLow.
 	PairKzSquaredSpectrum bool
+	// If true, include poles giving omega_- spectrum in the calculation.
+	// Has no effect if PairKzSquaredSpectrum = false (TODO - extend to cos(kz) spectrum).
+	// Expect negligible different between this being on or off.
+	OmegaMinusPoles bool
 	// Fix pair spectrum coefficients to their values at Tc (helps match F0 = 0 to Tc in T < Tc calculation).
 	FixedPairCoeffs bool
 	// If FixedPairCoeffs = true, stop varying pair spectrum coefficients after PairCoeffsReady is set to true.

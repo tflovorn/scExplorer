@@ -21,19 +21,19 @@ func ctSolvedEnv() (*tempAll.Environment, error) {
 	return env, nil
 }
 
-// Expect omega minus equation to have no solution
+// Expect omega_minus equation to have no solution.
 func TestOmegaMinusSolution(t *testing.T) {
 	env, err := ctSolvedEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
 	oc, err := OmegaFit(env, OmegaMinus)
-	if err == nil {
-		t.Fatalf("unexpected solution for OmegaMinus coeffs: %v", oc)
+	if err == nil && -oc[3] < 0.7 {
+		t.Fatalf("unexpected small-mu solution for OmegaMinus coeffs: %v", oc)
 	}
 }
 
-// Check deviation of OmegaPlus from parabolic approximation (free particle)
+// Check deviation of OmegaPlus from parabolic approximation (free particle).
 func TestOmegaPlusFitAccuracy(t *testing.T) {
 	env, err := ctSolvedEnv()
 	if err != nil {

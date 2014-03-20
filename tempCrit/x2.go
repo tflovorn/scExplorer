@@ -96,23 +96,20 @@ func nu(env *tempAll.Environment) (float64, error) {
 	if err != nil {
 		return 0.0, err
 	}
-	return plus, nil
-	/*
-		// above T_c, only plus poles exist
-		if env.F0 == 0.0 {
-			return plus, nil
-		}
-		// below T_c, maybe have minus poles
+	// If omega_- poles exist, they can change the solution.
+	// But, these are expected/shown to not exist or have large negative chemical potential.
+	if env.OmegaMinusPoles {
 		minusCoeffs, err := OmegaFit(env, OmegaMinus)
 		if err != nil {
 			fmt.Println("failed to find omega_- coeffs")
 			return plus, nil
 		}
 		fmt.Printf("got omega_- coeffs %v\n", minusCoeffs)
-		minus, err := OmegaIntegralY(env, minusCoeffs, integrand)
+		minus, err := OmegaMinusIntegralY(env, minusCoeffs[0], minusCoeffs[2], minusCoeffs[3], integrand)
 		if err != nil {
 			return 0.0, err
 		}
 		return plus + minus, nil
-	*/
+	}
+	return plus, nil
 }
