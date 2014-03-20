@@ -12,6 +12,11 @@ type Series struct {
 	xs, ys []float64
 }
 
+func MakeSeries(xs, ys []float64) Series {
+	s := Series{xs, ys}
+	return s
+}
+
 func (s *Series) X(i int) float64 {
 	return s.xs[i]
 }

@@ -33,7 +33,11 @@ func PlotMPL(data []Series, params map[string]string, seriesParams []map[string]
 	return nil
 }
 
-// Create a seriesParams for PlotMPL
+// Create a seriesParams for PlotMPL.
+// In the plot's legend, entries are displayed as "[varLabel] = (value)".
+// varFmt specifies a format string to use for the value.
+// varVals is a list of (float64) parameter values.
+// styles specifies the line styles to use when drawing each series.
 func MakeSeriesParams(varLabel, varFmt string, varVals []float64, styles []string) []map[string]string {
 	ret := make([]map[string]string, len(varVals))
 	for i, val := range varVals {

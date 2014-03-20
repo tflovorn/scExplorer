@@ -14,7 +14,6 @@ import (
 )
 
 var production = flag.Bool("production", false, "Production mode: make plots that shouldn't change.")
-var printerPlots = flag.Bool("printerPlots", false, "Use line types as plot styles instead of colors.")
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var tinyX = flag.Bool("tinyX", false, "Plot very small values of X")

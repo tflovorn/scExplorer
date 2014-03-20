@@ -64,7 +64,6 @@ func multiPlotHelper(data []interface{}, errs []error, vars GraphVars, graphPara
 			return err
 		}
 	}
-
 	return nil
 }
 
