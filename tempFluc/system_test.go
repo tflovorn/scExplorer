@@ -316,7 +316,7 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error making specific heat plot: %v", err)
 	}
-	// C_V / T = C_V * Beta
+	// plot gamma = C_V / T = C_V * Beta
 	Gamma := func(d interface{}) float64 {
 		env := d.(SpecificHeatEnv)
 		return SH12(d) * env.Beta

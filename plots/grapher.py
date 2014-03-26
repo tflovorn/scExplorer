@@ -9,7 +9,7 @@ from numpy import arange, meshgrid
 _GRAPH_DEFAULTS = {"xlabel":"$x$", "ylabel":"$y$", "num_ticks":5, 
     "axis_label_fontsize":"x-large", "tick_formatstr":"%.2f",
     "legend_fontsize":"large", "legend_loc":0, "legend_title":None, 
-    "ymin":None, "graph_filepath":None, "plot_type": "scatter",
+    "ymin":None, "xmax":None, "graph_filepath":None, "plot_type": "scatter",
     "delta":"0.05",
     "th":None,"thp":None,"t0":None,"D1":None,"Mu_h":None,"epsilon_min":None}
 
@@ -73,6 +73,9 @@ def make_graph(graph_data):
                 prop=fontprop_legend)
     axes.set_xlabel(graph_data["xlabel"], size=graph_data["axis_label_fontsize"])
     axes.set_ylabel(graph_data["ylabel"], size=graph_data["axis_label_fontsize"])
+    axes.tick_params(axis='x', pad=7)
+    if graph_data["xmax"] != None and graph_data["xmax"] != "":
+        axes.set_xlim(right=float(graph_data["xmax"]), auto=None)
     if graph_data["ymin"] != None and graph_data["ymin"] != "":
         axes.set_ylim(bottom=float(graph_data["ymin"]), auto=None)
     _save_figure(graph_data, fig)

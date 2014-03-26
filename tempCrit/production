@@ -1,6 +1,6 @@
 #!/bin/bash
 
-go test -production -test.timeout 10h
+go test -production -test.timeout 100h
 
 mkdir Thp
 mkdir Thp/color

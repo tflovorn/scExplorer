@@ -62,15 +62,16 @@ func TestProductionPlots(t *testing.T) {
 	}
 	*plotFS = false
 	*preciseFS = false
+	Nx := 90
 	// vary thp
-	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{30, 1, 3}, []float64{0.02, 0.1, -0.1}, []float64{0.12, 0.1, 0.1})
-	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, nil}
-	xyLabels := []string{"$x$", "$F_0$", "$\\mu_h$", "$D_1$"}
+	envs := defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{Nx, 1, 3}, []float64{0.001, 0.1, -0.1}, []float64{0.1, 0.1, 0.1})
+	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z/t_0", "t_h^{\\prime}/t_0"}, nil, nil}
+	xyLabels := []string{"$x_{eff}$", "$F_0$", "$\\mu_h/t_0$", "$D_1$"}
 	fileLabelF0 := "plot_data_THP.F0_x_dwave"
 	fileLabelMu := "plot_data_THP.Mu_h_x_dwave"
 	fileLabelD1 := "plot_data_THP.D1_x_dwave"
 	eps := 1e-6
-	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1, "0.1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,17 +80,17 @@ func TestProductionPlots(t *testing.T) {
 	fileLabelF0 = "plot_data_THP_BW.F0_x_dwave"
 	fileLabelMu = "plot_data_THP_BW.Mu_h_x_dwave"
 	fileLabelD1 = "plot_data_THP_BW.D1_x_dwave"
-	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1, "0.1")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// vary tz
 	*printerPlots = false
-	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{30, 3, 1}, []float64{0.02, -0.1, 0.1}, []float64{0.12, 0.1, 0.1})
+	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{Nx, 3, 1}, []float64{0.001, -0.1, 0.1}, []float64{0.1, 0.1, 0.1})
 	fileLabelF0 = "plot_data_TZ.F0_x_dwave"
 	fileLabelMu = "plot_data_TZ.Mu_h_x_dwave"
 	fileLabelD1 = "plot_data_TZ.D1_x_dwave"
-	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1, "0.1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +99,7 @@ func TestProductionPlots(t *testing.T) {
 	fileLabelF0 = "plot_data_TZ_BW.F0_x_dwave"
 	fileLabelMu = "plot_data_TZ_BW.Mu_h_x_dwave"
 	fileLabelD1 = "plot_data_TZ_BW.D1_x_dwave"
-	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1, "0.1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,20 +110,20 @@ func TestProductionPlots(t *testing.T) {
 	if defaultEnv.PointsPerSide < Nmin {
 		defaultEnv.PointsPerSide = Nmin
 	}
-	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 1, 3}, []float64{0.04, 0.1, -0.1}, []float64{0.12, 0.1, 0.1})
+	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{7, 1, 3}, []float64{0.04, 0.1, -0.1}, []float64{0.10, 0.1, 0.1})
 	fileLabelF0 = "plot_data_THP_FS.F0_x_dwave"
 	fileLabelMu = "plot_data_THP_FS.Mu_h_x_dwave"
 	fileLabelD1 = "plot_data_THP_FS.D1_x_dwave"
-	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1, "0.1")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// vary tz (Fermi surface)
-	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 3, 1}, []float64{0.04, -0.1, 0.1}, []float64{0.12, 0.1, 0.1})
+	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{7, 3, 1}, []float64{0.04, -0.1, 0.1}, []float64{0.10, 0.1, 0.1})
 	fileLabelF0 = "plot_data_TZ_FS.F0_x_dwave"
 	fileLabelMu = "plot_data_TZ_FS.Mu_h_x_dwave"
 	fileLabelD1 = "plot_data_TZ_FS.D1_x_dwave"
-	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1, "0.1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,12 +153,12 @@ func TestPlotF0VsX(t *testing.T) {
 		envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{10, 1, 3}, []float64{0.02, 0.1, 0.05}, []float64{0.12, 0.1, 0.15})
 	}
 	vars := plots.GraphVars{"X", "F0", []string{"Tz", "Thp"}, []string{"t_z", "t_h^{\\prime}"}, nil, nil}
-	xyLabels := []string{"$x$", "$F_0$", "$\\mu_h$", "$D_1$"}
+	xyLabels := []string{"$x_{eff}$", "$F_0$", "$\\mu_h$", "$D_1$"}
 	fileLabelF0 := "plot_data.F0_x_dwave"
 	fileLabelMu := "plot_data.Mu_h_x_dwave"
 	fileLabelD1 := "plot_data.D1_x_dwave"
 	eps := 1e-6
-	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	err = solveAndPlot(envs, eps, eps, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,14 +173,14 @@ func TestPlotF0VsX(t *testing.T) {
 	fileLabelF0 = "plot_data.F0_x_swave"
 	fileLabelMu = "plot_data.F0_x_swave"
 	fileLabelD1 = "plot_data.D1_x_swave"
-	err = solveAndPlot(envsS, 1e-6, 1e-6, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1)
+	err = solveAndPlot(envsS, 1e-6, 1e-6, vars, xyLabels, fileLabelF0, fileLabelMu, fileLabelD1, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Solve each given Environment and plot it.
-func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plots.GraphVars, xyLabels []string, fileLabelF0, fileLabelMu, fileLabelD1 string) error {
+func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plots.GraphVars, xyLabels []string, fileLabelF0, fileLabelMu, fileLabelD1, xmax string) error {
 	// solve
 	var plotEnvs []interface{}
 	var errs []error
@@ -191,7 +192,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelF0, plots.XLABEL_KEY: xyLabels[0], plots.YLABEL_KEY: xyLabels[1], plots.YMIN_KEY: "0.0"}
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelF0, plots.XLABEL_KEY: xyLabels[0], plots.YLABEL_KEY: xyLabels[1], plots.YMIN_KEY: "0.0", "xmax": xmax}
 	if !*plotFS && !*preciseFS {
 		// plot F0
 		err := plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, *printerPlots)
@@ -216,6 +217,7 @@ func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, vars plot
 	if err != nil {
 		return fmt.Errorf("error making plots: %v", err)
 	}
+	graphParams["xmax"] = ""
 	if *plotFS || *preciseFS {
 		// plot Fermi surface
 		for _, env := range envs {
