@@ -125,9 +125,9 @@ func TestProductionPlots(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	N_Mu_b := 4
-	N_Tz_Thp := 2
-	Nx := 2
+	N_Mu_b := 30
+	N_Tz_Thp := 3
+	Nx := 3
 	// vary thp; running a & b
 	defaultEnv.FixedPairCoeffs = false
 	envs := defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, 1, N_Tz_Thp, Nx}, []float64{0.0, 0.1, 0.05, 0.03}, []float64{-0.5, 0.1, 0.15, 0.09})
@@ -143,23 +143,20 @@ func TestProductionPlots(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// vary thp; fixed a & ba
-	/*
-		defaultEnv.FixedPairCoeffs = true
-		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, 1, N_Tz_Thp, Nx}, []float64{0.0, 0.1, 0.05, 0.03}, []float64{-0.5, 0.1, 0.15, 0.09})
-		fileLabelT := "plot_data_THP_FIXED_AB.Mu_b_T"
-		fileLabelMu := "plot_data_THP_FIXED_AB.Mu_h_T"
-		fileLabelD1 := "plot_data_THP_FIXED_AB.D1_T"
-		fileLabel_a := "plot_data_THP_FIXED_AB.a_T"
-		fileLabel_b := "plot_data_THP_FIXED_AB.b_T"
-		fileLabel_x2 := "plot_data_THP_FIXED_AB.x2_T"
-		fileLabel_x1 := "plot_data_THP_FIXED_AB.x1_T"
-		eps := 1e-6
-		err = solveAndPlot(envs, eps, eps, fileLabelT, fileLabelMu, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1)
-		if err != nil {
-			t.Fatal(err)
-		}
-	*/
+	// vary thp; fixed a & b
+	defaultEnv.FixedPairCoeffs = true
+	envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, 1, N_Tz_Thp, Nx}, []float64{0.0, 0.1, 0.05, 0.03}, []float64{-0.5, 0.1, 0.15, 0.09})
+	fileLabelT = "plot_data_THP_FIXED_AB.Mu_b_T"
+	fileLabelMu = "plot_data_THP_FIXED_AB.Mu_h_T"
+	fileLabelD1 = "plot_data_THP_FIXED_AB.D1_T"
+	fileLabel_a = "plot_data_THP_FIXED_AB.a_T"
+	fileLabel_b = "plot_data_THP_FIXED_AB.b_T"
+	fileLabel_x2 = "plot_data_THP_FIXED_AB.x2_T"
+	fileLabel_x1 = "plot_data_THP_FIXED_AB.x1_T"
+	err = solveAndPlot(envs, eps, eps, fileLabelT, fileLabelMu, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1)
+	if err != nil {
+		t.Fatal(err)
+	}
 	// vary tz; running a & b
 	defaultEnv.FixedPairCoeffs = false
 	envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, N_Tz_Thp, 1, Nx}, []float64{0.0, 0.05, 0.1, 0.03}, []float64{-0.5, 0.15, 0.1, 0.09})
@@ -175,21 +172,19 @@ func TestProductionPlots(t *testing.T) {
 		t.Fatal(err)
 	}
 	// vary tz; fixed a & b
-	/*
-		defaultEnv.FixedPairCoeffs = true
-		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, N_Tz_Thp, 1, Nx}, []float64{0.0, 0.05, 0.1, 0.03}, []float64{-0.5, 0.15, 0.1, 0.09})
-		fileLabelT = "plot_data_TZ_FIXED_AB.Mu_b_T"
-		fileLabelMu = "plot_data_TZ_FIXED_AB.Mu_h_T"
-		fileLabelD1 = "plot_data_TZ_FIXED_AB.D1_T"
-		fileLabel_a = "plot_data_TZ_FIXED_AB.a_T"
-		fileLabel_b = "plot_data_TZ_FIXED_AB.b_T"
-		fileLabel_x2 = "plot_data_TZ_FIXED_AB.x2_T"
-		fileLabel_x1 = "plot_data_TZ_FIXED_AB.x1_T"
-		err = solveAndPlot(envs, eps, eps, fileLabelT, fileLabelMu, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1)
-		if err != nil {
-			t.Fatal(err)
-		}
-	*/
+	defaultEnv.FixedPairCoeffs = true
+	envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, N_Tz_Thp, 1, Nx}, []float64{0.0, 0.05, 0.1, 0.03}, []float64{-0.5, 0.15, 0.1, 0.09})
+	fileLabelT = "plot_data_TZ_FIXED_AB.Mu_b_T"
+	fileLabelMu = "plot_data_TZ_FIXED_AB.Mu_h_T"
+	fileLabelD1 = "plot_data_TZ_FIXED_AB.D1_T"
+	fileLabel_a = "plot_data_TZ_FIXED_AB.a_T"
+	fileLabel_b = "plot_data_TZ_FIXED_AB.b_T"
+	fileLabel_x2 = "plot_data_TZ_FIXED_AB.x2_T"
+	fileLabel_x1 = "plot_data_TZ_FIXED_AB.x1_T"
+	err = solveAndPlot(envs, eps, eps, fileLabelT, fileLabelMu, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1)
+	if err != nil {
+		t.Fatal(err)
+	}
 	// SH with running a & b
 	defaultEnv.FixedPairCoeffs = false
 

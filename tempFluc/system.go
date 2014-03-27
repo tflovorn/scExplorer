@@ -57,6 +57,23 @@ func D1Mu_bSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 
 // Solve the (D1, Mu_h, Beta) system with x and Mu_b fixed.
 func FlucTempSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	// fix pair coefficients
+	if env.A == 0.0 && env.B == 0.0 && env.FixedPairCoeffs {
+		D1, Mu_h, Mu_b, Beta := env.D1, env.Mu_h, env.Mu_b, env.Beta
+		env.Mu_b = 0.0 // Mu_b is 0 at T_c
+		_, err := tempCrit.CritTempSolve(env, epsAbs, epsRel)
+		if err != nil {
+			return nil, err
+		}
+		omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
+		if err != nil {
+			return nil, err
+		}
+		env.A, env.B = omegaFit[0], omegaFit[2]
+		env.PairCoeffsReady = true
+		// uncache env
+		env.D1, env.Mu_h, env.Mu_b, env.Beta = D1, Mu_h, Mu_b, Beta
+	}
 	// our guess for beta should be a bit above Beta_p
 	pairSystem, pairStart := tempPair.PairTempSystem(env)
 	_, err := solve.MultiDim(pairSystem, pairStart, epsAbs, epsRel)
@@ -64,7 +81,7 @@ func FlucTempSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 		return nil, err
 	}
 	env.Beta += 0.1
-	// solve fluc temp system for reasonable values of Mu and D1 first
+	// solve fluc temp system for reasonable values of Mu_h and D1 first
 	system, start := FlucTempD1MuSystem(env)
 	_, err = solve.MultiDim(system, start, epsAbs, epsRel)
 	if err != nil {

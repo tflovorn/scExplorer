@@ -20,12 +20,14 @@ func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {
 			return 0.0, errors.New("NaN in input")
 		}
 		env.Set(v, variables)
-		// Before we evaluate error in Beta, Mu_h and D1 should have
-		// appropriate values.
-		eps := 1e-9
-		_, err := SolveD1Mu_h(env, eps, eps)
-		if err != nil {
-			return 0.0, err
+		if !env.FixedPairCoeffs || !env.PairCoeffsReady {
+			// Before we evaluate error in Beta, Mu_h and D1 should have
+			// appropriate values.
+			eps := 1e-9
+			_, err := SolveD1Mu_h(env, eps, eps)
+			if err != nil {
+				return 0.0, err
+			}
 		}
 		// Beta equation error = x - x1 - x2
 		x1 := tempPair.X1(env)
