@@ -15,6 +15,7 @@ import (
 	"../tempCrit"
 )
 
+var production = flag.Bool("production", false, "Production mode: make plots that shouldn't change.")
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")
 var longPlot = flag.Bool("longPlot", false, "Run long version of plot tests")
 var loadCache = flag.Bool("loadCache", false, "load cached data instead of re-generating")
@@ -105,6 +106,97 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{4, 1, 1, 1}, []float64{-0.05, 0.1, 0.1, 0.05}, []float64{-0.50, 0.1, 0.1, 0.05})
 	}
 	return envs, nil
+
+}
+
+// Production-ready plots:
+//   D1, Mu_h, and Tc vs T.
+//   Extra set of plots to zoom in on x=0.
+//   x1 & x2, a & b.
+//   x = {0.03, 0.06, 0.09} in each set.
+//   Vary tz and thp independently in each set (fix one at 0.1 and the other is in {0.05, 0.1, 0.15}).
+func TestProductionPlots(t *testing.T) {
+	// setup
+	flag.Parse()
+	if !*production {
+		return
+	}
+	defaultEnv, err := flucDefaultEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	N_Mu_b := 4
+	N_Tz_Thp := 2
+	Nx := 2
+	// vary thp; running a & b
+	defaultEnv.FixedPairCoeffs = false
+	envs := defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, 1, N_Tz_Thp, Nx}, []float64{0.0, 0.1, 0.05, 0.03}, []float64{-0.5, 0.1, 0.15, 0.09})
+	fileLabelT := "plot_data_THP.Mu_b_T"
+	fileLabelMu := "plot_data_THP.Mu_h_T"
+	fileLabelD1 := "plot_data_THP.D1_T"
+	fileLabel_a := "plot_data_THP.a_T"
+	fileLabel_b := "plot_data_THP.b_T"
+	fileLabel_x2 := "plot_data_THP.x2_T"
+	fileLabel_x1 := "plot_data_THP.x1_T"
+	eps := 1e-6
+	err = solveAndPlot(envs, eps, eps, fileLabelT, fileLabelMu, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// vary thp; fixed a & ba
+	/*
+		defaultEnv.FixedPairCoeffs = true
+		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, 1, N_Tz_Thp, Nx}, []float64{0.0, 0.1, 0.05, 0.03}, []float64{-0.5, 0.1, 0.15, 0.09})
+		fileLabelT := "plot_data_THP_FIXED_AB.Mu_b_T"
+		fileLabelMu := "plot_data_THP_FIXED_AB.Mu_h_T"
+		fileLabelD1 := "plot_data_THP_FIXED_AB.D1_T"
+		fileLabel_a := "plot_data_THP_FIXED_AB.a_T"
+		fileLabel_b := "plot_data_THP_FIXED_AB.b_T"
+		fileLabel_x2 := "plot_data_THP_FIXED_AB.x2_T"
+		fileLabel_x1 := "plot_data_THP_FIXED_AB.x1_T"
+		eps := 1e-6
+		err = solveAndPlot(envs, eps, eps, fileLabelT, fileLabelMu, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1)
+		if err != nil {
+			t.Fatal(err)
+		}
+	*/
+	// vary tz; running a & b
+	defaultEnv.FixedPairCoeffs = false
+	envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, N_Tz_Thp, 1, Nx}, []float64{0.0, 0.05, 0.1, 0.03}, []float64{-0.5, 0.15, 0.1, 0.09})
+	fileLabelT = "plot_data_TZ.Mu_b_T"
+	fileLabelMu = "plot_data_TZ.Mu_h_T"
+	fileLabelD1 = "plot_data_TZ.D1_T"
+	fileLabel_a = "plot_data_TZ.a_T"
+	fileLabel_b = "plot_data_TZ.b_T"
+	fileLabel_x2 = "plot_data_TZ.x2_T"
+	fileLabel_x1 = "plot_data_TZ.x1_T"
+	err = solveAndPlot(envs, eps, eps, fileLabelT, fileLabelMu, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// vary tz; fixed a & b
+	/*
+		defaultEnv.FixedPairCoeffs = true
+		envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, N_Tz_Thp, 1, Nx}, []float64{0.0, 0.05, 0.1, 0.03}, []float64{-0.5, 0.15, 0.1, 0.09})
+		fileLabelT = "plot_data_TZ_FIXED_AB.Mu_b_T"
+		fileLabelMu = "plot_data_TZ_FIXED_AB.Mu_h_T"
+		fileLabelD1 = "plot_data_TZ_FIXED_AB.D1_T"
+		fileLabel_a = "plot_data_TZ_FIXED_AB.a_T"
+		fileLabel_b = "plot_data_TZ_FIXED_AB.b_T"
+		fileLabel_x2 = "plot_data_TZ_FIXED_AB.x2_T"
+		fileLabel_x1 = "plot_data_TZ_FIXED_AB.x1_T"
+		err = solveAndPlot(envs, eps, eps, fileLabelT, fileLabelMu, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1)
+		if err != nil {
+			t.Fatal(err)
+		}
+	*/
+	// SH with running a & b
+	defaultEnv.FixedPairCoeffs = false
+
+	// SH with a & b fixed at their Tc values
+	defaultEnv.FixedPairCoeffs = true
+
+	// magnetization
 
 }
 
@@ -403,4 +495,132 @@ func TestPlotX2Collapse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error making Mu_h plot: %v", err)
 	}
+}
+
+func solveAndPlot(envs []*tempAll.Environment, epsabs, epsrel float64, fileLabelT, fileLabelMu, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1 string) error {
+	// solve
+	plotEnvs, errs := tempAll.MultiSolve(envs, epsabs, epsrel, FlucTempSolve)
+	// Mu_b vs T plot
+	vars := plots.GraphVars{"", "Mu_b", []string{"Tz", "Thp", "X"}, []string{"t_z/t_0", "t_h^{\\prime}/t_0", "x_{eff}"}, tempAll.GetTemp, nil}
+	wd, _ := os.Getwd()
+	grapherPath := wd + "/../plots/grapher.py"
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelT, plots.XLABEL_KEY: "$T$", plots.YLABEL_KEY: "$\\mu_{pair}/t_0$", plots.YMIN_KEY: ""}
+	err := plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, false)
+	if err != nil {
+		return err
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelT + "_BW_"
+	err = plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	// Mu_h vs T plots
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelMu
+	graphParams[plots.YLABEL_KEY] = "$\\mu_h/t_0$"
+	vars.Y = "Mu_h"
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		return err
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelMu + "_BW_"
+	err = plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	// D_1 vs T plots
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelD1
+	graphParams[plots.YLABEL_KEY] = "$D_1$"
+	vars.Y = "D1"
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		return err
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelD1 + "_BW_"
+	err = plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	// x_2 vs T plots
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel_x2
+	graphParams[plots.YLABEL_KEY] = "$x_2$"
+	graphParams[plots.YMIN_KEY] = "0.0"
+	vars.Y = ""
+	vars.YFunc = tempCrit.GetX2
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		return err
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel_x2 + "_BW_"
+	err = plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	// x_1 vs T plots
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel_x1
+	graphParams[plots.YLABEL_KEY] = "$x_1$"
+	x1fn := func(data interface{}) float64 {
+		env := data.(tempAll.Environment)
+		return env.X - tempCrit.GetX2(data)
+	}
+	vars.Y = ""
+	vars.YFunc = x1fn
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		return err
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel_x1 + "_BW_"
+	err = plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	// omega_+(q) parameters (a, b) vs T
+	get_fit := func(data interface{}, i int) float64 {
+		env := data.(tempAll.Environment)
+		if env.FixedPairCoeffs {
+			if i == 0 || i == 1 {
+				return env.A
+			} else {
+				return env.B
+			}
+		}
+		fit, err := tempCrit.OmegaFit(&env, tempCrit.OmegaPlus)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+		}
+		return fit[i]
+	}
+	get_a := func(data interface{}) float64 {
+		return get_fit(data, 0)
+	}
+	get_b := func(data interface{}) float64 {
+		return get_fit(data, 2)
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel_a
+	graphParams[plots.YLABEL_KEY] = "$a/t_0$"
+	graphParams[plots.YMIN_KEY] = ""
+	vars.Y = ""
+	vars.YFunc = get_a
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		return err
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel_a + "_BW_"
+	err = plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel_b
+	graphParams[plots.YLABEL_KEY] = "$b/t_0$"
+	vars.Y = ""
+	vars.YFunc = get_b
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		return err
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel_b + "_BW_"
+	err = plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	return nil
 }

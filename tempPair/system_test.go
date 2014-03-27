@@ -68,24 +68,36 @@ func TestProductionPlots(t *testing.T) {
 	fileLabelD1 := "plot_data_THP.D1_x"
 	eps := 1e-9
 	err = solveAndPlot(envs, eps, eps, fileLabelTp, fileLabelMu, fileLabelD1, xmax)
+	if err != nil {
+		t.Fatal(err)
+	}
 	// vary thp (small x)
 	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{Nx, 1, 3}, []float64{0.001, 0.1, -0.1}, []float64{0.01, 0.1, 0.1})
 	fileLabelTp = "plot_data_THP_LOWX.tp_x"
 	fileLabelMu = "plot_data_THP_LOWX.mu_x"
 	fileLabelD1 = "plot_data_THP_LOWX.D1_x"
 	err = solveAndPlot(envs, eps, eps, fileLabelTp, fileLabelMu, fileLabelD1, "0.01")
+	if err != nil {
+		t.Fatal(err)
+	}
 	// vary tz
 	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{Nx, 3, 1}, []float64{0.001, -0.1, 0.1}, []float64{xmaxf, 0.1, 0.1})
 	fileLabelTp = "plot_data_TZ.tp_x"
 	fileLabelMu = "plot_data_TZ.mu_x"
 	fileLabelD1 = "plot_data_TZ.D1_x"
 	err = solveAndPlot(envs, eps, eps, fileLabelTp, fileLabelMu, fileLabelD1, xmax)
+	if err != nil {
+		t.Fatal(err)
+	}
 	// vary tz (small x)
 	envs = defaultEnv.MultiSplit([]string{"X", "Tz", "Thp"}, []int{Nx, 3, 1}, []float64{0.001, -0.1, 0.1}, []float64{0.01, 0.1, 0.1})
 	fileLabelTp = "plot_data_TZ_LOWX.tp_x"
 	fileLabelMu = "plot_data_TZ_LOWX.mu_x"
 	fileLabelD1 = "plot_data_TZ_LOWX.D1_x"
 	err = solveAndPlot(envs, eps, eps, fileLabelTp, fileLabelMu, fileLabelD1, "0.01")
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Plot evolution of Tp vs X.
