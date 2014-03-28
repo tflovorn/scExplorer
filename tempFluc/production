@@ -22,6 +22,13 @@ mkdir Fixed_AB/X
 mkdir Fixed_AB/X/color
 mkdir Fixed_AB/X/print
 
+mkdir SH
+mkdir SH/color
+mkdir SH/print
+mkdir Fixed_AB/SH
+mkdir Fixed_AB/SH/color
+mkdir Fixed_AB/SH/print
+
 cp plot_data_THP.*TTz*X*.png Thp/color/
 cp plot_data_THP.*TX*Tz*.png Thp/color/
 cp plot_data_THP_FIXED_AB.*TTz*X*.png Fixed_AB/Thp/color/
@@ -57,3 +64,6 @@ cp plot_data_TZ.*BW*Thp*Tz*.png X/print/
 cp plot_data_TZ.*BW*Tz*Thp*.png X/print/
 cp plot_data_TZ_FIXED_AB*BW*Thp*Tz*.png Fixed_AB/X/print/
 cp plot_data_TZ_FIXED_AB*BW*Tz*Thp*.png Fixed_AB/X/print/
+
+cp plot_data_SH.*.png SH/
+cp plot_data_SH_FIXED_AB.*.png Fixed_AB/SH/

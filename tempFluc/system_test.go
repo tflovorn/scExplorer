@@ -35,7 +35,7 @@ func TestSolveFlucSystem(t *testing.T) {
 	flag.Parse()
 
 	// if we're plotting, don't care about this regression test
-	if *testPlot {
+	if *testPlot || *production {
 		return
 	}
 	vars := []string{"D1", "Mu_h", "Beta"}
@@ -54,7 +54,7 @@ func TestSolveFlucSystem_LargeMu_b(t *testing.T) {
 	flag.Parse()
 
 	// if we're plotting, don't care about this regression test
-	if *testPlot {
+	if *testPlot || *production {
 		return
 	}
 
@@ -185,12 +185,38 @@ func TestProductionPlots(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// SH with running a & b
+	// SH with running a & b; tz = thp = 0.1
 	defaultEnv.FixedPairCoeffs = false
-
+	envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, 1, 1, Nx}, []float64{-0.05, 0.1, 0.05, 0.03}, []float64{-0.5, 0.1, 0.15, 0.09})
+	plotEnvs, errs := tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
+	Xs := getXs(plotEnvs)
+	SH_envs := makeSHEnvs(plotEnvs, errs, Xs)
+	fileLabelSH1 := "plot_data_SH.SH1_T"
+	fileLabelSH2 := "plot_data_SH.SH2_T"
+	fileLabelSH12 := "plot_data_SH.SH12_T"
+	fileLabelGamma12 := "plot_data_SH.gamma12_T"
+	fileLabelGamma1 := "plot_data_SH.gamma1_T"
+	fileLabelGamma2 := "plot_data_SH.gamma2_T"
+	err = makeSHPlots(SH_envs, errs, fileLabelSH1, fileLabelSH2, fileLabelSH12, fileLabelGamma1, fileLabelGamma2, fileLabelGamma12)
+	if err != nil {
+		t.Fatal(err)
+	}
 	// SH with a & b fixed at their Tc values
 	defaultEnv.FixedPairCoeffs = true
-
+	envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X"}, []int{N_Mu_b, 1, 1, Nx}, []float64{-0.05, 0.1, 0.05, 0.03}, []float64{-0.5, 0.1, 0.15, 0.09})
+	plotEnvs, errs = tempAll.MultiSolve(envs, eps, eps, FlucTempSolve)
+	Xs = getXs(plotEnvs)
+	SH_envs = makeSHEnvs(plotEnvs, errs, Xs)
+	fileLabelSH1 = "plot_data_SH_FIXED_AB.SH1_T"
+	fileLabelSH2 = "plot_data_SH_FIXED_AB.SH2_T"
+	fileLabelSH12 = "plot_data_SH_FIXED_AB.SH12_T"
+	fileLabelGamma12 = "plot_data_SH_FIXED_AB.gamma12_T"
+	fileLabelGamma1 = "plot_data_SH_FIXED_AB.gamma1_T"
+	fileLabelGamma2 = "plot_data_SH_FIXED_AB.gamma2_T"
+	err = makeSHPlots(SH_envs, errs, fileLabelSH1, fileLabelSH2, fileLabelSH12, fileLabelGamma1, fileLabelGamma2, fileLabelGamma12)
+	if err != nil {
+		t.Fatal(err)
+	}
 	// magnetization
 
 }
@@ -325,6 +351,22 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		return
 	}
 	// calculate specific heat contributions
+	SH_envs := makeSHEnvs(plotEnvs, errs, Xs)
+	// specific heat plots
+	fileLabelSH1 := "plot_data.SH-1_mu_b"
+	fileLabelSH2 := "plot_data.SH-2_mu_b"
+	fileLabelSH12 := "plot_data.SH-12_mu_b"
+	fileLabelGamma12 := "plot_data.gamma-12_mu_b"
+	fileLabelGamma1 := "plot_data.gamma-1_mu_b"
+	fileLabelGamma2 := "plot_data.gamma-2_mu_b"
+	err := makeSHPlots(SH_envs, errs, fileLabelSH1, fileLabelSH2, fileLabelSH12, fileLabelGamma1, fileLabelGamma2, fileLabelGamma12)
+	if err != nil {
+		t.Fatalf("error making specific heat plot: %v", err)
+	}
+}
+
+// Make specific heat data
+func makeSHEnvs(plotEnvs []interface{}, errs []error, Xs []float64) []interface{} {
 	SHenvs := make([]interface{}, len(plotEnvs))
 	F := func(i int, cerr chan<- error) {
 		SHenvs[i] = nil
@@ -370,77 +412,111 @@ func TestPlotX2VsMu_b(t *testing.T) {
 		}
 	}
 	SHenvs = fixXs(SHenvs, Xs)
-	// specific heat plots
-	fileLabel = "plot_data.SH-1_mu_b"
-	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	return SHenvs
+}
+
+func makeSHPlots(SHenvs []interface{}, errs []error, fileLabelSH1, fileLabelSH2, fileLabelSH12, fileLabelGamma1, fileLabelGamma2, fileLabelGamma12 string) error {
+	wd, _ := os.Getwd()
+	vars := plots.GraphVars{"", "", []string{"Tz", "Thp", "X", "Be_field"}, []string{"t_z", "t_h^{\\prime}", "x", "eB"}, GetSHTemp, nil}
+	grapherPath := wd + "/../plots/grapher.py"
+	graphParams := map[string]string{plots.XLABEL_KEY: "$T$"}
+	// specific heat from unpaired holons
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelSH1
 	graphParams[plots.YLABEL_KEY] = "$C_V^{1}$"
-	vars.X = ""
-	vars.XFunc = GetSHTemp
 	vars.Y = "SH_1"
-	vars.YFunc = nil
 	err := plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
-		t.Fatalf("error making specific heat plot: %v", err)
+		return err
 	}
-	fileLabel = "plot_data.SH-2_mu_b"
-	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelSH1 + "_BW_"
+	err = plots.MultiPlotStyle(SHenvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	// specific heat from pairs
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelSH2
 	graphParams[plots.YLABEL_KEY] = "$C_V^{2}$"
 	vars.Y = "SH_2"
 	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
-		t.Fatalf("error making specific heat plot: %v", err)
+		return err
 	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelSH2 + "_BW_"
+	err = plots.MultiPlotStyle(SHenvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	// specific heat from holons+pairs
 	SH12 := func(d interface{}) float64 {
 		env := d.(SpecificHeatEnv)
 		return env.SH_1 + env.SH_2
 	}
-	fileLabel = "plot_data.SH-12_mu_b"
-	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelSH12
 	graphParams[plots.YLABEL_KEY] = "$C_V^{12}$"
 	vars.Y = ""
 	vars.YFunc = SH12
 	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
-		t.Fatalf("error making specific heat plot: %v", err)
+		return err
+	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelSH12 + "_BW_"
+	err = plots.MultiPlotStyle(SHenvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
 	}
 	// plot gamma = C_V / T = C_V * Beta
+	// gamma from holons+pairs
 	Gamma := func(d interface{}) float64 {
 		env := d.(SpecificHeatEnv)
 		return SH12(d) * env.Beta
 	}
-	fileLabel = "plot_data.gamma-12_mu_b"
-	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelGamma12
 	graphParams[plots.YLABEL_KEY] = "$\\gamma^{12}$"
 	vars.YFunc = Gamma
 	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
-		t.Fatalf("error making specific heat plot: %v", err)
+		return err
 	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelGamma12 + "_BW_"
+	err = plots.MultiPlotStyle(SHenvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	// gamma from unpaired holons
 	Gamma1 := func(d interface{}) float64 {
 		env := d.(SpecificHeatEnv)
 		return env.SH_1 * env.Beta
 	}
-	fileLabel = "plot_data.gamma-1_mu_b"
-	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelGamma1
 	graphParams[plots.YLABEL_KEY] = "$\\gamma^{1}$"
 	vars.YFunc = Gamma1
 	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
-		t.Fatalf("error making specific heat plot: %v", err)
+		return err
 	}
-
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelGamma1 + "_BW_"
+	err = plots.MultiPlotStyle(SHenvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	// gamma from pairs
 	Gamma2 := func(d interface{}) float64 {
 		env := d.(SpecificHeatEnv)
 		return env.SH_2 * env.Beta
 	}
-	fileLabel = "plot_data.gamma-2_mu_b"
-	graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelGamma2
 	graphParams[plots.YLABEL_KEY] = "$\\gamma^{2}$"
 	vars.YFunc = Gamma2
 	err = plots.MultiPlot(SHenvs, errs, vars, graphParams, grapherPath)
 	if err != nil {
-		t.Fatalf("error making specific heat plot: %v", err)
+		return err
 	}
+	graphParams[plots.FILE_KEY] = wd + "/" + fileLabelGamma2 + "_BW_"
+	err = plots.MultiPlotStyle(SHenvs, errs, vars, graphParams, grapherPath, true)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // X = 0.1; tz = 0.1; thp = 0.1; -0.7 < mu_b < -0.8
