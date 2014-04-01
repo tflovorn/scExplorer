@@ -1,0 +1,69 @@
+#!/bin/bash
+
+go test -production -test.timeout 100h
+
+mkdir Fixed_AB
+mkdir Thp
+mkdir Thp/color
+mkdir Thp/print
+mkdir Fixed_AB/Thp
+mkdir Fixed_AB/Thp/color
+mkdir Fixed_AB/Thp/print
+mkdir Tz
+mkdir Tz/color
+mkdir Tz/print
+mkdir Fixed_AB/Tz
+mkdir Fixed_AB/Tz/color
+mkdir Fixed_AB/Tz/print
+mkdir X
+mkdir X/color
+mkdir X/print
+mkdir Fixed_AB/X
+mkdir Fixed_AB/X/color
+mkdir Fixed_AB/X/print
+
+mkdir SH
+mkdir SH/color
+mkdir SH/print
+mkdir Fixed_AB/SH
+mkdir Fixed_AB/SH/color
+mkdir Fixed_AB/SH/print
+
+cp plot_data_THP.*TTz*X*.png Thp/color/
+cp plot_data_THP.*TX*Tz*.png Thp/color/
+cp plot_data_THP_FIXED_AB.*TTz*X*.png Fixed_AB/Thp/color/
+cp plot_data_THP_FIXED_AB.*TX*Tz*.png Fixed_AB/Thp/color/
+cp plot_data_THP.*BW*Tz*X*.png Thp/print/
+cp plot_data_THP.*BW*X*Tz*.png Thp/print/
+cp plot_data_THP_FIXED_AB*BW*Tz*X*.png Fixed_AB/Thp/print/
+cp plot_data_THP_FIXED_AB*BW*X*Tz*.png Fixed_AB/Thp/print/
+
+cp plot_data_THP.*TTz*Thp*.png X/color/
+cp plot_data_THP.*TThp*Tz*.png X/color/
+cp plot_data_THP_FIXED_AB.*TTz*Thp*.png Fixed_AB/X/color/
+cp plot_data_THP_FIXED_AB.*TThp*Tz*.png Fixed_AB/X/color/
+cp plot_data_THP.*BW*Tz*Thp*.png X/print/
+cp plot_data_THP.*BW*Thp*Tz*.png X/print/
+cp plot_data_THP_FIXED_AB*BW*Tz*Thp*.png Fixed_AB/X/print/
+cp plot_data_THP_FIXED_AB*BW*Thp*Tz*.png Fixed_AB/X/print/
+
+cp plot_data_TZ.*TThp*X*.png Tz/color/
+cp plot_data_TZ.*TX*Thp*.png Tz/color/
+cp plot_data_TZ_FIXED_AB.*TThp*X*.png Fixed_AB/Tz/color/
+cp plot_data_TZ_FIXED_AB.*TX*Thp*.png Fixed_AB/Tz/color/
+cp plot_data_TZ.*BW*Thp*X*.png Tz/print/
+cp plot_data_TZ.*BW*X*Thp*.png Tz/print/
+cp plot_data_TZ_FIXED_AB*BW*Thp*X*.png Fixed_AB/Tz/print/
+cp plot_data_TZ_FIXED_AB*BW*X*Thp*.png Fixed_AB/Tz/print/
+
+cp plot_data_TZ.*TThp*Tz*.png X/color/
+cp plot_data_TZ.*TTz*Thp*.png X/color/
+cp plot_data_TZ_FIXED_AB.*TThp*Tz*.png Fixed_AB/X/color/
+cp plot_data_TZ_FIXED_AB.*TTz*Thp*.png Fixed_AB/X/color/
+cp plot_data_TZ.*BW*Thp*Tz*.png X/print/
+cp plot_data_TZ.*BW*Tz*Thp*.png X/print/
+cp plot_data_TZ_FIXED_AB*BW*Thp*Tz*.png Fixed_AB/X/print/
+cp plot_data_TZ_FIXED_AB*BW*Tz*Thp*.png Fixed_AB/X/print/
+
+cp plot_data_SH.*.png SH/
+cp plot_data_SH_FIXED_AB.*.png Fixed_AB/SH/

@@ -60,7 +60,7 @@ func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("%v; Tc = %f\n", env, 1.0/env.Beta)
+		//fmt.Printf("%v; Tc = %f\n", env, 1.0/env.Beta)
 		omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
 		if err != nil {
 			return nil, err
