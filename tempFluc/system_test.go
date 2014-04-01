@@ -218,8 +218,34 @@ func TestProductionPlots(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// magnetization
-
+	// Want to make magnetization plot at fixed T instead of fixed Mu_b,
+	// so make the envs for that and solve.
+	minTcCoeff := 1.0
+	maxTcCoeff := 1.25
+	tempSteps := 6
+	numBField := 90
+	defaultEnv.IterateD1Mu_hMu_b = true
+	tempSplitEnvs, err := SplitByTemperature(defaultEnv, minTcCoeff, maxTcCoeff, tempSteps)
+	if err != nil {
+		t.Fatal(err)
+	}
+	magnetizationEnvs := []*tempAll.Environment{}
+	for _, env := range tempSplitEnvs {
+		envsWithB := env.MultiSplit([]string{"Be_field"}, []int{numBField}, []float64{0.0}, []float64{1.0})
+		magnetizationEnvs = append(magnetizationEnvs, envsWithB...)
+	}
+	epsMag := 1e-9
+	plotEnvs, errs = tempAll.MultiSolve(magnetizationEnvs, epsMag, epsMag, SolveD1Mu_hMu_b)
+	// Make magnetization plot.
+	fileLabelMagnetization := "plot_data.M_eB"
+	wd, _ := os.Getwd()
+	grapherPath := wd + "/../plots/grapher.py"
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelMagnetization, plots.XLABEL_KEY: "$eB$", plots.YLABEL_KEY: "$M$"}
+	vars := plots.GraphVars{"Be_field", "", []string{"T", "Tz", "Thp", "X"}, []string{"T/t_0", "t_z", "t_h^{\\prime}", "x_{eff}"}, nil, tempCrit.GetMagnetization}
+	err = plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	if err != nil {
+		t.Fatalf("error making M plot: %v", err)
+	}
 }
 
 func TestPlotX2VsMu_b(t *testing.T) {

@@ -111,11 +111,6 @@ func SolveD1Mu_hMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vect
 	maxIters := 1000
 	oldMu_b := env.Mu_b
 	for i := 0; i < maxIters; i++ {
-		// iterate D1/Mu_h
-		solution, err := SolveD1Mu_h(env, epsAbs, epsRel)
-		if err != nil {
-			return nil, err
-		}
 		// iterate Mu_b
 		zv := vec.ZeroVector(3)
 		omega0, err := tempCrit.OmegaPlus(env, zv)
@@ -123,6 +118,11 @@ func SolveD1Mu_hMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vect
 			return nil, err
 		}
 		env.Mu_b = -omega0
+		// iterate D1/Mu_h
+		solution, err := SolveD1Mu_h(env, epsAbs, epsRel)
+		if err != nil {
+			return nil, err
+		}
 		//fmt.Printf("iterating Mu_b: now %f, before %f\n", env.Mu_b, oldMu_b)
 		// check if done
 		if math.Abs(env.Mu_b-oldMu_b) < epsAbs || !env.IterateD1Mu_hMu_b {
@@ -141,4 +141,29 @@ func SolveD1Mu_bX(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector,
 		return nil, err
 	}
 	return solution, nil
+}
+
+// Make a set of envs with temperature fixed at some factor of Tc:
+//     minTcCoeff * Tc <= T <= maxTcCoeff * Tc
+// Number of T values (including ends) = tempSteps.
+func SplitByTemperature(env *tempAll.Environment, minTcCoeff, maxTcCoeff float64, tempSteps int) ([]*tempAll.Environment, error) {
+	// solve env for tc (copy to not disturb env)
+	tc_env := env.Copy()
+	eps := 1e-9
+	_, err := tempCrit.CritTempSolve(tc_env, eps, eps)
+	if err != nil {
+		return nil, err
+	}
+	Tc := 1.0 / tc_env.Beta
+	// make envs at specified coeffs
+	step := (maxTcCoeff - minTcCoeff) / float64(tempSteps - 1)
+	ret_envs := make([]*tempAll.Environment, tempSteps)
+	for i := 0; i < tempSteps; i++ {
+		coeff := minTcCoeff + float64(i) * step
+		T := coeff * Tc
+		ret_envs[i] = tc_env.Copy()
+		ret_envs[i].T = T
+		ret_envs[i].Beta = 1.0 / T
+	}
+	return ret_envs, nil
 }
