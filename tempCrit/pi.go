@@ -18,7 +18,7 @@ func Pi(env *tempAll.Environment, k vec.Vector, omega float64) vec.Vector {
 	// positive by choice of gauge). Also - would it be better to just
 	// test if F0 == 0.0? Would prefer to avoid equality comparison
 	// on float.
-	if env.F0 < 1e-9 {
+	if math.Abs(env.F0) < 1e-9 {
 		piInner = func(q vec.Vector, out *vec.Vector) {
 			// do vector operations on out to avoid allocation:
 			// out = k/2 + q
