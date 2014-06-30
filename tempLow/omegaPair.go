@@ -30,7 +30,7 @@ func parts_MDiag(env *tempAll.Environment, k vec.Vector, omega float64) (float64
 	Ey := 2.0 * (env.T0*cx + env.Tz*cz)
 	Pis := tempCrit.Pi(env, []float64{k[0], k[1]}, omega) // Pi_{xx, xy, yy}
 	u := -0.25 * (-(1.0/Ex + 1.0/Ey) + Pis[0] + Pis[2])
-	v := -0.25 * Pis[1]
+	v := -0.5 * Pis[1]
 	return u, v
 }
 
@@ -38,6 +38,6 @@ func parts_MDiagAnom(env *tempAll.Environment, k vec.Vector, omega float64) (flo
 	PiAs_plus := PiAnom(env, []float64{k[0], k[1]}, omega) // Pi^A_{xx, xy, yy}
 	PiAs_minus := PiAnom(env, []float64{-k[0], -k[1]}, -omega)
 	u := -0.25 * (PiAs_plus[0] + PiAs_minus[0] + PiAs_plus[2] + PiAs_minus[2])
-	v := -0.25 * (PiAs_plus[1] + PiAs_minus[1])
+	v := -0.5 * (PiAs_plus[1] + PiAs_minus[1])
 	return u, v
 }
