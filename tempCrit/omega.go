@@ -29,7 +29,7 @@ func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
 		numRadial = 3
 		startDistance = 2e-4
 	}
-	points := omegaCoeffsPoints(numRadial, startDistance)
+	points := OmegaCoeffsPoints(numRadial, startDistance)
 	fit, err := omegaFitHelper(env, fn, points)
 	if err != nil {
 		return nil, err
@@ -37,6 +37,8 @@ func OmegaFit(env *tempAll.Environment, fn OmegaFunc) (vec.Vector, error) {
 	return fit, nil
 }
 
+// Return a vector with the fit parameters [a_x, a_y, b, mu_pair] to the
+// given functions.
 func omegaFitHelper(env *tempAll.Environment, fn OmegaFunc, points []vec.Vector) (vec.Vector, error) {
 	// evaluate omega_+/-(k) at each point
 	omegas := []float64{}
@@ -61,7 +63,7 @@ func omegaFitHelper(env *tempAll.Environment, fn OmegaFunc, points []vec.Vector)
 }
 
 // Return a list of all k points surveyed by OmegaCoeffs().
-func omegaCoeffsPoints(numRadial int, sk float64) []vec.Vector {
+func OmegaCoeffsPoints(numRadial int, sk float64) []vec.Vector {
 	ssk := sk / math.Sqrt(2)
 	// basis vectors
 	xb := []float64{sk, 0.0, 0.0}

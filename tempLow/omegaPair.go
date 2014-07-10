@@ -1,11 +1,87 @@
 package tempLow
 
-import "math"
+import (
+	"math"
+	"fmt"
+)
 import (
 	"../tempCrit"
 	"../tempAll"
+	"../fit"
+	"../solve"
 	vec "../vector"
 )
+
+func OmegaPair(env *tempAll.Environment, k vec.Vector, r, s int) (float64, error) {
+	lfn := LambdaFn(env, k, r, s)
+	initOmega, epsAbs, epsRel := 0.01, 1e-9, 1e-9
+	root, err := solve.OneDimDiffRoot(lfn, initOmega, epsAbs, epsRel)
+	return root, err
+}
+
+// The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
+// we expect ax == ay.
+func OmegaFit(env *tempAll.Environment, fn tempCrit.OmegaFunc, epsabs, epsrel float64) (vec.Vector, error) {
+	numRadial := 3
+	startDistance := 1e-4
+	points := tempCrit.OmegaCoeffsPoints(numRadial, startDistance)
+	fit, err := omegaFitHelper(env, fn, points, epsabs, epsrel)
+	if err != nil {
+		return nil, err
+	}
+	return fit, nil
+}
+
+func omegaFitHelper(env *tempAll.Environment, fn tempCrit.OmegaFunc, points []vec.Vector, epsabs, epsrel float64) (vec.Vector, error) {
+	// evaluate omega_+/-(k) at each point
+	omegas := []float64{}
+	for _, q := range points {
+		omega, err := fn(env, q)
+		if err != nil {
+			continue
+		}
+		omegas = append(omegas, omega)
+	}
+	if len(omegas) < 3 {
+		return nil, fmt.Errorf("not enough omega_+/- values can be found")
+	}
+	// difference between fit and omega_i
+	errFuncF := func(cs vec.Vector, i int) (float64, error) {
+		return omegas[i] - OmegaFromFit(cs, points[i]), nil
+	}
+	errFuncDf := func(cs vec.Vector, i int) (vec.Vector, error) {
+		omega := OmegaFromFit(cs, points[i])
+		qx2 := math.Pow(points[i][0], 2.0)
+		qy2 := math.Pow(points[i][1], 2.0)
+		qz2 := math.Pow(points[i][2], 2.0)
+		left := (cs[0]*(qx2 + qy2) + cs[1]*qz2 - cs[2])
+		right := (cs[3]*(qx2 + qy2) + cs[4]*qz2 - cs[5])
+		result := make([]float64, 6)
+		result[0] = -left/omega * (qx2 + qy2)
+		result[1] = -left/omega * qz2
+		result[2] = left/omega
+		result[3] = right/omega * (qx2 + qy2)
+		result[4] = right/omega * qz2
+		result[5] = -right/omega
+		return result, nil
+	}
+	guess := []float64{env.T0, env.Tz, 0.0, env.T0, env.Tz, 0.0}
+	coeffs, err := fit.MultiDim(errFuncF, errFuncDf, len(points), guess, epsabs, epsrel)
+	if err != nil {
+		return coeffs, err
+	}
+	return coeffs, nil
+}
+
+// Calculate omega(q) given the fit cs.
+func OmegaFromFit(cs vec.Vector, q vec.Vector) float64 {
+	qx2 := math.Pow(q[0], 2.0)
+	qy2 := math.Pow(q[1], 2.0)
+	qz2 := math.Pow(q[2], 2.0)
+	left := (cs[0]*(qx2 + qy2) + cs[1]*qz2 - cs[2])
+	right := (cs[3]*(qx2 + qy2) + cs[4]*qz2 - cs[5])
+	return math.Pow(left*left - right*right, 0.5)
+}
 
 // Returns a function of omega which evaluates lambda_{r, s}(k, omega),
 // where r and s are either +1 or -1.
