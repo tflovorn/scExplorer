@@ -1,11 +1,11 @@
 package tempLow
 
-import "fmt"
+//import "fmt"
 import (
 	"../solve"
 	"../tempAll"
-	"../tempCrit"
-	"../tempPair"
+	//"../tempCrit"
+	//"../tempPair"
 	vec "../vector"
 )
 
@@ -17,6 +17,15 @@ func D1MuSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	diffMu_h := AbsErrorMu_h(env, variables)
 	system := solve.Combine([]solve.Diffable{diffD1, diffMu_h})
 	start := []float64{env.D1, env.Mu_h}
+	return system, start
+}
+
+func D1F0System(env *tempAll.Environment) (solve.DiffSystem, []float64) {
+	variables := []string{"D1", "F0"}
+	diffD1 := AbsErrorD1(env, variables)
+	diffF0 := AbsErrorF0(env, variables)
+	system := solve.Combine([]solve.Diffable{diffD1, diffF0})
+	start := []float64{env.D1, env.F0}
 	return system, start
 }
 
@@ -52,6 +61,7 @@ func D1F0XSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 
 // Solve the (D1, Mu_h, Beta) system with x and F0 fixed.
 func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	/*
 	// our guess for beta should be above beta_c
 	if env.A == 0.0 && env.B == 0.0 {
 		D1, Mu_h, F0 := env.D1, env.Mu_h, env.F0
@@ -71,6 +81,7 @@ func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 		// we are at T < T_c; uncache env
 		env.D1, env.Mu_h, env.F0 = D1, Mu_h, F0
 	}
+	*/
 	//fmt.Printf("%v; Tc = %f\n", env, 1.0 / env.Beta)
 	// solve low temp system for reasonable values of D1 and Mu_h first
 	_, err := D1MuSolve(env, epsAbs, epsRel)
@@ -88,10 +99,12 @@ func D1MuBetaSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector
 
 // Solve the (D1, Mu_h, F0) system with x and Beta fixed.
 func D1MuF0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	/*
 	if env.A == 0.0 && env.B == 0.0 {
 		// We must have T < T_c < T_p (Beta > Beta_c > Beta_p).
 		// Getting Beta_p is fast, so do that first.
-		D1, Mu_h, F0, Beta := env.F0, env.Mu_h, env.F0, env.Beta // cache env
+		//D1, Mu_h, F0, Beta := env.D1, env.Mu_h, env.F0, env.Beta // cache env
+		F0, Beta := env.F0, env.Beta // cache env
 		env.F0 = 0.0                                             // F0 is 0 at T_c and T_p
 		_, err := tempPair.PairTempSolve(env, epsAbs, epsRel)
 		if err != nil {
@@ -112,11 +125,14 @@ func D1MuF0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 		if err != nil {
 			return nil, err
 		}
+		fmt.Printf("got a=%f, b=%f at Tc\n", omegaFit[0], omegaFit[2])
 		env.A, env.B = omegaFit[0], omegaFit[2]
 		env.PairCoeffsReady = true
 		// we are at T < T_c; uncache env
-		env.D1, env.Mu_h, env.F0, env.Beta = D1, Mu_h, F0, Beta
+		//env.D1, env.Mu_h, env.F0, env.Beta = D1, Mu_h, F0, Beta
+		env.F0, env.Beta = F0, Beta
 	}
+	*/
 	// solve low temp system for reasonable values of D1 and Mu_h first
 	_, err := D1MuSolve(env, epsAbs, epsRel)
 	if err != nil {
@@ -134,6 +150,16 @@ func D1MuF0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 // Solve the (D1, Mu_h) system with Beta, x, and F0 fixed.
 func D1MuSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
 	system, start := D1MuSystem(env)
+	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	return solution, nil
+}
+
+// Solve the (D1, F0) system with Beta, x, and mu_h fixed.
+func D1F0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	system, start := D1F0System(env)
 	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
 	if err != nil {
 		return nil, err

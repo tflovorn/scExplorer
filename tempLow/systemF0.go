@@ -41,10 +41,10 @@ import (
 import (
 	"../solve"
 	"../tempAll"
-	"../tempCrit"
+	//"../tempCrit"
 	vec "../vector"
 )
-
+/*
 func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 	F := func(v vec.Vector) (float64, error) {
 		if v.ContainsNaN() {
@@ -77,3 +77,25 @@ func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
 	epsabs := 1e-4
 	return solve.SimpleDiffable(F, len(variables), h, epsabs)
 }
+*/
+
+func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {
+	F := func(v vec.Vector) (float64, error) {
+		if v.ContainsNaN() {
+			fmt.Printf("got NaN in AbsErrorF0 (v=%v)\n", v)
+			return 0.0, errors.New("NaN in input")
+		}
+		env.Set(v, variables)
+		zv := vec.ZeroVector(3)
+		omega0, err := Omega_pp(env, zv)
+		if err != nil {
+			return 0.0, err
+		}
+		fmt.Printf("for v=%v got omega0=%f\n", v, omega0)
+		return omega0, nil
+	}
+	h := 1e-5
+	epsabs := 1e-4
+	return solve.SimpleDiffable(F, len(variables), h, epsabs)
+}
+

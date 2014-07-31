@@ -14,76 +14,16 @@ import (
 
 func OmegaPair(env *tempAll.Environment, k vec.Vector, r, s int) (float64, error) {
 	lfn := LambdaFn(env, k, r, s)
-	initOmega, epsAbs, epsRel := 0.01, 1e-9, 1e-9
+	initOmega, epsAbs, epsRel := 0.001, 1e-9, 1e-9
 	root, err := solve.OneDimDiffRoot(lfn, initOmega, epsAbs, epsRel)
 	return root, err
 }
 
-// The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
-// we expect ax == ay.
-func OmegaFit(env *tempAll.Environment, fn tempCrit.OmegaFunc, epsabs, epsrel float64) (vec.Vector, error) {
-	numRadial := 3
-	startDistance := 1e-4
-	points := tempCrit.OmegaCoeffsPoints(numRadial, startDistance)
-	fit, err := omegaFitHelper(env, fn, points, epsabs, epsrel)
-	if err != nil {
-		return nil, err
-	}
-	return fit, nil
+func Omega_pp(env *tempAll.Environment, k vec.Vector) (float64, error) {
+	return OmegaPair(env, k, 1, 1)
 }
 
-func omegaFitHelper(env *tempAll.Environment, fn tempCrit.OmegaFunc, points []vec.Vector, epsabs, epsrel float64) (vec.Vector, error) {
-	// evaluate omega_+/-(k) at each point
-	omegas := []float64{}
-	for _, q := range points {
-		omega, err := fn(env, q)
-		if err != nil {
-			continue
-		}
-		omegas = append(omegas, omega)
-	}
-	if len(omegas) < 3 {
-		return nil, fmt.Errorf("not enough omega_+/- values can be found")
-	}
-	// difference between fit and omega_i
-	errFuncF := func(cs vec.Vector, i int) (float64, error) {
-		return omegas[i] - OmegaFromFit(cs, points[i]), nil
-	}
-	errFuncDf := func(cs vec.Vector, i int) (vec.Vector, error) {
-		omega := OmegaFromFit(cs, points[i])
-		qx2 := math.Pow(points[i][0], 2.0)
-		qy2 := math.Pow(points[i][1], 2.0)
-		qz2 := math.Pow(points[i][2], 2.0)
-		left := (cs[0]*(qx2 + qy2) + cs[1]*qz2 - cs[2])
-		right := (cs[3]*(qx2 + qy2) + cs[4]*qz2 - cs[5])
-		result := make([]float64, 6)
-		result[0] = -left/omega * (qx2 + qy2)
-		result[1] = -left/omega * qz2
-		result[2] = left/omega
-		result[3] = right/omega * (qx2 + qy2)
-		result[4] = right/omega * qz2
-		result[5] = -right/omega
-		return result, nil
-	}
-	guess := []float64{env.T0, env.Tz, 0.0, env.T0, env.Tz, 0.0}
-	coeffs, err := fit.MultiDim(errFuncF, errFuncDf, len(points), guess, epsabs, epsrel)
-	if err != nil {
-		return coeffs, err
-	}
-	return coeffs, nil
-}
-
-// Calculate omega(q) given the fit cs.
-func OmegaFromFit(cs vec.Vector, q vec.Vector) float64 {
-	qx2 := math.Pow(q[0], 2.0)
-	qy2 := math.Pow(q[1], 2.0)
-	qz2 := math.Pow(q[2], 2.0)
-	left := (cs[0]*(qx2 + qy2) + cs[1]*qz2 - cs[2])
-	right := (cs[3]*(qx2 + qy2) + cs[4]*qz2 - cs[5])
-	return math.Pow(left*left - right*right, 0.5)
-}
-
-// Returns a function of omega which evaluates lambda_{r, s}(k, omega),
+// Returns a function of omega which evaluates lambda^2_{r, s}(k, omega),
 // where r and s are either +1 or -1.
 // When omega = omega_{r, s}(k), lambda_{r, s}(k, omega) = 0.
 // Imaginary part of M^D(p) should be 0 since we let
@@ -96,7 +36,9 @@ func LambdaFn(env *tempAll.Environment, k vec.Vector, r, s int) func(float64) (f
 		Re_MD := u + float64(r)*v
 		u_anom, v_anom := parts_MDiagAnom(env, k, omega)
 		MDA := u_anom + float64(r)*v_anom
-		return math.Pow(math.Pow(Re_MD, 2.0) - math.Pow(MDA, 2.0), 0.5), nil
+		result := math.Pow(Re_MD, 2.0) - math.Pow(MDA, 2.0)
+		//fmt.Printf("for omega=%f got lambda=%f\n", omega, result)
+		return result, nil
 	}
 }
 
@@ -104,16 +46,123 @@ func parts_MDiag(env *tempAll.Environment, k vec.Vector, omega float64) (float64
 	cx, cy, cz := math.Cos(k[0]), math.Cos(k[1]), math.Cos(k[2])
 	Ex := 2.0 * (env.T0*cy + env.Tz*cz)
 	Ey := 2.0 * (env.T0*cx + env.Tz*cz)
-	Pis := tempCrit.Pi(env, []float64{k[0], k[1]}, omega) // Pi_{xx, xy, yy}
-	u := -0.25 * (-(1.0/Ex + 1.0/Ey) + Pis[0] + Pis[2])
-	v := -0.5 * Pis[1]
+	Pis := Pi(env, []float64{k[0], k[1]}, omega) // Pi_{xx, xy, yy}
+	//fmt.Printf("for omega=%f got Pis=%v\n", omega, Pis)
+	u := -0.25 * (Ex*Pis[0] + Ey*Pis[2] - 2.0)
+	v := -0.5 * math.Pow(Ex*Ey, 0.5) * math.Abs(Pis[1])
 	return u, v
 }
 
 func parts_MDiagAnom(env *tempAll.Environment, k vec.Vector, omega float64) (float64, float64) {
+	cx, cy, cz := math.Cos(k[0]), math.Cos(k[1]), math.Cos(k[2])
+	Ex := 2.0 * (env.T0*cy + env.Tz*cz)
+	Ey := 2.0 * (env.T0*cx + env.Tz*cz)
 	PiAs_plus := PiAnom(env, []float64{k[0], k[1]}, omega) // Pi^A_{xx, xy, yy}
 	PiAs_minus := PiAnom(env, []float64{-k[0], -k[1]}, -omega)
-	u := -0.25 * (PiAs_plus[0] + PiAs_minus[0] + PiAs_plus[2] + PiAs_minus[2])
-	v := -0.5 * (PiAs_plus[1] + PiAs_minus[1])
+	//fmt.Printf("for omega=%f got PiAs_plus=%v\n", omega, PiAs_plus)
+	//fmt.Printf("for omega=%f got PiAs_minus=%v\n", omega, PiAs_minus)
+	u := -0.25 * (Ex*PiAs_plus[0] + Ex*PiAs_minus[0] + Ey*PiAs_plus[2] + Ey*PiAs_minus[2])
+	v := -0.5 * math.Pow(Ex*Ey, 0.5) * math.Abs(PiAs_plus[1] + PiAs_minus[1])
 	return u, v
+}
+
+// The returned vector has the values {ax, ay, b, mu_b}. Due to x<->y symmetry
+// we expect ax == ay.
+func OmegaFit(env *tempAll.Environment, fn tempCrit.OmegaFunc, epsabs, epsrel float64) (vec.Vector, error) {
+	numRadial := 5
+	startDistance := 1e-3
+	points_qx, points_qz := []vec.Vector{}, []vec.Vector{}
+	for i := 0; i < numRadial; i++ {
+		points_qx = append(points_qx, []float64{startDistance * float64(i+1), 0.0, 0.0})
+		points_qz = append(points_qz, []float64{0.0, 0.0, startDistance * float64(i+1)})
+	}
+	fit, err := omegaFitHelper(env, fn, points_qx, points_qz, epsabs, epsrel)
+	if err != nil {
+		return nil, err
+	}
+	return fit, nil
+}
+
+func omegaFitHelper(env *tempAll.Environment, fn tempCrit.OmegaFunc, points_qx, points_qz []vec.Vector, epsabs, epsrel float64) (vec.Vector, error) {
+	// evaluate omega_+/-(k) at each point
+	omegas_qx, used_points_qx := []float64{}, []vec.Vector{}
+	omegas_qz, used_points_qz := []float64{}, []vec.Vector{}
+	for _, q := range points_qx {
+		omega, err := fn(env, q)
+		if err != nil {
+			continue
+		}
+		fmt.Printf("at k=%v got omega=%f\n", q, omega)
+		used_points_qx = append(used_points_qx, q)
+		omegas_qx = append(omegas_qx, omega)
+	}
+	for _, q := range points_qz {
+		omega, err := fn(env, q)
+		if err != nil {
+			continue
+		}
+		fmt.Printf("at k=%v got omega=%f\n", q, omega)
+		used_points_qz = append(used_points_qz, q)
+		omegas_qz = append(omegas_qz, omega)
+	}
+	if len(omegas_qx) < 3 || len(omegas_qz) < 3 {
+		return nil, fmt.Errorf("not enough omega_+/- values can be found")
+	}
+	fmt.Printf("omegas_qx = %v\n", omegas_qx)
+	// difference between fit and omega_i
+	errFuncF_qx := func(cs vec.Vector, i int) (float64, error) {
+		fmt.Printf("in qx trying coeffs=%v\n", cs)
+		return math.Pow(omegas_qx[i], 2.0) - OmegaFromFit_qx(cs, used_points_qx[i]), nil
+	}
+	errFuncDf_qx := func(cs vec.Vector, i int) (vec.Vector, error) {
+		qx2 := math.Pow(used_points_qx[i][0], 2.0)
+		result := make([]float64, 3)
+		result[0] = -2.0 * (cs[0] * qx2 - cs[2]) * qx2
+		result[1] = 2.0 * (cs[1] * qx2 - cs[2]) * qx2
+		result[2] = 2.0 * (cs[0] - cs[1]) * qx2
+		return result, nil
+	}
+	guess_qx := []float64{env.T0, 0.0, -0.1}
+	coeffs_qx, err := fit.MultiDim(errFuncF_qx, errFuncDf_qx, len(used_points_qx), guess_qx, epsabs, epsrel)
+	if err != nil {
+		return coeffs_qx, err
+	}
+	fmt.Printf("---got qx coeffs=%v\n", coeffs_qx)
+	/*
+	guess_qz := []float64{env.Tz, 0.0}
+	errFuncF_qz := func(cs vec.Vector, i int) (float64, error) {
+		fmt.Printf("in qz trying coeffs=%v\n", cs)
+		return math.Pow(omegas_qz[i], 2.0) - OmegaFromFit_qz(cs, used_points_qz[i], coeffs_qx[2]), nil
+	}
+	errFuncDf_qz := func(cs vec.Vector, i int) (vec.Vector, error) {
+		qz2 := math.Pow(used_points_qz[i][2], 2.0)
+		result := make([]float64, 2)
+		result[0] = -2.0 * (cs[0] * qz2 - coeffs_qx[2]) * qz2
+		result[1] = 2.0 * (cs[1] * qz2 - coeffs_qx[2]) * qz2
+		return result, nil
+	}
+	coeffs_qz, err := fit.MultiDim(errFuncF_qz, errFuncDf_qz, len(used_points_qz), guess_qz, epsabs, epsrel)
+	if err != nil {
+		return coeffs_qz, err
+	}
+	fmt.Printf("---got q coeffs=%v\n", coeffs_qz)
+	fmt.Printf("coeffs_qx: %v; coeffs_qz: %v\n", coeffs_qx, coeffs_qz)
+	*/
+	//coeffs := []float64{coeffs_qx[0], coeffs_qz[0], coeffs_qx[2], coeffs_qx[1], coeffs_qz[1], coeffs_qx[2]}
+	coeffs := []float64{coeffs_qx[0], coeffs_qx[2], coeffs_qx[1]}
+	return coeffs, nil
+}
+
+// Calculate omega(q) given the fit cs.
+// Consider q = (qx, 0, 0) only and assume C = C^A.
+func OmegaFromFit_qx(cs vec.Vector, q vec.Vector) float64 {
+	qx2 := math.Pow(q[0], 2.0)
+	return math.Pow(cs[0]*qx2 - cs[2], 2.0) - math.Pow(cs[1]*qx2 - cs[2], 2.0)
+}
+
+// Calculate omega(q) given the fit cs.
+// Consider q = (0, 0, qz) only and assume C = C^A.
+func OmegaFromFit_qz(cs vec.Vector, q vec.Vector, C float64) float64 {
+	qz2 := math.Pow(q[2], 2.0)
+	return math.Pow(cs[0]*qz2 - C, 2.0) - math.Pow(cs[1]*qz2 - C, 2.0)
 }

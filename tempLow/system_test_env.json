@@ -1,14 +1,15 @@
 {
   "PointsPerSide": 64,
-  "X": 0.1,
+  "X": 0.05,
   "T0": 1.0,
   "Thp": 0.1,
   "Tz": 0.1,
   "Alpha": -1,
-  "D1": 0.01,
-  "Mu_h": -0.5,
-  "Beta": 3.9112,
+  "D1": 0.0010440607668073766,
+  "Mu_h": -0.5986417392930956,
+  "Beta": 6.0,
   "F0": 0.01,
   "Mu_b": 0.0,
-  "FixedPairCoeffs": true
+  "FixedPairCoeffs": false,
+  "PairKzSquaredSpectrum": false
 }

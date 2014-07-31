@@ -25,7 +25,13 @@ func PiAnom(env *tempAll.Environment, k vec.Vector, omega float64) vec.Vector {
 		// Get part of result that's the same for all (xx, xy, yy):
 		t1 := math.Tanh(env.Beta * E1 / 2.0)
 		t2 := math.Tanh(env.Beta * E2 / 2.0)
-		common := -Delta1*Delta2/(4.0*E1*E2) * ((t1 + t2)*(1.0/(omega + E1 + E2) - 1.0/(omega - E1 - E2)) + (t1 - t2)*(1.0/(omega - E1 + E2) - 1.0/(omega + E1 - E2)))
+
+		var common float64
+		if math.Abs(E1 - E2) > 1e-6 {
+			common = -Delta1*Delta2/(4.0*E1*E2) * ((t1 + t2)*(1.0/(omega + E1 + E2) - 1.0/(omega - E1 - E2)) + (t1 - t2)*(1.0/(omega - E1 + E2) - 1.0/(omega + E1 - E2)))
+		} else {
+			common = -Delta1*Delta2/(4.0*E1*E2) * (t1 + t2)*(1.0/(omega + E1 + E2) - 1.0/(omega - E1 - E2))
+		}
 		// Set out = result:
 		sx := math.Sin(q[0])
 		sy := math.Sin(q[1])
