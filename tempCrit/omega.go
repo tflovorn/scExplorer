@@ -89,15 +89,18 @@ func OmegaCoeffsPoints(numRadial int, sk float64) []vec.Vector {
 // Calculate omega_+(k) by finding zeros of 1 - lambda_+
 func OmegaPlus(env *tempAll.Environment, k vec.Vector) (float64, error) {
 	lp := lambdaPlusFn(env, k)
+	h, diffEpsAbs := 1e-5, 1e-4
 	initOmega, epsAbs, epsRel := 0.01, 1e-9, 1e-9
-	root, err := solve.OneDimDiffRoot(lp, initOmega, epsAbs, epsRel)
+	root, err := solve.OneDimDiffRoot(lp, initOmega, epsAbs, epsRel, h, diffEpsAbs)
 	return root, err
 }
 
 // Calculate omega_-(k) by finding zeros of 1 - lambda_-
 func OmegaMinus(env *tempAll.Environment, k vec.Vector) (float64, error) {
 	lm := lambdaMinusFn(env, k)
-	root, err := solve.OneDimDiffRoot(lm, 0.01, 1e-9, 1e-9)
+	h, diffEpsAbs := 1e-5, 1e-4
+	initOmega, epsAbs, epsRel := 0.01, 1e-9, 1e-9
+	root, err := solve.OneDimDiffRoot(lm, initOmega, epsAbs, epsRel, h, diffEpsAbs)
 	return root, err
 }
 
