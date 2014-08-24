@@ -15,7 +15,7 @@ import (
 func OmegaPair(env *tempAll.Environment, k vec.Vector, r, s int) (float64, error) {
 	lfn := LambdaFn(env, k, r, s)
 	h, diffEpsAbs := 1e-5, 1e-4
-	initOmega, epsAbs, epsRel := 0.001, 1e-9, 1e-9
+	initOmega, epsAbs, epsRel := 0.001, 1e-15, 1e-15
 	root, err := solve.OneDimDiffRoot(lfn, initOmega, epsAbs, epsRel, h, diffEpsAbs)
 	return root, err
 }
@@ -41,7 +41,7 @@ func LambdaFn(env *tempAll.Environment, k vec.Vector, r, s int) func(float64) (f
 		//uTc, vTc := tempCrit.LambdaParts(env, k, omega)
 		//fmt.Printf("uTc = %v, vTc = %v\n", uTc, vTc)
 		//fmt.Printf("u + v = %v; 1 - (uTc + vTc) = %v\n", u + v, 1.0 - (uTc + vTc))
-		result := math.Sqrt(math.Abs(math.Pow(Re_MD, 2.0) - math.Pow(MDA, 2.0)))
+		result := math.Pow(Re_MD, 2.0) - math.Pow(MDA, 2.0)
 		//fmt.Printf("for omega=%f got lambda=%f\n", omega, result)
 		return result, nil
 	}
@@ -55,6 +55,7 @@ func parts_MDiag(env *tempAll.Environment, k vec.Vector, omega float64) (float64
 	//fmt.Printf("for omega=%f got Pis=%v\n", omega, Pis)
 	u := -0.25 * (Ex*Pis[0] + Ey*Pis[2] - 2.0)
 	v := -0.5 * math.Sqrt(Ex*Ey) * math.Abs(Pis[1])
+	//v := -0.5 * math.Sqrt(0.25*math.Pow(Ex*Pis[0]-Ey*Pis[2],2.0) + Ex*Ey*math.Pow(Pis[1], 2.0))
 	return u, v
 }
 
@@ -66,6 +67,7 @@ func parts_MDiagAnom(env *tempAll.Environment, k vec.Vector, omega float64) (flo
 	PiAs_minus := PiAnom(env, []float64{-k[0], -k[1]}, -omega)
 	u := -0.25 * (Ex*PiAs_plus[0] + Ex*PiAs_minus[0] + Ey*PiAs_plus[2] + Ey*PiAs_minus[2])
 	v := -0.5 * math.Sqrt(Ex*Ey) * math.Abs(PiAs_plus[1] + PiAs_minus[1])
+	//v := -0.5 * math.Sqrt(0.25*math.Pow(Ex*(PiAs_plus[0] + PiAs_minus[0]) - Ey*(PiAs_plus[2]+PiAs_minus[2]), 2.0) + Ex*Ey*math.Pow(PiAs_plus[1] + PiAs_minus[1], 2.0))
 	return u, v
 }
 
@@ -96,7 +98,7 @@ func omegaFitHelper(env *tempAll.Environment, fn tempCrit.OmegaFunc, points_qx, 
 			fmt.Printf("at k=%v got err=%v\n", q, err)
 			continue
 		}
-		//fmt.Printf("at k=%v got omega=%v\n", q, omega)
+		fmt.Printf("at k=%v got omega=%v\n", q, omega)
 		used_points_qx = append(used_points_qx, q)
 		omegas_qx = append(omegas_qx, omega)
 	}
@@ -105,7 +107,7 @@ func omegaFitHelper(env *tempAll.Environment, fn tempCrit.OmegaFunc, points_qx, 
 		if err != nil {
 			continue
 		}
-		//fmt.Printf("at k=%v got omega=%v\n", q, omega)
+		fmt.Printf("at k=%v got omega=%v\n", q, omega)
 		used_points_qz = append(used_points_qz, q)
 		omegas_qz = append(omegas_qz, omega)
 	}
@@ -204,4 +206,17 @@ func OmegaFromFit_qz(cs vec.Vector, q vec.Vector, C, B_Tc float64) float64 {
 	} else {
 		return math.Pow(B_Tc*qz2 - C, 2.0) - math.Pow(cs[0]*qz2 - C, 2.0)
 	}
+}
+
+// cs = [a^A, C, b^A]
+func OmegaFromFit(q, cs vec.Vector, A_Tc, B_Tc float64) float64 {
+	qx2 := math.Pow(q[0], 2.0)
+	qy2 := math.Pow(q[1], 2.0)
+	qz2 := math.Pow(q[2], 2.0)
+	left := math.Pow(A_Tc * (qx2 + qy2) + B_Tc * qz2 - cs[1], 2.0)
+	right := math.Pow(cs[0] * (qx2 + qy2) + cs[2] * qz2 - cs[1], 2.0)
+	if (left < right) {
+		fmt.Printf("got left < right in OmegaFromFit\n")
+	}
+	return math.Sqrt(left - right)
 }

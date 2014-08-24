@@ -20,6 +20,14 @@ func D1MuSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	return system, start
 }
 
+func MuSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
+	variables := []string{"Mu_h"}
+	diffMu_h := AbsErrorMu_h(env, variables)
+	system := solve.Combine([]solve.Diffable{diffMu_h})
+	start := []float64{env.Mu_h}
+	return system, start
+}
+
 func D1F0System(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	variables := []string{"D1", "F0"}
 	diffD1 := AbsErrorD1(env, variables)
@@ -156,6 +164,16 @@ func D1MuSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, er
 	}
 	return solution, nil
 }
+
+func MuSolve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	system, start := MuSystem(env)
+	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	return solution, nil
+}
+
 
 // Solve the (D1, F0) system with Beta, x, and mu_h fixed.
 func D1F0Solve(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
