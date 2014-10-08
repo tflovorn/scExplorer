@@ -5,8 +5,8 @@ import (
 	"math"
 )
 import (
-	"../integrate"
-	"../tempAll"
+	"github.com/tflovorn/scExplorer/integrate"
+	"github.com/tflovorn/scExplorer/tempAll"
 )
 
 // Integrate F * n_BE(omega_+) over relevant energy range.

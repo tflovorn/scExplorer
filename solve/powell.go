@@ -73,7 +73,7 @@ import (
 	"fmt"
 	"unsafe"
 )
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 // if true, print solution progress
 func DebugReport(on bool) {

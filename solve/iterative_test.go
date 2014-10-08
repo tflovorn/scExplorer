@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 )
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 func TestIterativeRosenbrock(t *testing.T) {
 	epsAbs := []float64{1e-9, 1e-9}

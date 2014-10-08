@@ -2,7 +2,7 @@ package solve
 
 import "math"
 import (
-	vec "../vector"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // Solve each system in `stages` iteratively, starting with stages[0] and

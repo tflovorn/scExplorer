@@ -2,9 +2,9 @@ package tempLow
 
 import "math"
 import (
-	"../bzone"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bzone"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // Evaluate the anomalous retarded pair Green's function,

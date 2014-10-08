@@ -5,11 +5,11 @@ import (
 	"fmt"
 )
 import (
-	"../tempCrit"
-	"../tempAll"
-	"../fit"
-	"../solve"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/tempCrit"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/fit"
+	"github.com/tflovorn/scExplorer/solve"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 func OmegaPair(env *tempAll.Environment, k vec.Vector, r, s int) (float64, error) {

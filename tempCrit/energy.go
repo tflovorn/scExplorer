@@ -5,11 +5,11 @@ import (
 	"math"
 )
 import (
-	"../bessel"
-	"../bzone"
-	"../seriesaccel"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bessel"
+	"github.com/tflovorn/scExplorer/bzone"
+	"github.com/tflovorn/scExplorer/seriesaccel"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // Calculate U_{1}/N = 1/N \sum_k \epsilon_h(k) f_h(\xi_h(k))

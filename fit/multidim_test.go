@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 )
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 func TestFitParabola(t *testing.T) {
 	epsAbs, epsRel := 1e-9, 1e-9

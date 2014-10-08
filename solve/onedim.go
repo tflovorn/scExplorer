@@ -1,6 +1,6 @@
 package solve
 
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 type Func1D func(float64) (float64, error)
 

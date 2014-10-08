@@ -4,9 +4,9 @@ import (
 	"math"
 )
 import (
-	"../bzone"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bzone"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // Evaluate the retarded pair Green's function Pi_R(k, omega)_{xx, xy, yy}.

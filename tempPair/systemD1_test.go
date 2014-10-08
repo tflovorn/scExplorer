@@ -1,10 +1,10 @@
 package tempPair
 
 import (
-	"../solve"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
 )
 import (
-	"../tempAll"
 	"io/ioutil"
 	"math"
 	"testing"

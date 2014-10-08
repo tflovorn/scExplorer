@@ -1,7 +1,7 @@
 package tempFluc
 
 import (
-	"../tempAll"
+	"github.com/tflovorn/scExplorer/tempAll"
 )
 
 func FlucTempEnvironment(jsonData string) (*tempAll.Environment, error) {

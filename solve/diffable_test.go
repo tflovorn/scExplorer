@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 func TestCombineRosenbrock(t *testing.T) {
 	checkRosenbrock := func(a, b float64) {

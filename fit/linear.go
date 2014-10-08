@@ -6,7 +6,7 @@ package fit
 #include <gsl/gsl_multifit.h>
 */
 import "C"
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 // Return the value for vector c which best fits the linear model y = Xc.
 // X is a matrix given by its row vectors: each row corresponds to a y value;

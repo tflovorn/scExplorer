@@ -6,9 +6,9 @@ import (
 	"reflect"
 )
 import (
-	"../bzone"
-	"../serialize"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bzone"
+	"github.com/tflovorn/scExplorer/serialize"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // Container for variables relevant at all temperatures.

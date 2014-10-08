@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 )
-import "../serialize"
+import "github.com/tflovorn/scExplorer/serialize"
 
 func LoadEnvCache(cachePath string) ([]interface{}, []error, error) {
 	jsonData, err := ioutil.ReadFile(cachePath)

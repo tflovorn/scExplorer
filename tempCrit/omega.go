@@ -5,10 +5,10 @@ import (
 	"math"
 )
 import (
-	"../fit"
-	"../solve"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/fit"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 type OmegaFunc func(*tempAll.Environment, vec.Vector) (float64, error)

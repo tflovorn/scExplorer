@@ -1,9 +1,9 @@
 package tempPair
 
 import (
-	"../bzone"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bzone"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // Concentration of unpaired holons

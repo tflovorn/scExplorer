@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 import (
-	"../bzone"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bzone"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // The minimum of env.Epsilon() should be equal to 0.

@@ -1,6 +1,6 @@
 package bzone
 
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 import (
 	"fmt"

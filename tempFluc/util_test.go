@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 import (
-	"../tempAll"
+	"github.com/tflovorn/scExplorer/tempAll"
 )
 
 func TestGetXs(t *testing.T) {

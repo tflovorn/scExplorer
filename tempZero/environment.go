@@ -2,7 +2,7 @@ package tempZero
 
 import "math"
 import (
-	"../tempAll"
+	"github.com/tflovorn/scExplorer/tempAll"
 )
 
 // Use serialized data to create an Environment appropriate for T=0.

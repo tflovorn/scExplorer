@@ -5,7 +5,7 @@ import (
 	"math"
 	"reflect"
 )
-import "../solve"
+import "github.com/tflovorn/scExplorer/solve"
 
 // A Systemer returns a system for solving `env` and a starting point.
 type Systemer func(env *Environment) (solve.DiffSystem, []float64)

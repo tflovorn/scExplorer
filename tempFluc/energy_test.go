@@ -3,7 +3,7 @@ package tempFluc
 import (
 	"testing"
 )
-import "../tempCrit"
+import "github.com/tflovorn/scExplorer/tempCrit"
 
 func TestEnergies(t *testing.T) {
 	// kz^2 values

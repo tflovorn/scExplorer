@@ -1,9 +1,9 @@
 package tempPair
 
 import (
-	"../solve"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 func PairTempSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {

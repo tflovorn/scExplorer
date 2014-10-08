@@ -5,10 +5,10 @@ import (
 	"fmt"
 )
 import (
-	"../solve"
-	"../tempAll"
-	"../tempPair"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/tempPair"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {

@@ -1,7 +1,7 @@
 package bzone
 
 import "math"
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 type BzVectorFunc func(k vec.Vector, out *vec.Vector)
 type bzVectorConsumer func(next vec.Vector, total *vec.Vector)

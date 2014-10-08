@@ -9,10 +9,10 @@ import (
 	"testing"
 )
 import (
-	"../parallel"
-	"../plots"
-	"../tempAll"
-	"../tempCrit"
+	"github.com/tflovorn/scExplorer/parallel"
+	"github.com/tflovorn/scExplorer/plots"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/tempCrit"
 )
 
 var testPlot = flag.Bool("testPlot", false, "Run tests involving plots")

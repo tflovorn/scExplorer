@@ -5,7 +5,7 @@ package bzone
 import (
 	"math"
 )
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 type BzFunc func(k vec.Vector) float64
 type bzConsumer func(next, total float64) float64

@@ -1,7 +1,7 @@
 package tempAll
 
 import "strconv"
-import "../plots"
+import "github.com/tflovorn/scExplorer/plots"
 
 // Make a Fermi surface plot of env, which should be a
 // pre-solved T=0, non-interacting Environment.

@@ -5,9 +5,9 @@ import (
 	"math"
 )
 import (
-	"../bessel"
-	"../seriesaccel"
-	"../tempAll"
+	"github.com/tflovorn/scExplorer/bessel"
+	"github.com/tflovorn/scExplorer/seriesaccel"
+	"github.com/tflovorn/scExplorer/tempAll"
 )
 
 // Magnetization per unit area divided by e

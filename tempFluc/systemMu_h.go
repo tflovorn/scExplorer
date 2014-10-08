@@ -4,11 +4,11 @@ import (
 	"math"
 )
 import (
-	"../bzone"
-	"../solve"
-	"../tempAll"
-	"../tempPair"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bzone"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/tempPair"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 func AbsErrorMu_h(env *tempAll.Environment, variables []string) solve.Diffable {

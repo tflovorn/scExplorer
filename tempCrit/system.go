@@ -1,10 +1,10 @@
 package tempCrit
 
 import (
-	"../solve"
-	"../tempAll"
-	"../tempPair"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/tempPair"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // For use with solve.Iterative:

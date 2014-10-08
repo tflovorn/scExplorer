@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 )
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 func TestBzVectorAvgOnes(t *testing.T) {
 	fn := func(k vec.Vector, out *vec.Vector) {

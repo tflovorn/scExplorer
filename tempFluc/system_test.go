@@ -9,10 +9,10 @@ import (
 	"testing"
 )
 import (
-	"../parallel"
-	"../plots"
-	"../tempAll"
-	"../tempCrit"
+	"github.com/tflovorn/scExplorer/parallel"
+	"github.com/tflovorn/scExplorer/plots"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/tempCrit"
 )
 
 var production = flag.Bool("production", false, "Production mode: make plots that shouldn't change.")

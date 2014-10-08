@@ -1,6 +1,6 @@
 package tempLow
 
-import "../tempAll"
+import "github.com/tflovorn/scExplorer/tempAll"
 
 func Environment(jsonData string) (*tempAll.Environment, error) {
 	env, err := tempAll.NewEnvironment(jsonData)

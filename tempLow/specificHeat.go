@@ -5,9 +5,9 @@ import (
 	"math"
 )
 import (
-	"../solve"
-	"../tempAll"
-	"../tempCrit"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/tempCrit"
 )
 
 type SpecificHeatEnv struct {

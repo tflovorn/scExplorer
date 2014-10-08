@@ -4,7 +4,7 @@ import (
 	"math"
 )
 import (
-	"../tempAll"
+	"github.com/tflovorn/scExplorer/tempAll"
 )
 
 func getXs(envs []interface{}) []float64 {

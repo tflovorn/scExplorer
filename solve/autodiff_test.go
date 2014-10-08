@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 )
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 // Check if the derivative of a*v is a constant.
 func TestAutoDiffLinear(t *testing.T) {

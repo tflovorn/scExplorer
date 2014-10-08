@@ -5,11 +5,11 @@ import (
 	"fmt"
 )
 import (
-	"../solve"
-	"../tempAll"
-	"../tempCrit"
-	"../tempPair"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/tempCrit"
+	"github.com/tflovorn/scExplorer/tempPair"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // Calculate x - (x_1 + x_2) with Mu_h fixed.

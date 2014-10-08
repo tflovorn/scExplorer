@@ -1,6 +1,6 @@
 package tempPair
 
-import "../tempAll"
+import "github.com/tflovorn/scExplorer/tempAll"
 
 func PairTempEnvironment(jsonData string) (*tempAll.Environment, error) {
 	env, err := tempAll.NewEnvironment(jsonData)

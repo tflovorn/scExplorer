@@ -2,10 +2,10 @@ package tempLow
 
 import "math"
 import (
-	"../bzone"
-	"../solve"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bzone"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // Return the absolute error and gradient for the doping w.r.t. the given

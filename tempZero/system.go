@@ -1,9 +1,9 @@
 package tempZero
 
 import (
-	"../solve"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 func ZeroTempSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {

@@ -3,10 +3,10 @@ package tempLow
 
 import "math"
 import (
-	"../bzone"
-	"../solve"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bzone"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 // Return the absolute error and gradient for the doping w.r.t. the given
@@ -39,10 +39,10 @@ import (
 	"fmt"
 )
 import (
-	"../solve"
-	"../tempAll"
-	"../tempCrit"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/tempCrit"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 func AbsErrorF0(env *tempAll.Environment, variables []string) solve.Diffable {

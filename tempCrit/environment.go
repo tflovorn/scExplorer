@@ -1,6 +1,6 @@
 package tempCrit
 
-import "../tempAll"
+import "github.com/tflovorn/scExplorer/tempAll"
 
 func CritTempEnvironment(jsonData string) (*tempAll.Environment, error) {
 	env, err := tempAll.NewEnvironment(jsonData)

@@ -48,7 +48,7 @@ import (
 	"fmt"
 	"unsafe"
 )
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 type FitErrF func(params vec.Vector, index int) (float64, error)
 type FitErrDf func(params vec.Vector, index int) (vec.Vector, error)

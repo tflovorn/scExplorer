@@ -20,7 +20,7 @@ import (
 	"math"
 	"unsafe"
 )
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 type fnWithIndex struct {
 	fn vec.FnDim0

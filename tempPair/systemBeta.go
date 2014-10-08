@@ -2,10 +2,10 @@ package tempPair
 
 import "math"
 import (
-	"../bzone"
-	"../solve"
-	"../tempAll"
-	vec "../vector"
+	"github.com/tflovorn/scExplorer/bzone"
+	"github.com/tflovorn/scExplorer/solve"
+	"github.com/tflovorn/scExplorer/tempAll"
+	vec "github.com/tflovorn/scExplorer/vector"
 )
 
 func AbsErrorBeta(env *tempAll.Environment, variables []string) solve.Diffable {

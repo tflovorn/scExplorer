@@ -1,6 +1,6 @@
 package solve
 
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 // Function plus first derivatives.
 type Diffable struct {

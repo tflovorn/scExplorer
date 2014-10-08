@@ -8,9 +8,9 @@ import (
 	"testing"
 )
 import (
-	"../plots"
-	"../tempAll"
-	"../tempPair"
+	"github.com/tflovorn/scExplorer/plots"
+	"github.com/tflovorn/scExplorer/tempAll"
+	"github.com/tflovorn/scExplorer/tempPair"
 )
 
 var production = flag.Bool("production", false, "Production mode: make plots that shouldn't change.")

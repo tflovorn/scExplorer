@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"runtime"
 )
-import vec "../vector"
+import vec "github.com/tflovorn/scExplorer/vector"
 
 // Solves `env` to absolute/relative tolerances `epsAbs` and `epsRel`
 type Solver func(env *Environment, epsAbs, epsRel float64) (vec.Vector, error)
