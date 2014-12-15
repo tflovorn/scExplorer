@@ -34,6 +34,9 @@ type Environment struct {
 	Mu_b float64 // holon pair (bosonic) chemical potential (0 if T <= Tc)
 	A, B float64 // pair spectrum parameters
 
+	// Data for plotting
+	Temp float64 // 1/Beta -- to only be used for plotting; may otherwise be invalid
+
 	// Behavior flags:
 
 	// Iterate solution for Mu_b in tempFluc.SolveD1Mu_hMu_b.

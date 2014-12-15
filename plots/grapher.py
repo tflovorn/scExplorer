@@ -96,8 +96,8 @@ def _yData(series):
 def _save_figure(graph_data, fig):
     if graph_data["graph_filepath"] is None:
         return
-    fig.savefig(graph_data["graph_filepath"] + ".png")
-    fig.savefig(graph_data["graph_filepath"] + ".eps")
+    fig.savefig(graph_data["graph_filepath"] + ".png", bbox_inches="tight", dpi=200)
+    fig.savefig(graph_data["graph_filepath"] + ".eps", bbox_inches="tight", dpi=200)
 
 # Plot a single Fermi surface.
 # To make this plot, graph_data["Fermi_surface_data"] must be a dictionary

@@ -27,19 +27,31 @@ type GraphVars struct {
 // graphParams[FILE_KEY] must specify a file path for output. grapherPath
 // must specify the location of the Python graphing script.
 func MultiPlot(data []interface{}, errs []error, vars GraphVars, graphParams map[string]string, grapherPath string) error {
-	return multiPlotHelper(data, errs, vars, graphParams, grapherPath, DEFAULT_STYLES)
+	addZeros := false
+	return multiPlotHelper(data, errs, vars, graphParams, grapherPath, DEFAULT_STYLES, addZeros)
 }
+
+// Create a plot for each combination of vars.Params contained in data.
+// graphParams[FILE_KEY] must specify a file path for output. grapherPath
+// must specify the location of the Python graphing script.
+// In each series, add a point (0, 0).
+func MultiPlotAddZeros(data []interface{}, errs []error, vars GraphVars, graphParams map[string]string, grapherPath string) error {
+	addZeros := true
+	return multiPlotHelper(data, errs, vars, graphParams, grapherPath, DEFAULT_STYLES, addZeros)
+}
+
 
 // Same as MultiPlot except that printStyle = true specifies to use line
 // styles appropriate for printing in black & white.
 func MultiPlotStyle(data []interface{}, errs []error, vars GraphVars, graphParams map[string]string, grapherPath string, printStyle bool) error {
+	addZeros := false
 	if printStyle {
-		return multiPlotHelper(data, errs, vars, graphParams, grapherPath, PRINT_STYLES)
+		return multiPlotHelper(data, errs, vars, graphParams, grapherPath, PRINT_STYLES, addZeros)
 	}
-	return multiPlotHelper(data, errs, vars, graphParams, grapherPath, COLOR_STYLES)
+	return multiPlotHelper(data, errs, vars, graphParams, grapherPath, COLOR_STYLES, addZeros)
 }
 
-func multiPlotHelper(data []interface{}, errs []error, vars GraphVars, graphParams map[string]string, grapherPath string, seriesStyles []string) error {
+func multiPlotHelper(data []interface{}, errs []error, vars GraphVars, graphParams map[string]string, grapherPath string, seriesStyles []string, addZeros bool) error {
 	data = stripNils(data)
 	// we need to know the values of vars.Params to set up constraint
 	allParamValues, err := extractParamValues(data, errs, vars)
@@ -57,7 +69,7 @@ func multiPlotHelper(data []interface{}, errs []error, vars GraphVars, graphPara
 		}
 		graphParams[FILE_KEY] = basePath + extraPath
 
-		series, primaryVals := ExtractSeries(data, errs, []string{vars.X, vars.Y, primaryNames[i]}, secondaries[i], vars.XFunc, vars.YFunc)
+		series, primaryVals := ExtractSeries(data, errs, []string{vars.X, vars.Y, primaryNames[i]}, secondaries[i], vars.XFunc, vars.YFunc, addZeros)
 		sp := MakeSeriesParams(primaryLabels[i], "%.3f", primaryVals, seriesStyles)
 		err := PlotMPL(series, graphParams, sp, grapherPath)
 		if err != nil {

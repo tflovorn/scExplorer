@@ -1,8 +1,8 @@
 package tempFluc
 
 import (
-	"fmt"
-	"math"
+	//"fmt"
+	//"math"
 )
 import (
 	"github.com/tflovorn/scExplorer/solve"
@@ -52,6 +52,17 @@ func D1Mu_bSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	diffMu_b := AbsErrorMu_b(env, variables)
 	system := solve.Combine([]solve.Diffable{diffD1, diffMu_b})
 	start := []float64{env.D1, env.Mu_b}
+	return system, start
+}
+
+// System to solve (D1, Mu_b) with X, Mu_h and Beta fixed
+func D1Mu_hMu_bSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
+	variables := []string{"D1", "Mu_h", "Mu_b"}
+	diffD1 := tempPair.AbsErrorD1(env, variables)
+	diffMu_h := AbsErrorMu_h(env, variables)
+	diffMu_b := AbsErrorBeta(env, variables)
+	system := solve.Combine([]solve.Diffable{diffD1, diffMu_h, diffMu_b})
+	start := []float64{env.D1, env.Mu_h, env.Mu_b}
 	return system, start
 }
 
@@ -108,6 +119,27 @@ func SolveD1Mu_h(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 
 // Solve the (D1, Mu_h, Mu_b) system with Beta and x fixed.
 func SolveD1Mu_hMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	/*
+	// fix pair coefficients
+	if env.A == 0.0 && env.B == 0.0 && env.FixedPairCoeffs {
+		D1, Mu_h, Mu_b, Beta, Be_field := env.D1, env.Mu_h, env.Mu_b, env.Beta, env.Be_field
+		env.Mu_b = 0.0 // Mu_b is 0 at T_c
+		env.Be_field = 0.0
+		_, err := tempCrit.CritTempSolve(env, epsAbs, epsRel)
+		if err != nil {
+			return nil, err
+		}
+		omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
+		if err != nil {
+			return nil, err
+		}
+		env.A, env.B = omegaFit[0], omegaFit[2]
+		env.PairCoeffsReady = true
+		// uncache env
+		env.D1, env.Mu_h, env.Mu_b, env.Beta, env.Be_field = D1, Mu_h, Mu_b, Beta, Be_field
+	}
+	*/
+	/*
 	maxIters := 1000
 	oldMu_b := env.Mu_b
 	for i := 0; i < maxIters; i++ {
@@ -117,12 +149,20 @@ func SolveD1Mu_hMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vect
 			return nil, err
 		}
 		// iterate Mu_b
+		Be_field := env.Be_field
+		env.Be_field = 0.0
 		zv := vec.ZeroVector(3)
 		omega0, err := tempCrit.OmegaPlus(env, zv)
+		//omegaFit, err := tempCrit.OmegaFit(env, tempCrit.OmegaPlus)
 		if err != nil {
 			return nil, err
 		}
 		env.Mu_b = -omega0
+		env.Be_field = Be_field
+		//A, Mub_eff := omegaFit[0], omegaFit[3]
+		//env.Mu_b = -omega0 + 2.0 * env.Be_field * env.A
+		//Mub_eff := omegaFit[3]
+		//env.Mu_b = Mub_eff
 		//fmt.Printf("iterating Mu_b: now %f, before %f\n", env.Mu_b, oldMu_b)
 		// check if done
 		if math.Abs(env.Mu_b-oldMu_b) < epsAbs || !env.IterateD1Mu_hMu_b {
@@ -131,6 +171,13 @@ func SolveD1Mu_hMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vect
 		oldMu_b = env.Mu_b
 	}
 	return []float64{0.0, 0.0, 0.0}, fmt.Errorf("failed to find D1/Mu_h/Mu_b solution for env=%s\n", env.String())
+	*/
+	system, start := D1Mu_hMu_bSystem(env)
+	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	return solution, nil
 }
 
 // Solve the (D1, x) system with Mu_h, Beta, and Mu_b fixed.

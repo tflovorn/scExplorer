@@ -98,7 +98,8 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	var envs []*tempAll.Environment
 	if long {
 		if *magnetization_calc {
-			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{8, 1, 1, 3, 20}, []float64{0.0, 0.1, 0.1, 0.025, 0.0}, []float64{-0.5, 0.1, 0.1, 0.075, 1.0})
+			//envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{8, 1, 1, 3, 20}, []float64{0.0, 0.1, 0.1, 0.025, 0.0}, []float64{-0.5, 0.1, 0.1, 0.075, 1.0})
+			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{2, 1, 1, 1, 20}, []float64{0.0, 0.1, 0.1, 0.1, 0.0}, []float64{-0.1, 0.1, 0.1, 0.1, 1.0})
 		} else {
 			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{16, 1, 1, 3, 4}, []float64{-0.05, 0.1, 0.1, 0.025, 0.0}, []float64{-0.3, 0.1, 0.1, 0.075, 0.01})
 		}
@@ -125,6 +126,8 @@ func TestProductionPlots(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	eps := 1e-6
+
 	N_Mu_b := 60
 	N_Tz_Thp := 3
 	Nx := 3
@@ -138,7 +141,6 @@ func TestProductionPlots(t *testing.T) {
 	fileLabel_b := "plot_data_THP.b_T"
 	fileLabel_x2 := "plot_data_THP.x2_T"
 	fileLabel_x1 := "plot_data_THP.x1_T"
-	eps := 1e-6
 	err = solveAndPlot(envs, eps, eps, fileLabelMu_b, fileLabelMu_h, fileLabelD1, fileLabel_a, fileLabel_b, fileLabel_x2, fileLabel_x1)
 	if err != nil {
 		t.Fatal(err)
@@ -219,7 +221,31 @@ func TestProductionPlots(t *testing.T) {
 		t.Fatal(err)
 	}
 	// magnetization
+	eps = 1e-9
+	defaultEnv.FixedPairCoeffs = true
+	defaultEnv.IterateD1Mu_hMu_b = true
+	defaultEnv.X = 0.1
+	TcFactors := []float64{1.0, 1.05, 1.1, 1.15}
+	//TcFactors := []float64{1.0, 1.2, 1.4, 1.6}
+	BeFields := []float64{}
+	for i := 0; i < 10; i++ {
+		BeFields = append(BeFields, 0.05 * float64(i) + 0.05)
+	}
+	magEnvs, err := EnvSplitTcB(defaultEnv, TcFactors, BeFields, eps, eps)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plotEnvs, errs = tempAll.MultiSolve(magEnvs, eps, eps, SolveD1Mu_hMu_b)
 
+	fileLabelB := "plot_data.M_eB"
+	vars := plots.GraphVars{"Be_field", "", []string{"Temp"}, []string{"T/t_0"}, nil, tempCrit.GetMagnetization}
+	wd, _ := os.Getwd()
+	grapherPath := wd + "/../plots/grapher.py"
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelB, plots.XLABEL_KEY: "$eB$", plots.YLABEL_KEY: "$M$"}
+	errMPlot := plots.MultiPlotAddZeros(plotEnvs, errs, vars, graphParams, grapherPath)
+	if errMPlot != nil {
+		t.Fatalf("error making M plot: %v", errMPlot)
+	}
 }
 
 func TestPlotX2VsMu_b(t *testing.T) {

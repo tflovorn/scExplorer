@@ -40,7 +40,7 @@ func TestExtractXY(t *testing.T) {
 // sorted.
 func TestExtractSeries(t *testing.T) {
 	vals, errs := seriesTestDefaultData(6)
-	series, zVals := ExtractSeries(vals, errs, []string{"X", "Y", "Z"}, nil, nil, nil)
+	series, zVals := ExtractSeries(vals, errs, []string{"X", "Y", "Z"}, nil, nil, nil, false)
 	if zVals[0] != 0.0 || zVals[1] != 1.0 {
 		t.Fatalf("ExtractSeries returned incorrect z values")
 	}

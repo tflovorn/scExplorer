@@ -46,7 +46,7 @@ func (s *Series) Pairs() [][]float64 {
 // parameter values to include; for example if constraints = {"Tz": 0.1}, only
 // data points with Tz = 0.1 will be extracted. If the name of y is given as
 // the empty string, `YFunc` is used to obtain a value for y instead.
-func ExtractSeries(dataSet []interface{}, errs []error, varNames []string, constraints map[string]float64, XFunc, YFunc func(interface{}) float64) ([]Series, []float64) {
+func ExtractSeries(dataSet []interface{}, errs []error, varNames []string, constraints map[string]float64, XFunc, YFunc func(interface{}) float64, addZeros bool) ([]Series, []float64) {
 	if len(varNames) < 2 {
 		panic("not enough variable names for ExtractSeries")
 	} else if len(varNames) == 2 {
@@ -110,12 +110,21 @@ func ExtractSeries(dataSet []interface{}, errs []error, varNames []string, const
 		zmap := maps[z]
 		// x should be in ascending order within the series
 		xs := make([]float64, 0)
+		if addZeros {
+			xs = append(xs, 0.0)
+		}
 		for x, _ := range zmap {
 			xs = append(xs, x)
 		}
 		sort.Float64s(xs)
 		ys := make([]float64, len(xs))
+		if addZeros {
+			ys[0] = 0.0
+		}
 		for j, x := range xs {
+			if addZeros && j == 0 {
+				continue
+			}
 			ys[j] = zmap[x]
 		}
 		ret[i] = Series{xs, ys}
