@@ -56,13 +56,24 @@ func X2(env *tempAll.Environment) (float64, error) {
 		omega_c := 4.0 * env.Be_field * a
 		mu_tilde := env.Mu_b - omega_c/2.0
 		return I0 * math.Exp(env.Beta*r*(mu_tilde-2.0*b)) / (-math.Expm1(-env.Beta * omega_c * r))
+		/*
+		sum_n_term := func(ni int) float64 {
+			n := float64(ni)
+			np1_fact := math.Gamma(n + 2.0)
+			return math.Pow(-r * env.Beta * omega_c, n) / np1_fact
+		}
+		sum_n, _ := seriesaccel.Levin_u(sum_n_term, 1, 20)
+		return I0 * math.Exp(env.Beta*r*(mu_tilde-2.0*b)) / (r * (1.0 + sum_n))
+		*/
 	}
 	sum, _ := seriesaccel.Levin_u(x2BSumTerm, 1, 20)
+	//fmt.Printf("%v\n", sum)
 	// reporting of absErr:
 	// (dropped this since absErr is always very small relative to sum)
 	//sum, absErr := seriesaccel.Levin_u(x2BSumTerm, 1, 20)
 	//fmt.Printf("for env=%s; x2 B sum %e, absErr %e\n", env.String(), sum, absErr)
 	return 2.0 * env.Be_field * sum / math.Pi, nil
+	//return sum / (2.0 * math.Pi * env.Beta * a), nil
 }
 
 // Equivalent to X2(); for use as YFunc in a plots.GraphVars

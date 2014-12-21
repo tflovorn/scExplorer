@@ -27,6 +27,13 @@ func EnvSplitTcB(baseEnv *tempAll.Environment, TcFactors, BeFields []float64, ep
 		T := TcFactor * Tc
 		env.Beta = 1.0/T
 		env.Temp = T
+		// fix (D1, Mu_h) appropriate for Beta
+		//_, err := SolveD1Mu_h(env, epsAbs, epsRel)
+		_, err := SolveD1Mu_hMu_b(env, epsAbs, epsRel)
+		if err != nil {
+			return nil, err
+		}
+		// keep (D1, Mu_h) independent of magnetic field
 		BeNum := len(BeFields)
 		thisEnv_BeSplit := env.MultiSplit([]string{"Be_field"}, []int{BeNum}, []float64{BeFields[0]}, []float64{BeFields[BeNum - 1]})
 		result = append(result, thisEnv_BeSplit...)

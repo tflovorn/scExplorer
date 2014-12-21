@@ -37,14 +37,31 @@ func Magnetization(env *tempAll.Environment) (float64, error) {
 		exp := -math.Expm1(-r * env.Beta * omega_c)
 		bracket := 1.0/(env.Beta*r*exp) - omega_c*math.Exp(-r*env.Beta*omega_c)/(exp*exp)
 		return I0 * math.Exp(r*env.Beta*(mu_tilde-2.0*b)) * bracket
+		/*
+		bracket_num_term := func(ni int) float64 {
+			n := float64(ni)
+			nm1_fact := math.Gamma(n)
+			return -math.Pow(-r * env.Beta * omega_c, n + 1.0) / ((n + 1.0) * nm1_fact)
+		}
+		bracket_denom_term := func(ni int) float64 {
+			n := float64(ni)
+			n_fact := math.Gamma(n + 1.0)
+			return math.Pow(-r * env.Beta * omega_c, n) * (math.Pow(2.0, n - 1.0) - 1.0) / n_fact
+		}
+		bracket_num, _ := seriesaccel.Levin_u(bracket_num_term, 1, 20)
+		bracket_denom, _ := seriesaccel.Levin_u(bracket_denom_term, 2, 20)
+		return I0 * math.Exp(r*env.Beta*(mu_tilde-2.0*b)) * bracket_num / (2.0 * bracket_denom)
+		*/
 	}
-	sum, absErr := seriesaccel.Levin_u(MSumTerm, 1, 20)
-	fmt.Printf("Magnetization sum %e, absErr %e\n", sum, absErr)
+	//sum, absErr := seriesaccel.Levin_u(MSumTerm, 1, 20)
+	//fmt.Printf("Magnetization sum %e, absErr %e\n", sum, absErr)
+	sum, _ := seriesaccel.Levin_u(MSumTerm, 1, 20)
 	x2, err := X2(env)
 	if err != nil {
 		return 0.0, err
 	}
 	return -a*x2 + sum/math.Pi, nil
+	//return -a*x2 - sum/math.Pi, nil
 }
 
 // Equivalent to Magnetization(); for use as YFunc in a plots.GraphVars

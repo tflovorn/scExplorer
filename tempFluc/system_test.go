@@ -99,7 +99,7 @@ func flucDefaultEnvSet(long bool) ([]*tempAll.Environment, error) {
 	if long {
 		if *magnetization_calc {
 			//envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{8, 1, 1, 3, 20}, []float64{0.0, 0.1, 0.1, 0.025, 0.0}, []float64{-0.5, 0.1, 0.1, 0.075, 1.0})
-			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{2, 1, 1, 1, 20}, []float64{0.0, 0.1, 0.1, 0.1, 0.0}, []float64{-0.1, 0.1, 0.1, 0.1, 1.0})
+			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{4, 1, 1, 1, 40}, []float64{-0.03, 0.1, 0.1, 0.1, 0.0}, []float64{-0.15, 0.1, 0.1, 0.1, 0.1})
 		} else {
 			envs = defaultEnv.MultiSplit([]string{"Mu_b", "Tz", "Thp", "X", "Be_field"}, []int{16, 1, 1, 3, 4}, []float64{-0.05, 0.1, 0.1, 0.025, 0.0}, []float64{-0.3, 0.1, 0.1, 0.075, 0.01})
 		}
@@ -127,7 +127,7 @@ func TestProductionPlots(t *testing.T) {
 		t.Fatal(err)
 	}
 	eps := 1e-6
-
+	/*
 	N_Mu_b := 60
 	N_Tz_Thp := 3
 	Nx := 3
@@ -220,29 +220,34 @@ func TestProductionPlots(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	*/
 	// magnetization
 	eps = 1e-9
 	defaultEnv.FixedPairCoeffs = true
 	defaultEnv.IterateD1Mu_hMu_b = true
-	defaultEnv.X = 0.1
-	TcFactors := []float64{1.0, 1.05, 1.1, 1.15}
+	defaultEnv.X = 0.05
+	//TcFactors := []float64{1.0, 1.05, 1.1, 1.15}
+	//TcFactors := []float64{1.15, 1.2, 1.25, 1.3} // works for x = 0.1
+	TcFactors := []float64{1.2, 1.25, 1.3, 1.35} // works for x = 0.05
+	//TcFactors := []float64{1.15, 1.2, 1.25, 1.3}
+	//TcFactors := []float64{1.2, 1.4, 1.6}
 	//TcFactors := []float64{1.0, 1.2, 1.4, 1.6}
 	BeFields := []float64{}
-	for i := 0; i < 10; i++ {
-		BeFields = append(BeFields, 0.05 * float64(i) + 0.05)
+	for i := 0; i < 11; i++ {
+		BeFields = append(BeFields, 0.005 * float64(i))
 	}
 	magEnvs, err := EnvSplitTcB(defaultEnv, TcFactors, BeFields, eps, eps)
 	if err != nil {
 		t.Fatal(err)
 	}
-	plotEnvs, errs = tempAll.MultiSolve(magEnvs, eps, eps, SolveD1Mu_hMu_b)
+	plotEnvs, errs := tempAll.MultiSolve(magEnvs, eps, eps, SolveMu_b)
 
 	fileLabelB := "plot_data.M_eB"
 	vars := plots.GraphVars{"Be_field", "", []string{"Temp"}, []string{"T/t_0"}, nil, tempCrit.GetMagnetization}
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
-	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelB, plots.XLABEL_KEY: "$eB$", plots.YLABEL_KEY: "$M$"}
-	errMPlot := plots.MultiPlotAddZeros(plotEnvs, errs, vars, graphParams, grapherPath)
+	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelB, plots.XLABEL_KEY: "$eB$", plots.YLABEL_KEY: "$M/e$", "xmax":"0.05"}
+	errMPlot := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 	if errMPlot != nil {
 		t.Fatalf("error making M plot: %v", errMPlot)
 	}
@@ -362,15 +367,19 @@ func TestPlotX2VsMu_b(t *testing.T) {
 	// if looking for magnetization plot, make that plot and don't get Cv
 	if *magnetization_calc && !*skipPlots {
 		fileLabel = "plot_data.M_eB"
+		//fileLabel := "plot_data.M_eB"
+		//graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabel, plots.XLABEL_KEY: "$eB$", plots.YLABEL_KEY: "$M$"}
 		graphParams[plots.FILE_KEY] = wd + "/" + fileLabel
 		graphParams[plots.XLABEL_KEY] = "$eB$"
 		graphParams[plots.YLABEL_KEY] = "$M$"
+		//vars := plots.GraphVars{"Be_field", "", []string{"Tz", "Thp", "X", "Mu_b"}, []string{"t_z", "t_h^{\\prime}", "x", "\\mu_b"}, nil, tempCrit.GetMagnetization}
 		vars.X = "Be_field"
 		vars.XFunc = nil
 		vars.Y = ""
 		vars.YFunc = tempCrit.GetMagnetization
 		vars.Params = []string{"Tz", "Thp", "X", "Mu_b"}
 		vars.ParamLabels = []string{"t_z", "t_h^{\\prime}", "x", "\\mu_b"}
+		//grapherPath := wd + "/../plots/grapher.py"
 		err := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
 		if err != nil {
 			t.Fatalf("error making M plot: %v", err)

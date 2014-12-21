@@ -19,7 +19,7 @@ type DiffSystem struct {
 	Dimension int // length of input vectors and Df output vector
 }
 
-// Create a diffable from F using automatic differentiation. h gives the
+// Create a diffable from F using numerical differentiation. h gives the
 // initial differentiation step size and epsabs gives the error tolerance.
 func SimpleDiffable(F vec.FnDim0, dimension int, h, epsabs float64) Diffable {
 	Df := func(v vec.Vector) (vec.Vector, error) {

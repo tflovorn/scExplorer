@@ -1,8 +1,8 @@
 package tempFluc
 
 import (
-	//"fmt"
-	//"math"
+	"fmt"
+	"math"
 )
 import (
 	"github.com/tflovorn/scExplorer/solve"
@@ -52,6 +52,15 @@ func D1Mu_bSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
 	diffMu_b := AbsErrorMu_b(env, variables)
 	system := solve.Combine([]solve.Diffable{diffD1, diffMu_b})
 	start := []float64{env.D1, env.Mu_b}
+	return system, start
+}
+
+// System to solve (D1, Mu_b) with X, Mu_h and Beta fixed
+func Mu_bSystem(env *tempAll.Environment) (solve.DiffSystem, []float64) {
+	variables := []string{"Mu_b"}
+	diffMu_b := AbsErrorBeta(env, variables)
+	system := solve.Combine([]solve.Diffable{diffMu_b})
+	start := []float64{env.Mu_b}
 	return system, start
 }
 
@@ -117,6 +126,29 @@ func SolveD1Mu_h(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, 
 	return solution, nil
 }
 
+func SolveMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
+	/*
+	system, start := Mu_bSystem(env)
+	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	return solution, nil
+	*/
+	variables := []string{"Mu_b"}
+	diffMu_b := AbsErrorBeta(env, variables)
+	x_lo := 2.0 * env.Mu_h // works
+	//x_lo := -100.0
+	x_hi := 0.0 // works
+	//omega_c := 4.0 * env.Be_field * env.A
+	//x_hi := omega_c/2.0 + 2.0 * env.B
+	result, err := solve.Brent(diffMu_b, x_lo, x_hi, epsAbs, epsRel)
+	if err != nil {
+		return nil, err
+	}
+	return []float64{result}, nil
+}
+
 // Solve the (D1, Mu_h, Mu_b) system with Beta and x fixed.
 func SolveD1Mu_hMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vector, error) {
 	/*
@@ -139,7 +171,6 @@ func SolveD1Mu_hMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vect
 		env.D1, env.Mu_h, env.Mu_b, env.Beta, env.Be_field = D1, Mu_h, Mu_b, Beta, Be_field
 	}
 	*/
-	/*
 	maxIters := 1000
 	oldMu_b := env.Mu_b
 	for i := 0; i < maxIters; i++ {
@@ -171,13 +202,14 @@ func SolveD1Mu_hMu_b(env *tempAll.Environment, epsAbs, epsRel float64) (vec.Vect
 		oldMu_b = env.Mu_b
 	}
 	return []float64{0.0, 0.0, 0.0}, fmt.Errorf("failed to find D1/Mu_h/Mu_b solution for env=%s\n", env.String())
-	*/
+	/*
 	system, start := D1Mu_hMu_bSystem(env)
 	solution, err := solve.MultiDim(system, start, epsAbs, epsRel)
 	if err != nil {
 		return nil, err
 	}
 	return solution, nil
+	*/
 }
 
 // Solve the (D1, x) system with Mu_h, Beta, and Mu_b fixed.
