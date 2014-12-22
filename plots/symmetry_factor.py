@@ -20,7 +20,7 @@ def plotSymFactor3D(alpha):
 
     plt.show()
 
-def plotSymFactor(alpha, fname):
+def plotSymFactor(alpha, fname, largeFont):
     X = np.arange(-np.pi, np.pi+0.001, 0.01)
     Y = np.arange(-np.pi, np.pi+0.001, 0.01)
     X, Y = np.meshgrid(X, Y)
@@ -28,14 +28,26 @@ def plotSymFactor(alpha, fname):
 
     fig = plt.figure()
 
-    N = 20
+    if largeFont:
+        plt.xlabel("$k_x$", fontsize=20)
+        plt.ylabel("$k_y$", fontsize=20)
+        plt.xticks(fontsize=20)
+        plt.yticks(fontsize=20)
+    else:
+        plt.xlabel("$k_x$")
+        plt.ylabel("$k_y$")
+
+    N = 30
     p = plt.contourf(X, Y, Z, N, cmap=cm.binary)
 
-    fig.colorbar(p)
+    cb = fig.colorbar(p)
+    
+    if largeFont:
+        cb.ax.tick_params(labelsize=20)
 
     plt.savefig(fname + ".png", bbox_inches="tight", dpi=200)
 
 
 if __name__ == "__main__":
-    plotSymFactor(-1, "sym_alpha_m1")
-    plotSymFactor(1, "sym_alpha_p1")
+    plotSymFactor(-1, "sym_alpha_m1", False)
+    plotSymFactor(1, "sym_alpha_p1", False)
