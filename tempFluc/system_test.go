@@ -247,7 +247,7 @@ func TestProductionPlots(t *testing.T) {
 	wd, _ := os.Getwd()
 	grapherPath := wd + "/../plots/grapher.py"
 	graphParams := map[string]string{plots.FILE_KEY: wd + "/" + fileLabelB, plots.XLABEL_KEY: "$eB$", plots.YLABEL_KEY: "$M/e$", "xmax":"0.05"}
-	errMPlot := plots.MultiPlot(plotEnvs, errs, vars, graphParams, grapherPath)
+	errMPlot := plots.MultiPlotStyle(plotEnvs, errs, vars, graphParams, grapherPath, true)
 	if errMPlot != nil {
 		t.Fatalf("error making M plot: %v", errMPlot)
 	}
